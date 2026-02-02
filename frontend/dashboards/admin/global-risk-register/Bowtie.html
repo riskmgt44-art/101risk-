@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Bowtie Diagram – RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --muted: #64748b;
+            --shadow: 0 12px 32px rgba(0,0,0,.08);
+            --radius: 14px;
+            --shimmer: #e5e7eb;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        header {
+            position: fixed;
+            inset: 0 0 auto 0;
+            height: 64px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 20;
+        }
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .back-button:hover { color: var(--primary); }
+        header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0;
+        }
+        main {
+            padding-top: 88px;
+            padding-bottom: 40px;
+            display: flex;
+            justify-content: center;
+        }
+        .diagram-wrapper {
+            width: 96%;
+            max-width: 1480px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        svg {
+            width: 100%;
+            height: auto;
+            min-height: 620px;
+            overflow: visible;
+        }
+        .node {
+            rx: 12;
+            ry: 12;
+            stroke-width: 1.8;
+            transition: transform 0.35s ease, filter 0.35s ease;
+        }
+        .threat, .consequence {
+            fill: #fee2e2;
+            stroke: var(--red);
+        }
+        .barrier.green  { fill: #d1fae5; stroke: var(--green); }
+        .barrier.amber  { fill: #fef3c7; stroke: var(--amber); }
+        .barrier.red    { fill: #fee2e2; stroke: var(--red); }
+        .central-event {
+            fill: #0f172a;
+        }
+        .label {
+            font-size: 13.5px;
+            font-weight: 600;
+            fill: var(--text);
+            pointer-events: none;
+        }
+        .sub {
+            font-size: 11.5px;
+            fill: var(--muted);
+            pointer-events: none;
+        }
+        .dot {
+            r: 9;
+            stroke: white;
+            stroke-width: 3.5;
+        }
+        .dot.green { fill: var(--green); }
+        .dot.amber { fill: var(--amber); }
+        .dot.red   { fill: var(--red); }
+        path.link {
+            stroke: #cbd5e1;
+            stroke-width: 4.2;
+            fill: none;
+            marker-end: url(#arrow);
+        }
+        marker#arrow path {
+            fill: #cbd5e1;
+        }
+        g.node-group:hover .node {
+            transform: translateY(-8px);
+            filter: drop-shadow(0 14px 24px rgba(0,0,0,.14));
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.8s infinite;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        @media (max-width: 1024px) {
+            .diagram-wrapper { padding: 28px; }
+            svg { min-height: 540px; }
+        }
+        @media (max-width: 768px) {
+            header { padding: 0 16px; }
+            main { padding-top: 80px; }
+            .diagram-wrapper { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="back-button" onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Risk</span>
+    </div>
+    <h1 id="bowtieTitle">Bowtie Diagram – Loading...</h1>
+    <div></div>
+</header>
+
+<main>
+    <div class="diagram-wrapper">
+        <svg id="bowtieSVG" viewBox="0 0 1480 780" xmlns="http://www.w3.org/2000/svg">
+            <!-- Skeleton when loading -->
+            <g id="skeletonLayer"></g>
+            <!-- Real content -->
+            <g id="contentLayer" style="opacity:0;"></g>
+        </svg>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const svg = document.getElementById('bowtieSVG');
+    const titleEl = document.getElementById('bowtieTitle');
+    const skeletonLayer = document.getElementById('skeletonLayer');
+    const contentLayer = document.getElementById('contentLayer');
+
+    // Show skeleton immediately
+    showSkeleton();
+
+    // Listen for real data from parent window
+    window.addEventListener('message', (event) => {
+        if (event.data?.type === 'BOWTIE_DATA') {
+            const data = event.data.payload;
+            if (data && data.riskId) {
+                renderBowtie(data);
+            }
+        }
+    });
+
+    // Fallback timeout
+    setTimeout(() => {
+        if (contentLayer.children.length === 0) {
+            showEmptyState();
+        }
+    }, 3500);
+
+    function showSkeleton() {
+        skeletonLayer.innerHTML = `
+            <rect x="600" y="300" width="280" height="180" rx="16" class="skeleton"/>
+            <rect x="50" y="120" width="240" height="120" rx="12" class="skeleton"/>
+            <rect x="50" y="300" width="240" height="120" rx="12" class="skeleton"/>
+            <rect x="50" y="480" width="240" height="120" rx="12" class="skeleton"/>
+            <rect x="340" y="180" width="240" height="140" rx="12" class="skeleton"/>
+            <rect x="340" y="410" width="240" height="140" rx="12" class="skeleton"/>
+            <rect x="800" y="180" width="260" height="140" rx="12" class="skeleton"/>
+            <rect x="800" y="410" width="260" height="140" rx="12" class="skeleton"/>
+            <rect x="1100" y="120" width="260" height="120" rx="12" class="skeleton"/>
+            <rect x="1100" y="280" width="260" height="120" rx="12" class="skeleton"/>
+            <rect x="1100" y="440" width="260" height="120" rx="12" class="skeleton"/>
+        `;
+    }
+
+    function showEmptyState() {
+        titleEl.textContent = "Bowtie Diagram – No Data";
+        skeletonLayer.innerHTML = '';
+        contentLayer.innerHTML = `
+            <text x="740" y="380" text-anchor="middle" font-size="24" fill="#94a3b8">
+                No bowtie data available for this risk
+            </text>
+        `;
+        contentLayer.style.opacity = '1';
+    }
+
+    function renderBowtie(data) {
+        skeletonLayer.innerHTML = '';
+        contentLayer.innerHTML = '';
+
+        titleEl.textContent = `Bowtie Diagram – ${escapeHtml(data.riskId || 'Unknown')}: ${escapeHtml(data.title || 'Risk')}`;
+
+        // You can make this dynamic based on real data later
+        // For now we keep your original layout with minor cleanups
+
+        const svgContent = `
+            <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z"/>
+                </marker>
+            </defs>
+
+            <g id="lines">
+                <path class="link" d="M270 180 C 420 180, 520 330, 650 360"/>
+                <path class="link" d="M270 350 C 420 350, 520 350, 650 360"/>
+                <path class="link" d="M270 520 C 420 520, 520 390, 650 360"/>
+                <path class="link" d="M540 250 C 580 300, 620 330, 650 360"/>
+                <path class="link" d="M540 480 C 580 430, 620 390, 650 360"/>
+                <path class="link" d="M770 360 C 900 360, 1040 180, 1130 180"/>
+                <path class="link" d="M770 360 C 900 360, 1040 340, 1130 340"/>
+                <path class="link" d="M770 360 C 900 360, 1040 500, 1130 500"/>
+                <path class="link" d="M860 250 C 980 250, 1080 180, 1130 180"/>
+                <path class="link" d="M860 480 C 980 480, 1080 500, 1130 500"/>
+            </g>
+
+            <g class="node-group">
+                <rect class="node central-event" x="650" y="310" width="120" height="100"/>
+                <text x="710" y="350" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">DATA</text>
+                <text x="710" y="370" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">EXFILTRATION</text>
+            </g>
+
+            <!-- Threats -->
+            <g class="node-group"><rect class="node threat" x="80" y="140" width="190" height="80"/><text class="label" x="175" y="180" text-anchor="middle">Weak Access Control</text></g>
+            <g class="node-group"><rect class="node threat" x="80" y="310" width="190" height="80"/><text class="label" x="175" y="350" text-anchor="middle">No MFA Enforcement</text></g>
+            <g class="node-group"><rect class="node threat" x="80" y="480" width="190" height="80"/><text class="label" x="175" y="520" text-anchor="middle">Unpatched Systems</text></g>
+
+            <!-- Preventive Barriers -->
+            <g class="node-group">
+                <rect class="node barrier amber" x="350" y="200" width="190" height="100"/>
+                <circle class="dot amber" cx="520" cy="220"/>
+                <text class="label" x="445" y="240" text-anchor="middle">Implement MFA</text>
+                <text class="sub" x="445" y="262" text-anchor="middle">ACTION-101 · In Progress</text>
+            </g>
+            <g class="node-group">
+                <rect class="node barrier red" x="350" y="430" width="190" height="100"/>
+                <circle class="dot red" cx="520" cy="450"/>
+                <text class="label" x="445" y="470" text-anchor="middle">Penetration Testing</text>
+                <text class="sub" x="445" y="492" text-anchor="middle">ACTION-102 · Proposed</text>
+            </g>
+
+            <!-- Recovery Barriers -->
+            <g class="node-group">
+                <rect class="node barrier green" x="860" y="200" width="200" height="100"/>
+                <circle class="dot green" cx="1030" cy="220"/>
+                <text class="label" x="960" y="240" text-anchor="middle">Incident Response</text>
+                <text class="sub" x="960" y="262" text-anchor="middle">Containment & Recovery</text>
+            </g>
+            <g class="node-group">
+                <rect class="node barrier green" x="860" y="430" width="200" height="100"/>
+                <circle class="dot green" cx="1030" cy="450"/>
+                <text class="label" x="960" y="470" text-anchor="middle">PR Crisis Handling</text>
+                <text class="sub" x="960" y="492" text-anchor="middle">Stakeholder Comms</text>
+            </g>
+
+            <!-- Consequences -->
+            <g class="node-group"><rect class="node consequence" x="1130" y="140" width="200" height="80"/><text class="label" x="1230" y="180" text-anchor="middle">Financial Loss</text></g>
+            <g class="node-group"><rect class="node consequence" x="1130" y="300" width="200" height="80"/><text class="label" x="1230" y="340" text-anchor="middle">Reputation Damage</text></g>
+            <g class="node-group"><rect class="node consequence" x="1130" y="460" width="200" height="80"/><text class="label" x="1230" y="500" text-anchor="middle">Regulatory Penalties</text></g>
+        `;
+
+        contentLayer.innerHTML = svgContent;
+        contentLayer.style.opacity = '1';
+    }
+
+    function escapeHtml(unsafe) {
+        if (typeof unsafe !== 'string') return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+});
+</script>
+</body>
+</html>
