@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History — RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+        .main {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            padding: 24px 32px 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 12px;
+        }
+        .toggle-btn {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 8px 18px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .toggle-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .toggle-btn:hover:not(.active) {
+            background: rgba(93,161,161,0.08);
+        }
+        .content-wrapper {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+        }
+        /* Skeleton */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+        .skeleton-item { height: 140px; margin: 40px 0; }
+        /* Timeline */
+        .timeline-container {
+            max-width: 960px;
+            margin: 0 auto;
+            position: relative;
+            padding-top: 20px;
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0; left: 50%;
+            width: 4px;
+            background: var(--border);
+            transform: translateX(-50%);
+        }
+        .timeline-item {
+            position: relative;
+            margin: 48px 0;
+            display: flex;
+            align-items: center;
+        }
+        .timeline-item:nth-child(odd) { flex-direction: row-reverse; }
+        .timeline-content {
+            width: 46%;
+            background: var(--card-bg);
+            padding: 20px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        .timeline-item:nth-child(odd) .timeline-content { text-align: right; }
+        .timeline-dot {
+            width: 20px; height: 20px;
+            background: var(--primary);
+            border: 4px solid var(--card-bg);
+            border-radius: 50%;
+            position: absolute;
+            left: 50%; transform: translateX(-50%);
+            z-index: 1;
+            box-shadow: 0 0 0 4px var(--border);
+        }
+        .timeline-date {
+            font-size: 14px; font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .timeline-type {
+            font-size: 12px; font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--neutral);
+            margin-bottom: 10px;
+        }
+        .timeline-desc {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+        .timeline-meta {
+            display: flex; flex-wrap: wrap; gap: 16px;
+            font-size: 12.8px; color: var(--text-secondary);
+        }
+        .timeline-item:nth-child(odd) .timeline-meta { justify-content: flex-end; }
+        .meta-item { display: flex; align-items: center; gap: 6px; }
+        /* Table View */
+        .table-container {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead {
+            position: sticky; top: 0;
+            background: var(--card-bg);
+            z-index: 8;
+        }
+        th {
+            text-align: left;
+            padding: 14px 18px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 14px 18px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+        tbody tr:hover { background: rgba(93,161,161,0.04); }
+        .hidden { display: none !important; }
+        /* Responsive */
+        @media (max-width: 992px) {
+            .timeline-container::before { left: 36px; }
+            .timeline-item { flex-direction: row !important; padding-left: 70px; }
+            .timeline-content { width: 100%; text-align: left !important; }
+            .timeline-dot { left: 36px; transform: none; }
+            .timeline-meta { justify-content: flex-start !important; }
+        }
+        @media (max-width: 768px) {
+            .view { padding: 16px; }
+            .header { padding: 16px; flex-direction: column; gap: 12px; align-items: flex-start; }
+            .table-container { overflow-x: auto; }
+            table { min-width: 1100px; }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="main">
+        <div class="header">
+            <h1 id="historyTitle">History — Loading...</h1>
+            <div class="view-toggle">
+                <button class="toggle-btn active" data-view="timeline">Timeline View</button>
+                <button class="toggle-btn" data-view="table">Table View</button>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Timeline View -->
+            <div id="timeline-view" class="view">
+                <div class="timeline-container" id="timelineContainer">
+                    <!-- Skeleton items will be injected here -->
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div id="table-view" class="view hidden">
+                <div class="table-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>Event Type</th>
+                                <th>Description</th>
+                                <th>Changed By</th>
+                                <th>Role</th>
+                                <th>Source</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const timelineContainer = document.getElementById('timelineContainer');
+    const tableBody = document.getElementById('historyTableBody');
+    const titleEl = document.getElementById('historyTitle');
+
+    showSkeleton();
+
+    // Listen for data from parent window
+    window.addEventListener('message', e => {
+        if (e.data?.type === 'HISTORY_DATA') {
+            const data = e.data.payload ?? [];
+            renderHistory(data);
+        }
+    });
+
+    // Fallback after 3s
+    setTimeout(() => {
+        if (timelineContainer.children.length <= 3) {
+            showEmptyState();
+        }
+    }, 3000);
+
+    function showSkeleton() {
+        timelineContainer.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        for (let i = 0; i < 6; i++) {
+            // Timeline skeleton
+            const item = document.createElement('div');
+            item.className = 'timeline-item';
+            item.innerHTML = `
+                <div class="timeline-content skeleton" style="height:140px;"></div>
+                <div class="timeline-dot skeleton" style="background:#e5e7eb;"></div>
+            `;
+            timelineContainer.appendChild(item);
+
+            // Table skeleton row
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><div class="skeleton" style="height:20px;width:140px;"></div></td>
+                <td><div class="skeleton" style="height:20px;width:100px;"></div></td>
+                <td><div class="skeleton" style="height:20px;width:320px;"></div></td>
+                <td><div class="skeleton" style="height:20px;width:110px;"></div></td>
+                <td><div class="skeleton" style="height:20px;width:90px;"></div></td>
+                <td><div class="skeleton" style="height:20px;width:80px;"></div></td>
+                <td><div class="skeleton" style="height:20px;width:70px;"></div></td>
+            `;
+            tableBody.appendChild(tr);
+        }
+    }
+
+    function showEmptyState() {
+        titleEl.textContent = "History — No Records";
+        timelineContainer.innerHTML = `
+            <div style="text-align:center;padding:120px 20px;color:var(--text-muted);">
+                <i class="fas fa-history" style="font-size:64px;opacity:0.4;margin-bottom:24px;"></i><br>
+                <div style="font-size:18px;font-weight:500;">No history entries yet</div>
+            </div>`;
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center;padding:120px;color:var(--text-muted);">
+                    No history records available
+                </td>
+            </tr>`;
+    }
+
+    function renderHistory(entries) {
+        if (!Array.isArray(entries) || entries.length === 0) {
+            showEmptyState();
+            return;
+        }
+
+        timelineContainer.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        titleEl.textContent = `History — ${escapeHtml(entries[0]?.riskId || 'Risk')}`;
+
+        entries.forEach(entry => {
+            // Timeline item
+            const item = document.createElement('div');
+            item.className = 'timeline-item';
+            item.innerHTML = `
+                <div class="timeline-content">
+                    <div class="timeline-date">${escapeHtml(entry.date || '—')}</div>
+                    <div class="timeline-type">${escapeHtml(entry.type || '—')}</div>
+                    <div class="timeline-desc">${escapeHtml(entry.description || '—')}</div>
+                    <div class="timeline-meta">
+                        <div class="meta-item"><i class="fas fa-user"></i> ${escapeHtml(entry.changedBy || '—')}</div>
+                        <div class="meta-item"><i class="fas fa-briefcase"></i> ${escapeHtml(entry.role || '—')}</div>
+                        <div class="meta-item"><i class="${getSourceIcon(entry.source)}"></i> ${escapeHtml(entry.source || '—')}</div>
+                        <div class="meta-item"><i class="fas fa-link"></i> ${escapeHtml(entry.reference || '—')}</div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            `;
+            timelineContainer.appendChild(item);
+
+            // Table row
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${escapeHtml(entry.date || '—')}</td>
+                <td>${escapeHtml(entry.type || '—')}</td>
+                <td>${escapeHtml(entry.description || '—')}</td>
+                <td>${escapeHtml(entry.changedBy || '—')}</td>
+                <td>${escapeHtml(entry.role || '—')}</td>
+                <td>${escapeHtml(entry.source || '—')}</td>
+                <td>${escapeHtml(entry.reference || '—')}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function getSourceIcon(source) {
+        if (!source) return 'fas fa-question';
+        source = source.toLowerCase();
+        if (source.includes('manual')) return 'fas fa-mouse-pointer';
+        if (source.includes('approval')) return 'fas fa-check-circle';
+        if (source.includes('workflow') || source.includes('system')) return 'fas fa-cogs';
+        if (source.includes('automated')) return 'fas fa-robot';
+        return 'fas fa-question';
+    }
+
+    function escapeHtml(unsafe) {
+        if (typeof unsafe !== 'string') return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // View toggle
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const view = btn.dataset.view;
+            document.getElementById('timeline-view').classList.toggle('hidden', view !== 'timeline');
+            document.getElementById('table-view').classList.toggle('hidden', view !== 'table');
+        });
+    });
+});
+</script>
+</body>
+</html>

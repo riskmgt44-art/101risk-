@@ -1,0 +1,2522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Overview • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            /* Color Palette */
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --primary-light: rgba(93, 161, 161, 0.1);
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-muted: #6b7280;
+            --bg: #f9fafb;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --border-light: #f3f4f6;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            
+            /* Spacing Scale */
+            --space-xs: 0.5rem;
+            --space-sm: 0.75rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 2.5rem;
+            --space-3xl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 300ms ease;
+            --transition-slow: 500ms ease;
+            
+            /* Sizing */
+            --sidebar-width: 224px;
+            --header-height: 64px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: var(--header-height) 1fr;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ===== CUSTOM SCROLLBARS ===== */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--border-light);
+            border-radius: var(--radius-sm);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: var(--radius-sm);
+            transition: background-color var(--transition-fast);
+            border: 2px solid var(--border-light);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: var(--primary);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* Firefox scrollbar styling */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--text-muted) var(--border-light);
+        }
+
+        /* Specific scrollbar for sidebar */
+        .nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .nav::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Specific scrollbar for modal */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: transparent;
+            margin: var(--space-xs) 0;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        /* Dark mode scrollbars */
+        @media (prefers-color-scheme: dark) {
+            ::-webkit-scrollbar-track {
+                background: var(--border);
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: var(--border-light);
+                border-color: var(--border);
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--text-muted);
+            }
+            
+            * {
+                scrollbar-color: var(--border-light) var(--border);
+            }
+            
+            .nav::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.1);
+            }
+            
+            .nav::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+            
+            .modal-body::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.15);
+            }
+            
+            .modal-body::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.25);
+            }
+        }
+
+        /* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+            border-radius: var(--radius-sm);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* ===== LOADING STATES ===== */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-md);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .loading .real-content {
+            display: none;
+        }
+
+        body:not(.loading) .shimmer {
+            display: none !important;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            grid-row: 1 / -1;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            z-index: 50;
+        }
+
+        .sidebar-header {
+            padding: var(--space-lg) var(--space-md);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo:focus-visible {
+            outline-offset: 4px;
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .nav {
+            flex: 1;
+            padding: var(--space-md) 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-secondary);
+            transition: background-color var(--transition-fast);
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            width: 100%;
+            text-align: left;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-item:focus-visible {
+            outline-offset: -2px;
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            border-left-color: var(--primary);
+        }
+
+        .nav-item i {
+            width: 1rem;
+            height: 1rem;
+            font-size: 1rem;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Dropdown Styles */
+        .nav-item.dropdown {
+            justify-content: space-between;
+        }
+
+        .dropdown-toggle {
+            transition: transform var(--transition-base);
+            width: 1rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item.dropdown.open .dropdown-toggle {
+            transform: rotate(180deg);
+        }
+
+        .sub-nav {
+            display: none;
+            flex-direction: column;
+            background: rgba(93, 161, 161, 0.02);
+        }
+
+        .nav-item.dropdown.open + .sub-nav {
+            display: flex;
+        }
+
+        .sub-item {
+            font-size: 0.8125rem;
+            padding: var(--space-sm) var(--space-md) var(--space-sm) 3rem;
+        }
+
+        .sub-item:hover {
+            background: rgba(93, 161, 161, 0.04);
+        }
+
+        /* Add Asset Button */
+        .add-asset-btn {
+            margin: var(--space-sm) var(--space-md);
+            padding: var(--space-sm);
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .add-asset-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .add-asset-btn:focus-visible {
+            outline-offset: 2px;
+        }
+
+        .sidebar-footer {
+            padding: var(--space-md);
+            border-top: 1px solid var(--border-light);
+            margin-top: auto;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+        }
+
+        .avatar {
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.65rem;
+            color: var(--primary);
+            background: rgba(93, 161, 161, 0.15);
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+            display: inline-block;
+            margin-top: 0.125rem;
+            white-space: nowrap;
+        }
+
+        .logout {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            padding: 0.5rem var(--space-sm);
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            background: none;
+            border: none;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .logout:hover {
+            background: rgba(239, 68, 68, 0.08);
+            color: var(--red);
+        }
+
+        .logout:focus-visible {
+            outline-offset: 2px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            grid-column: 2 / -1;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 var(--space-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            height: var(--header-height);
+        }
+
+        .page-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            width: 240px;
+            font-size: 0.875rem;
+            background: var(--bg);
+            transition: all var(--transition-fast);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93, 161, 161, 0.1);
+            width: 280px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .notifications {
+            position: relative;
+            cursor: pointer;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            transition: background-color var(--transition-fast);
+        }
+
+        .notifications:hover {
+            background: var(--border-light);
+        }
+
+        .notifications:focus-visible {
+            outline-offset: 2px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background: var(--red);
+            color: white;
+            font-size: 0.625rem;
+            min-width: 1.125rem;
+            height: 1.125rem;
+            border-radius: 0.5625rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            padding: 0 0.25rem;
+            border: 2px solid var(--card-bg);
+        }
+
+        .notification-badge:empty {
+            display: none;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            grid-column: 2 / -1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        #content-frame {
+            position: absolute;
+            top: var(--header-height);
+            left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            height: calc(100% - var(--header-height));
+            border: none;
+            display: none;
+            z-index: 5;
+        }
+
+        #overview-content {
+            padding: var(--space-xl);
+            overflow-y: auto;
+            height: 100%;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        /* ===== KPI CARDS ===== */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-2xl);
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+            text-align: center;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+            line-height: 1;
+        }
+
+        .kpi-value.total { color: var(--text-primary); }
+        .kpi-value.high { color: var(--red); }
+        .kpi-value.open { color: var(--primary); }
+        .kpi-value.overdue { color: var(--amber); }
+        .kpi-value.pending { color: var(--red); }
+        .kpi-value.active { color: var(--green); }
+
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ===== DASHBOARD ACCESS ===== */
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-2xl);
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-icon {
+            width: 3rem;
+            height: 3rem;
+            background: rgba(93, 161, 161, 0.15);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-md);
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .dashboard-icon i {
+            font-size: 1.25rem;
+        }
+
+        .dashboard-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            color: var(--text-primary);
+        }
+
+        .dashboard-desc {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-lg);
+            flex: 1;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .btn-view {
+            align-self: flex-start;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .btn-view:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-view:focus-visible {
+            outline-offset: 2px;
+        }
+
+        /* ===== APPROVALS & GOVERNANCE ===== */
+        .split-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-2xl);
+        }
+
+        .approvals-panel,
+        .governance-panel {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .governance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) 0;
+            font-size: 0.875rem;
+        }
+
+        .governance-item:not(:last-child) {
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ===== ADMIN SHORTCUTS ===== */
+        .admin-section {
+            background: rgba(93, 161, 161, 0.06);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            border: 1px solid rgba(93, 161, 161, 0.2);
+            margin-bottom: var(--space-xl);
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: var(--space-md);
+        }
+
+        .admin-card {
+            text-align: center;
+            padding: var(--space-lg);
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .admin-card:focus-visible {
+            outline-offset: 2px;
+        }
+
+        .admin-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: rgba(93, 161, 161, 0.15);
+            border-radius: var(--radius-lg);
+            margin: 0 auto var(--space-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .admin-icon i {
+            font-size: 1.125rem;
+        }
+
+        .admin-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: var(--space-xs);
+            color: var(--text-primary);
+        }
+
+        .admin-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            max-width: 400px;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            animation: slideIn 0.3s ease forwards;
+            border-left: 4px solid var(--primary);
+            max-width: 100%;
+        }
+
+        .toast.success {
+            border-left-color: var(--green);
+        }
+
+        .toast.error {
+            border-left-color: var(--red);
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        .toast.success .toast-icon path {
+            fill: var(--green);
+        }
+
+        .toast.error .toast-icon path {
+            fill: var(--red);
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+
+        .toast-close {
+            width: 1.25rem;
+            height: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            transition: background-color var(--transition-fast);
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        /* ===== MODAL STYLES ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 720px;
+            max-height: 85vh;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: var(--space-lg) var(--space-xl);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            cursor: pointer;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            transition: background-color var(--transition-fast);
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .modal-close:focus-visible {
+            outline-offset: 2px;
+        }
+
+        .modal-body {
+            padding: var(--space-xl);
+            overflow-y: auto;
+            flex: 1;
+            overscroll-behavior: contain;
+        }
+
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: all var(--transition-fast);
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93, 161, 161, 0.1);
+        }
+
+        .form-group input[readonly] {
+            background: var(--border-light);
+            cursor: not-allowed;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .modal-footer {
+            padding: var(--space-lg) var(--space-xl);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: flex-end;
+            flex-shrink: 0;
+            background: var(--bg);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            min-width: 80px;
+        }
+
+        .btn:focus-visible {
+            outline-offset: 2px;
+        }
+
+        .btn-secondary {
+            background: var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 1200px) {
+            .split-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            body {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform var(--transition-base);
+                z-index: 60;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .header {
+                grid-column: 1 / -1;
+                padding: var(--space-md) var(--space-lg);
+            }
+
+            .main {
+                grid-column: 1 / -1;
+            }
+
+            #content-frame {
+                left: 0;
+                width: 100%;
+                top: 0;
+                height: 100%;
+            }
+
+            #overview-content {
+                padding: var(--space-lg);
+            }
+
+            .hamburger-menu {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 2.5rem;
+                height: 2.5rem;
+                cursor: pointer;
+                border-radius: var(--radius-md);
+                transition: background-color var(--transition-fast);
+                margin-right: var(--space-sm);
+            }
+
+            .hamburger-menu:hover {
+                background: var(--border-light);
+            }
+
+            .hamburger-menu:focus-visible {
+                outline-offset: 2px;
+            }
+
+            .modal {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --space-xl: 1.5rem;
+                --space-2xl: 2rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--space-md);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+
+            .header-actions .search-box input:not(:focus) {
+                width: 180px;
+            }
+
+            /* Horizontal scroll for dashboard cards on mobile */
+            .dashboard-grid {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                padding-bottom: var(--space-md);
+                margin-bottom: calc(var(--space-2xl) - var(--space-md));
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .dashboard-grid::-webkit-scrollbar {
+                height: 6px;
+            }
+
+            .dashboard-grid::-webkit-scrollbar-track {
+                background: var(--border-light);
+                border-radius: 3px;
+                margin: 0 var(--space-lg);
+            }
+
+            .dashboard-grid::-webkit-scrollbar-thumb {
+                background: var(--text-muted);
+                border-radius: 3px;
+            }
+
+            .dashboard-card {
+                min-width: 85vw;
+                scroll-snap-align: start;
+                flex-shrink: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .modal-footer .btn {
+                width: 100%;
+            }
+
+            .toast-container {
+                left: var(--space-md);
+                right: var(--space-md);
+                max-width: none;
+            }
+        }
+
+        /* ===== DARK MODE SUPPORT ===== */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #4c9e9e;
+                --primary-hover: #3d8d8d;
+                --primary-light: rgba(76, 158, 158, 0.15);
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --text-muted: #9ca3af;
+                --bg: #111827;
+                --card-bg: #1f2937;
+                --border: #374151;
+                --border-light: #4b5563;
+                --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
+                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.24);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+            }
+
+            .admin-section {
+                background: rgba(76, 158, 158, 0.08);
+                border-color: rgba(76, 158, 158, 0.3);
+            }
+
+            .shimmer {
+                background: linear-gradient(90deg, #2d3748 25%, #374151 50%, #2d3748 75%);
+            }
+
+            .dashboard-grid::-webkit-scrollbar-track {
+                background: var(--border);
+            }
+
+            .dashboard-grid::-webkit-scrollbar-thumb {
+                background: var(--border-light);
+            }
+        }
+
+        /* ===== FORM ERROR STYLES ===== */
+        .form-group .error-message {
+            display: none;
+            color: var(--red);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-group input.error,
+        .form-group select.error,
+        .form-group textarea.error {
+            border-color: var(--red);
+        }
+
+        .form-group input.error:focus,
+        .form-group select.error:focus,
+        .form-group textarea.error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        /* ===== EMPTY STATES ===== */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-2xl);
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: var(--space-md);
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            margin-bottom: var(--space-xs);
+            color: var(--text-secondary);
+        }
+
+        /* ===== TOOLTIPS ===== */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]:hover::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--text-primary);
+            color: white;
+            font-size: 0.75rem;
+            border-radius: var(--radius-sm);
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 4px;
+        }
+
+        [data-tooltip]:hover::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: var(--text-primary);
+            margin-bottom: -4px;
+        }
+    </style>
+</head>
+<body class="loading" aria-busy="true">
+    <!-- Screen Reader Navigation -->
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <!-- Mobile Hamburger Menu -->
+    <button class="hamburger-menu" id="mobileMenuToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+        <div class="sidebar-header">
+            <a href="#" class="logo" onclick="return loadOverview();" aria-label="RiskMGT Home">
+                <div class="logo-icon" aria-hidden="true">R</div>
+                <span>Risk+</span>
+            </a>
+        </div>
+        <nav class="nav" aria-label="Dashboard navigation">
+            <button class="nav-item active" data-target="overview" aria-current="page">
+                <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                Overview
+            </button>
+            
+            <button class="nav-item dropdown" id="assetDropdown" aria-expanded="false" aria-controls="assetSubNav">
+                <i class="fas fa-box" aria-hidden="true"></i>
+                Asset
+                <i class="fas fa-chevron-down dropdown-toggle" aria-hidden="true"></i>
+            </button>
+            
+            <div class="sub-nav" id="assetSubNav" role="region" aria-labelledby="assetDropdown">
+                <button class="add-asset-btn" id="addAssetBtn" aria-label="Add new business asset">
+                    <i class="fas fa-plus" aria-hidden="true"></i> Add Asset
+                </button>
+                <div id="dynamicAssets" role="list" aria-label="Asset list"></div>
+                <button class="nav-item sub-item" data-target="assets/overview.html">
+                    <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                    Asset Overview
+                </button>
+                <button class="nav-item sub-item" data-target="assets/list.html">
+                    <i class="fas fa-list" aria-hidden="true"></i>
+                    Asset List
+                </button>
+            </div>
+            
+            <button class="nav-item" data-target="global-risk-register/list.html">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                Global Risk Register
+            </button>
+            
+            <button class="nav-item" data-target="global-actions/list.html">
+                <i class="fas fa-tasks" aria-hidden="true"></i>
+                Global Actions
+            </button>
+            
+            <button class="nav-item" data-target="approvals.html">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                Approvals
+                <span class="notification-badge" id="approvalBadge" aria-label="0 pending approvals"></span>
+            </button>
+            
+            <button class="nav-item" data-target="delete-requests.html">
+                <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                Delete Requests
+            </button>
+            
+            <button class="nav-item" data-target="dashboards/enterprise-overview.html">
+                <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                Dashboards
+            </button>
+            
+            <button class="nav-item" data-target="audit-trail.html">
+                <i class="fas fa-history" aria-hidden="true"></i>
+                Audit Trail
+            </button>
+            
+            <button class="nav-item" data-target="user-activity.html">
+                <i class="fas fa-user-clock" aria-hidden="true"></i>
+                User Activity
+            </button>
+            
+            <button class="nav-item" data-target="admin/users.html">
+                <i class="fas fa-cog" aria-hidden="true"></i>
+                Admin
+            </button>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="avatar" id="userAvatar" aria-hidden="true">??</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Loading...</div>
+                    <div class="user-role" id="userRole">User</div>
+                </div>
+            </div>
+            <button class="logout" id="logoutBtn" aria-label="Logout">
+                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header" id="overviewHeader" role="banner">
+        <h1 class="page-title" id="pageTitle">Executive Overview • RiskMGT</h1>
+        <div class="header-actions">
+            <div class="search-box">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search" 
+                       placeholder="Search risks, actions, users..." 
+                       aria-label="Search dashboard"
+                       id="searchInput">
+            </div>
+            <button class="notifications" id="notificationsBtn" aria-label="Notifications" aria-describedby="notificationCount">
+                <i class="fas fa-bell" aria-hidden="true"></i>
+                <span class="notification-badge" id="notificationCount" aria-live="polite">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main" id="main-content" role="main">
+        <iframe id="content-frame" 
+                src="" 
+                title="Content Frame"
+                scrolling="no"
+                loading="lazy"
+                aria-label="Content area">
+        </iframe>
+        
+        <div id="overview-content">
+            <!-- KPI Grid -->
+            <div class="kpi-grid">
+                <!-- Shimmer Loading States -->
+                <div class="kpi-card shimmer" aria-hidden="true">
+                    <div class="shimmer" style="height: 2rem; width: 60%; margin: 0 auto 0.5rem;"></div>
+                    <div class="shimmer" style="height: 1rem; width: 40%; margin: 0 auto;"></div>
+                </div>
+                <div class="kpi-card shimmer" aria-hidden="true">
+                    <div class="shimmer" style="height: 2rem; width: 60%; margin: 0 auto 0.5rem;"></div>
+                    <div class="shimmer" style="height: 1rem; width: 40%; margin: 0 auto;"></div>
+                </div>
+                <div class="kpi-card shimmer" aria-hidden="true">
+                    <div class="shimmer" style="height: 2rem; width: 60%; margin: 0 auto 0.5rem;"></div>
+                    <div class="shimmer" style="height: 1rem; width: 40%; margin: 0 auto;"></div>
+                </div>
+                <div class="kpi-card shimmer" aria-hidden="true">
+                    <div class="shimmer" style="height: 2rem; width: 60%; margin: 0 auto 0.5rem;"></div>
+                    <div class="shimmer" style="height: 1rem; width: 40%; margin: 0 auto;"></div>
+                </div>
+                <div class="kpi-card shimmer" aria-hidden="true">
+                    <div class="shimmer" style="height: 2rem; width: 60%; margin: 0 auto 0.5rem;"></div>
+                    <div class="shimmer" style="height: 1rem; width: 40%; margin: 0 auto;"></div>
+                </div>
+                <div class="kpi-card shimmer" aria-hidden="true">
+                    <div class="shimmer" style="height: 2rem; width: 60%; margin: 0 auto 0.5rem;"></div>
+                    <div class="shimmer" style="height: 1rem; width: 40%; margin: 0 auto;"></div>
+                </div>
+
+                <!-- Real Content -->
+                <div class="real-content kpi-card">
+                    <div class="kpi-value total" id="totalRisks" aria-live="polite">0</div>
+                    <div class="kpi-label">Total Risks</div>
+                </div>
+                <div class="real-content kpi-card">
+                    <div class="kpi-value high" id="highSeverityRisks" aria-live="polite">0</div>
+                    <div class="kpi-label">High-Severity Risks</div>
+                </div>
+                <div class="real-content kpi-card">
+                    <div class="kpi-value open" id="openActions" aria-live="polite">0</div>
+                    <div class="kpi-label">Open Actions</div>
+                </div>
+                <div class="real-content kpi-card">
+                    <div class="kpi-value overdue" id="overdueActions" aria-live="polite">0</div>
+                    <div class="kpi-label">Overdue Actions</div>
+                </div>
+                <div class="real-content kpi-card">
+                    <div class="kpi-value pending" id="pendingApprovals" aria-live="polite">0</div>
+                    <div class="kpi-label">Pending Approvals</div>
+                </div>
+                <div class="real-content kpi-card">
+                    <div class="kpi-value active" id="activeUsers" aria-live="polite">0</div>
+                    <div class="kpi-label">Active Users</div>
+                </div>
+            </div>
+
+            <!-- Enterprise Dashboards -->
+            <h2 class="section-title real-content">
+                <i class="fas fa-th-large" aria-hidden="true"></i>
+                Enterprise Dashboards
+            </h2>
+            <div class="dashboard-grid">
+                <div class="dashboard-card real-content">
+                    <div class="dashboard-icon" aria-hidden="true"><i class="fas fa-th-large"></i></div>
+                    <div class="dashboard-title">Enterprise Risk Overview</div>
+                    <div class="dashboard-desc">Comprehensive view of all risks across the organization with severity distribution and trends.</div>
+                    <button class="btn-view" onclick="loadIframePage('dashboards/enterprise-overview.html')">
+                        View Dashboard
+                        <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="dashboard-card real-content">
+                    <div class="dashboard-icon" aria-hidden="true"><i class="fas fa-map"></i></div>
+                    <div class="dashboard-title">Enterprise Heatmap</div>
+                    <div class="dashboard-desc">Visual representation of risk concentration by department, location, and category.</div>
+                    <button class="btn-view" onclick="loadIframePage('dashboards/enterprise-heatmap.html')">
+                        View Dashboard
+                        <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="dashboard-card real-content">
+                    <div class="dashboard-icon" aria-hidden="true"><i class="fas fa-chart-line"></i></div>
+                    <div class="dashboard-title">Trend Analysis</div>
+                    <div class="dashboard-desc">Historical risk trends, mitigation effectiveness, and emerging risk patterns over time.</div>
+                    <button class="btn-view" onclick="loadIframePage('dashboards/enterprise-trends.html')">
+                        View Dashboard
+                        <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Approvals & Governance -->
+            <h2 class="section-title real-content">
+                <i class="fas fa-check-double" aria-hidden="true"></i>
+                Approvals & Governance
+            </h2>
+            <div class="split-section">
+                <div class="approvals-panel real-content">
+                    <h3 style="margin-bottom: var(--space-md); font-size: 1rem; font-weight: 600;">Pending Approvals</h3>
+                    <div class="empty-state" id="approvalsEmptyState">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <h3>No pending approvals</h3>
+                        <p>You're all caught up! No approvals require your attention at this time.</p>
+                    </div>
+                    <div id="approvalsList" style="display: none;"></div>
+                </div>
+                <div class="governance-panel real-content">
+                    <h3 style="margin-bottom: var(--space-md); font-size: 1rem; font-weight: 600;">Governance Snapshot</h3>
+                    <div class="governance-item">
+                        <span>Audit Trail Entries (24h)</span>
+                        <strong id="auditEntries24h" aria-live="polite">0</strong>
+                    </div>
+                    <div class="governance-item">
+                        <span>Recent Role Changes</span>
+                        <strong id="recentRoleChanges" aria-live="polite">0</strong>
+                    </div>
+                    <div class="governance-item">
+                        <span>Policy Updates (30d)</span>
+                        <strong id="policyUpdates30d" aria-live="polite">0</strong>
+                    </div>
+                    <div class="governance-item">
+                        <span>System Health</span>
+                        <strong style="color: var(--green);">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i> Healthy
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Administration -->
+            <div class="admin-section">
+                <h2 class="section-title real-content" style="color: var(--primary); margin-bottom: var(--space-lg);">
+                    <i class="fas fa-cogs" aria-hidden="true"></i>
+                    Administration
+                </h2>
+                <div class="admin-grid">
+                    <a class="admin-card real-content" href="javascript:void(0)" onclick="loadIframePage('admin/users.html')" aria-label="User Management">
+                        <div class="admin-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
+                        <div class="admin-title">User Management</div>
+                        <div class="admin-desc">Add, edit, or deactivate users</div>
+                    </a>
+                    <a class="admin-card real-content" href="javascript:void(0)" onclick="loadIframePage('admin/roles.html')" aria-label="Role Management">
+                        <div class="admin-icon"><i class="fas fa-user-shield" aria-hidden="true"></i></div>
+                        <div class="admin-title">Role Management</div>
+                        <div class="admin-desc">Define and assign roles</div>
+                    </a>
+                    <a class="admin-card real-content" href="javascript:void(0)" onclick="loadIframePage('admin/permissions.html')" aria-label="Permissions Management">
+                        <div class="admin-icon"><i class="fas fa-key" aria-hidden="true"></i></div>
+                        <div class="admin-title">Permissions</div>
+                        <div class="admin-desc">Fine-grained access control</div>
+                    </a>
+                    <a class="admin-card real-content" href="javascript:void(0)" onclick="loadIframePage('admin/system-settings.html')" aria-label="System Settings">
+                        <div class="admin-icon"><i class="fas fa-cogs" aria-hidden="true"></i></div>
+                        <div class="admin-title">System Settings</div>
+                        <div class="admin-desc">Global configuration & policies</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Logout Modal -->
+    <div class="modal-overlay" id="logoutModal" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="logoutModalTitle">Confirm Logout</h2>
+                <button class="modal-close" id="closeLogoutModal" aria-label="Close logout dialog">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to log out of your account?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
+                <button class="btn btn-primary" id="confirmLogout">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Business Asset Modal -->
+    <div class="modal-overlay" id="addAssetModal" role="dialog" aria-modal="true" aria-labelledby="assetModalTitle" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="assetModalTitle">Add Business Asset</h2>
+                <button class="modal-close" id="closeAssetModal" aria-label="Close asset dialog">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="assetForm" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="assetName">Asset Name *</label>
+                            <input type="text" id="assetName" required aria-required="true">
+                            <div class="error-message" id="assetNameError" role="alert" aria-live="polite"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="assetCategory">Asset Category *</label>
+                            <select id="assetCategory" required aria-required="true">
+                                <option value="" selected disabled>Select category</option>
+                                <option value="Department">Department</option>
+                                <option value="Business Unit">Business Unit</option>
+                                <option value="Production Asset">Production Asset</option>
+                                <option value="Location">Location</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="error-message" id="assetCategoryError" role="alert" aria-live="polite"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="parentOrganization">Parent Organization *</label>
+                            <input type="text" id="parentOrganization" value="Leadway Insurance" readonly aria-readonly="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="assetNature">Asset Nature</label>
+                            <select id="assetNature">
+                                <option value="" selected>Select nature (optional)</option>
+                                <option value="Operational">Operational</option>
+                                <option value="Corporate">Corporate</option>
+                                <option value="Technical">Technical</option>
+                                <option value="Regulatory">Regulatory</option>
+                                <option value="Strategic">Strategic</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="assetLocation">Location (Optional)</label>
+                            <input type="text" id="assetLocation">
+                        </div>
+                        <div class="form-group">
+                            <label for="assetOwner">Asset Owner</label>
+                            <input type="text" id="assetOwner">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="assetDescription">Description</label>
+                        <textarea id="assetDescription"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelAsset">Cancel</button>
+                <button class="btn btn-primary" id="saveAsset" type="submit" form="assetForm">Save Asset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        // ===== GLOBAL STATE =====
+        const state = {
+            isLoading: true,
+            assets: [],
+            notifications: 0,
+            currentPage: 'overview'
+        };
+
+        // ===== UTILITY FUNCTIONS =====
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function throttle(func, limit) {
+            let inThrottle;
+            return function(...args) {
+                if (!inThrottle) {
+                    func.apply(this, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        }
+
+        // ===== TOAST SYSTEM =====
+        function showToast(message, type = 'success', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const toastId = 'toast-' + Date.now();
+            
+            toast.className = `toast ${type}`;
+            toast.id = toastId;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            const iconPath = type === 'success' 
+                ? '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>'
+                : '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
+            
+            toast.innerHTML = `
+                <svg class="toast-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    ${iconPath}
+                </svg>
+                <div class="toast-message">${message}</div>
+                <button class="toast-close" onclick="removeToast('${toastId}')" aria-label="Close notification">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto-remove after duration
+            setTimeout(() => removeToast(toastId), duration);
+            
+            return toastId;
+        }
+
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+
+        // ===== MODAL MANAGEMENT =====
+        class ModalManager {
+            constructor() {
+                this.currentModal = null;
+                this.focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+            }
+
+            open(modalId) {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+
+                this.currentModal = modal;
+                modal.setAttribute('aria-hidden', 'false');
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+
+                // Focus first focusable element
+                const focusable = modal.querySelectorAll(this.focusableElements);
+                if (focusable.length > 0) {
+                    focusable[0].focus();
+                }
+
+                // Trap focus
+                modal.addEventListener('keydown', this.trapFocus.bind(this));
+            }
+
+            close(modalId) {
+                const modal = document.getElementById(modalId || (this.currentModal?.id));
+                if (!modal) return;
+
+                modal.setAttribute('aria-hidden', 'true');
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+
+                // Remove focus trap
+                modal.removeEventListener('keydown', this.trapFocus.bind(this));
+                this.currentModal = null;
+            }
+
+            trapFocus(e) {
+                if (e.key !== 'Tab' || !this.currentModal) return;
+
+                const focusable = this.currentModal.querySelectorAll(this.focusableElements);
+                if (focusable.length === 0) return;
+
+                const firstElement = focusable[0];
+                const lastElement = focusable[focusable.length - 1];
+
+                if (e.shiftKey && document.activeElement === firstElement) {
+                    lastElement.focus();
+                    e.preventDefault();
+                } else if (!e.shiftKey && document.activeElement === lastElement) {
+                    firstElement.focus();
+                    e.preventDefault();
+                }
+            }
+        }
+
+        const modalManager = new ModalManager();
+
+        // ===== NAVIGATION SYSTEM =====
+        function loadIframePage(target) {
+            const iframe = document.getElementById('content-frame');
+            const overviewContent = document.getElementById('overview-content');
+            const overviewHeader = document.getElementById('overviewHeader');
+            
+            iframe.src = target;
+            iframe.style.display = 'block';
+            overviewContent.style.display = 'none';
+            overviewHeader.style.display = 'none';
+            
+            // Update page title
+            const pageTitle = document.getElementById('pageTitle');
+            const pageName = target.split('/').pop().replace('.html', '').replace(/-/g, ' ');
+            pageTitle.textContent = `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} • RiskMGT`;
+            
+            state.currentPage = target;
+            
+            // Close mobile menu if open
+            closeMobileMenu();
+        }
+
+        function loadOverview() {
+            const iframe = document.getElementById('content-frame');
+            const overviewContent = document.getElementById('overview-content');
+            const overviewHeader = document.getElementById('overviewHeader');
+            
+            iframe.style.display = 'none';
+            overviewContent.style.display = 'block';
+            overviewHeader.style.display = 'flex';
+            
+            document.getElementById('pageTitle').textContent = 'Executive Overview • RiskMGT';
+            state.currentPage = 'overview';
+            
+            // Close mobile menu if open
+            closeMobileMenu();
+            
+            return false; // Prevent default link behavior
+        }
+
+        // ===== ASSET MANAGEMENT =====
+        class AssetManager {
+            constructor() {
+                this.assets = [];
+            }
+
+            async loadAssets() {
+                const token = localStorage.getItem('token');
+                if (!token) return [];
+
+                try {
+                    const response = await fetch('/api/assets', {
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'Cache-Control': 'no-cache'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            showToast('Session expired. Please login again.', 'error');
+                            setTimeout(() => window.location.href = '../../auth/login.html', 2000);
+                            return [];
+                        }
+                        throw new Error(`Failed to load assets: ${response.status}`);
+                    }
+
+                    this.assets = await response.json();
+                    this.renderAssets();
+                    return this.assets;
+                } catch (err) {
+                    console.error('Load assets error:', err);
+                    showToast('Failed to load assets', 'error');
+                    return [];
+                }
+            }
+
+            renderAssets() {
+                const container = document.getElementById('dynamicAssets');
+                container.innerHTML = '';
+
+                this.assets.forEach(asset => {
+                    const subItem = document.createElement('button');
+                    subItem.className = 'nav-item sub-item';
+                    subItem.setAttribute('data-target', `assets/detail-${asset.id}.html`);
+                    subItem.setAttribute('aria-label', `View ${asset.name} asset`);
+                    subItem.innerHTML = `
+                        <i class="fas fa-box-open" aria-hidden="true"></i>
+                        ${this.truncateText(asset.name, 20)}
+                    `;
+
+                    subItem.addEventListener('click', () => {
+                        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                        subItem.classList.add('active');
+                        loadIframePage(`assets/detail-${asset.id}.html`);
+                    });
+
+                    container.appendChild(subItem);
+                });
+            }
+
+            async saveAsset(assetData) {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showToast('Please login to add assets', 'error');
+                    return null;
+                }
+
+                try {
+                    const response = await fetch('/api/assets', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(assetData)
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.message || 'Failed to add asset');
+                    }
+
+                    return await response.json();
+                } catch (err) {
+                    throw err;
+                }
+            }
+
+            truncateText(text, maxLength) {
+                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            }
+        }
+
+        const assetManager = new AssetManager();
+
+        // ===== DASHBOARD DATA LOADING =====
+        async function loadDashboardData() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast('Please login to view dashboard data', 'error');
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/dashboard/executive', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showToast('Session expired. Please login again.', 'error');
+                        setTimeout(() => window.location.href = '../../auth/login.html', 2000);
+                        return;
+                    }
+                    throw new Error(`Failed to load data: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Update KPI values
+                updateKPIValue('totalRisks', data.totalRisks || 0);
+                updateKPIValue('highSeverityRisks', data.highSeverityRisks || 0);
+                updateKPIValue('openActions', data.openActions || 0);
+                updateKPIValue('overdueActions', data.overdueActions || 0);
+                updateKPIValue('pendingApprovals', data.pendingApprovals || 0);
+                updateKPIValue('activeUsers', data.activeUsers || 0);
+
+                // Update governance values
+                updateGovernanceValue('auditEntries24h', data.auditEntries24h || 0);
+                updateGovernanceValue('recentRoleChanges', data.recentRoleChanges || 0);
+                updateGovernanceValue('policyUpdates30d', data.policyUpdates30d || 0);
+
+                // Update notification badges
+                updateNotificationBadges(data.pendingApprovals || 0);
+
+                setLoading(false);
+
+            } catch (err) {
+                console.error('Dashboard fetch error:', err);
+                showToast('Failed to load dashboard data.', 'error');
+                setLoading(false);
+            }
+        }
+
+        function updateKPIValue(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                // Animate counter
+                const start = parseInt(element.textContent) || 0;
+                animateCounter(element, start, value, 1000);
+            }
+        }
+
+        function updateGovernanceValue(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value.toLocaleString();
+            }
+        }
+
+        function updateNotificationBadges(count) {
+            const badge = document.getElementById('notificationCount');
+            const approvalBadge = document.getElementById('approvalBadge');
+            
+            if (badge) {
+                badge.textContent = count;
+                badge.setAttribute('aria-label', `${count} notifications`);
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            
+            if (approvalBadge) {
+                approvalBadge.textContent = count;
+                approvalBadge.setAttribute('aria-label', `${count} pending approvals`);
+                approvalBadge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            
+            state.notifications = count;
+        }
+
+        function animateCounter(element, start, end, duration) {
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentValue = Math.floor(start + (end - start) * progress);
+                element.textContent = currentValue.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = end.toLocaleString();
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        // ===== USER MANAGEMENT =====
+        function updateUserDisplay() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast('Please login to continue', 'error');
+                setTimeout(() => window.location.href = '../../auth/login.html', 1000);
+                return;
+            }
+
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const fullName = payload.name || `${payload.firstName || ''} ${payload.lastName || ''}`.trim() || 'User';
+                const role = payload.role || 'User';
+                const initials = fullName.split(' ')
+                    .map(n => n[0]?.toUpperCase() || '')
+                    .join('')
+                    .slice(0, 2) || '??';
+
+                document.getElementById('userAvatar').textContent = initials;
+                document.getElementById('userName').textContent = fullName;
+                document.getElementById('userRole').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+            } catch (e) {
+                console.error('Failed to decode token for user display', e);
+                document.getElementById('userName').textContent = 'User';
+                document.getElementById('userRole').textContent = 'Unknown';
+            }
+        }
+
+        // ===== FORM VALIDATION =====
+        function validateAssetForm() {
+            const name = document.getElementById('assetName').value.trim();
+            const category = document.getElementById('assetCategory').value;
+            let isValid = true;
+
+            // Clear previous errors
+            clearErrors();
+
+            if (!name) {
+                showError('assetName', 'Asset name is required');
+                isValid = false;
+            } else if (name.length > 100) {
+                showError('assetName', 'Asset name must be less than 100 characters');
+                isValid = false;
+            }
+
+            if (!category) {
+                showError('assetCategory', 'Please select a category');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+            
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.setAttribute('aria-invalid', 'true');
+                field.classList.add('error');
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+            
+            document.querySelectorAll('[aria-invalid="true"]').forEach(el => {
+                el.removeAttribute('aria-invalid');
+                el.classList.remove('error');
+            });
+        }
+
+        // ===== MOBILE MENU =====
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('mobileMenuToggle');
+            const isOpen = sidebar.classList.contains('open');
+            
+            sidebar.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', !isOpen);
+            
+            // Add backdrop when menu is open
+            if (!isOpen) {
+                addBackdrop();
+            } else {
+                removeBackdrop();
+            }
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('mobileMenuToggle');
+            
+            sidebar.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+            removeBackdrop();
+        }
+
+        function addBackdrop() {
+            let backdrop = document.getElementById('sidebarBackdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.id = 'sidebarBackdrop';
+                backdrop.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 55;
+                    backdrop-filter: blur(2px);
+                `;
+                backdrop.addEventListener('click', closeMobileMenu);
+                document.body.appendChild(backdrop);
+            }
+        }
+
+        function removeBackdrop() {
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
+
+        // ===== LOADING STATE =====
+        function setLoading(isLoading) {
+            state.isLoading = isLoading;
+            document.body.classList.toggle('loading', isLoading);
+            document.body.setAttribute('aria-busy', isLoading);
+            
+            if (isLoading) {
+                document.getElementById('overview-content').setAttribute('aria-busy', 'true');
+            } else {
+                document.getElementById('overview-content').removeAttribute('aria-busy');
+            }
+        }
+
+        // ===== SEARCH FUNCTIONALITY =====
+        function handleSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput.value.trim();
+            
+            if (query.length < 2) {
+                showToast('Please enter at least 2 characters to search', 'error');
+                return;
+            }
+            
+            showToast(`Searching for "${query}"...`, 'success');
+            // Implement actual search functionality here
+        }
+
+        // ===== ASSET FORM HANDLER =====
+        async function handleAssetFormSubmit(e) {
+            e.preventDefault();
+            
+            if (!validateAssetForm()) {
+                showToast('Please fix the errors in the form', 'error');
+                return;
+            }
+            
+            const assetData = {
+                name: document.getElementById('assetName').value.trim(),
+                category: document.getElementById('assetCategory').value,
+                nature: document.getElementById('assetNature').value || null,
+                location: document.getElementById('assetLocation').value.trim() || null,
+                owner: document.getElementById('assetOwner').value.trim() || null,
+                description: document.getElementById('assetDescription').value.trim() || null
+            };
+            
+            const saveBtn = document.getElementById('saveAsset');
+            const originalText = saveBtn.innerHTML;
+            const originalState = saveBtn.disabled;
+            
+            try {
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveBtn.disabled = true;
+                
+                const asset = await assetManager.saveAsset(assetData);
+                
+                if (asset) {
+                    // Close modal first
+                    modalManager.close('addAssetModal');
+                    
+                    // Wait for modal animation to complete, then show toast
+                    setTimeout(() => {
+                        showToast(`Business asset "${asset.name}" added successfully`, 'success');
+                        
+                        // Reset form
+                        document.getElementById('assetForm').reset();
+                        
+                        // Reload assets in sidebar
+                        assetManager.loadAssets();
+                    }, 300);
+                }
+            } catch (err) {
+                showToast(err.message || 'Failed to add asset', 'error');
+            } finally {
+                // Restore button state
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = originalState;
+            }
+        }
+
+        // ===== EVENT LISTENERS =====
+        function initializeEventListeners() {
+            // Mobile menu toggle
+            document.getElementById('mobileMenuToggle')?.addEventListener('click', toggleMobileMenu);
+            
+            // Asset dropdown
+            document.getElementById('assetDropdown')?.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = this.classList.toggle('open');
+                this.setAttribute('aria-expanded', isOpen);
+                
+                const subNav = document.getElementById('assetSubNav');
+                if (subNav) {
+                    subNav.setAttribute('aria-hidden', !isOpen);
+                }
+            });
+            
+            // Navigation items
+            document.querySelectorAll('.nav-item:not(.dropdown)').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    if (this.classList.contains('active')) return;
+                    
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.removeAttribute('aria-current');
+                    });
+                    
+                    this.classList.add('active');
+                    this.setAttribute('aria-current', 'page');
+                    
+                    const target = this.getAttribute('data-target');
+                    if (target === 'overview') {
+                        loadOverview();
+                    } else if (target) {
+                        loadIframePage(target);
+                    }
+                    
+                    closeMobileMenu();
+                });
+            });
+            
+            // Add asset button
+            document.getElementById('addAssetBtn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modalManager.open('addAssetModal');
+                closeMobileMenu();
+            });
+            
+            // Asset form - UPDATED to use new handler
+            document.getElementById('assetForm')?.addEventListener('submit', handleAssetFormSubmit);
+            
+            // Logout functionality
+            document.getElementById('logoutBtn')?.addEventListener('click', () => {
+                modalManager.open('logoutModal');
+                closeMobileMenu();
+            });
+            
+            document.getElementById('confirmLogout')?.addEventListener('click', () => {
+                modalManager.close('logoutModal');
+                showToast('You have been logged out successfully.', 'success');
+                
+                // Clear local storage and redirect
+                localStorage.removeItem('token');
+                sessionStorage.clear();
+                
+                setTimeout(() => {
+                    window.location.href = '../../auth/login.html';
+                }, 1000);
+            });
+            
+            // Modal close buttons
+            document.querySelectorAll('.modal-close, .btn-secondary').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const modal = this.closest('.modal-overlay');
+                    if (modal) {
+                        modalManager.close(modal.id);
+                    }
+                });
+            });
+            
+            // Close modals on overlay click
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modalManager.close(modal.id);
+                    }
+                });
+            });
+            
+            // Search input with debounce
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(handleSearch, 500));
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleSearch();
+                    }
+                });
+            }
+            
+            // Escape key to close modals
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (document.body.style.overflow === 'hidden') {
+                        modalManager.close();
+                        closeMobileMenu();
+                    }
+                }
+            });
+            
+            // Resize handling
+            window.addEventListener('resize', debounce(() => {
+                if (window.innerWidth >= 992) {
+                    closeMobileMenu();
+                }
+            }, 250));
+        }
+
+        // ===== INITIALIZATION =====
+        async function initialize() {
+            // Check authentication
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+            
+            // Initialize components
+            updateUserDisplay();
+            initializeEventListeners();
+            
+            // Load initial data
+            await Promise.all([
+                loadDashboardData(),
+                assetManager.loadAssets()
+            ]);
+            
+            // Hide loading state
+            setTimeout(() => setLoading(false), 1000);
+            
+            // Set up periodic refresh (every 5 minutes)
+            setInterval(loadDashboardData, 5 * 60 * 1000);
+        }
+
+        // ===== ERROR BOUNDARY =====
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            showToast('An unexpected error occurred. Please refresh the page.', 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            showToast('An unexpected error occurred. Please try again.', 'error');
+        });
+
+        // ===== START APPLICATION =====
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>

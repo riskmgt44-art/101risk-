@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actions • Risk+ Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+            --viewer-bg: rgba(93,161,161,0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--viewer-bg);
+            color: var(--text-primary);
+        }
+
+        /* Shimmer Skeleton Animation */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 0.5s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer {
+            0%   { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        /* Top Nav */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 40px;
+            background: rgba(93,161,161,0.08);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: none;
+        }
+        .nav-tab:hover:not(.active) { background: rgba(93,161,161,0.15); }
+        .nav-tab .favicon {
+            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+        }
+        
+        /* Viewer badge */
+        .viewer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(93,161,161,0.1);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 12px;
+            border: 1px solid rgba(93,161,161,0.2);
+        }
+        
+        .viewer-badge i {
+            font-size: 10px;
+        }
+        
+        .actions-group { display: flex; align-items: center; gap: 19.2px; }
+        .search-box input {
+            padding: 8px 12.8px; border: 1px solid var(--border); border-radius: 9.6px;
+            width: 320px; font-size: 12px; background: #f9f9f9;
+        }
+        .search-box input:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
+        .btn-primary {
+            padding: 8px 16px; background: var(--primary); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        
+        /* Viewer disabled button */
+        .viewer-disabled-btn {
+            background: #f3f4f6 !important;
+            color: #9ca3af !important;
+            border-color: #e5e7eb !important;
+            cursor: not-allowed !important;
+        }
+        
+        .viewer-disabled-btn:hover {
+            background: #f3f4f6 !important;
+            color: #9ca3af !important;
+            transform: none !important;
+        }
+
+        /* Main */
+        .main { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+        .content-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .page-content { display: none; height: 100%; overflow: auto; padding: 32px; }
+
+        /* Table View */
+        .table-view { display: block; height: calc(100% - 64px); }
+        .table-container {
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { position: sticky; top: 0; background: var(--card-bg); z-index: 8; }
+        th { padding: 12.8px 16px; font-size: 11.2px; font-weight: 600; color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+        td { padding: 12.8px 16px; font-size: 12.8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+
+        /* Skeleton Rows */
+        .skeleton-row td {
+            padding: 16px;
+        }
+        .skeleton-cell {
+            height: 20px;
+            width: 80%;
+            border-radius: 4px;
+        }
+        .skeleton-cell.short { width: 50%; }
+        .skeleton-cell.medium { width: 70%; }
+        .skeleton-pill {
+            height: 24px;
+            width: 90px;
+            border-radius: 999px;
+        }
+
+        /* Mobile Cards Skeleton */
+        .skeleton-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .skeleton-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .skeleton-title {
+            height: 24px;
+            width: 70%;
+            border-radius: 6px;
+        }
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 12px;
+        }
+        .skeleton-label {
+            height: 16px;
+            width: 60%;
+            border-radius: 4px;
+        }
+        .skeleton-value {
+            height: 20px;
+            width: 85%;
+            border-radius: 4px;
+        }
+
+        /* Mobile Cards */
+        .card-view { display: none; padding: 16px; overflow-y: auto; height: 100%; }
+        .action-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            border-left: 3px solid rgba(93,161,161,0.2);
+        }
+        .action-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .action-card-title { font-size: 16px; font-weight: 600; cursor: pointer; }
+        .action-card-title:hover { color: var(--primary); }
+        .action-card-grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: 13px; }
+        .action-card-label { color: var(--text-secondary); font-weight: 500; }
+
+        /* Pills */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; }
+        .pill-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-progress { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .pill-proposed { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-closed { background: rgba(107,114,128,0.1); color: var(--neutral); }
+        .pill-overdue { background: rgba(239,68,68,0.1); color: var(--red); }
+        .pill-pending { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-completed { background: rgba(16,185,129,0.1); color: var(--green); }
+
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+        }
+        .icon-btn:hover { background: rgba(93,161,161,0.1); color: var(--primary); }
+        
+        .icon-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .icon-btn:disabled:hover {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        /* Action Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-overlay.open {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            box-shadow: none;
+            animation: fadeIn 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-secondary);
+            line-height: 1;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        
+        .modal-close:hover {
+            background: rgba(93,161,161,0.1);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 32px;
+            flex: 1;
+            overflow-y: auto;
+            background: var(--viewer-bg);
+        }
+        
+        .modal-footer {
+            padding: 20px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        
+        .btn-secondary {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 120px;
+            background: #f3f4f6;
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Action Detail Styles */
+        .action-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .action-detail-header {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .action-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .action-main-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .action-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        
+        .action-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .action-meta-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .action-meta-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .detail-section {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .detail-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        
+        .detail-value.disabled {
+            background: #f9f9f9;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .toast.error { border-left-color: var(--red); }
+        .toast.error .toast-icon { color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+        .toast.success .toast-icon { color: var(--green); }
+        .toast.warning { border-left-color: var(--amber); }
+        .toast.warning .toast-icon { color: var(--amber); }
+        .toast.info { border-left-color: var(--primary); }
+        .toast.info .toast-icon { color: var(--primary); }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .filter-group {
+            flex: 1;
+        }
+        
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        
+        .filter-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .filter-group select:disabled {
+            background: #f9f9f9;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            color: rgba(93,161,161,0.2);
+            margin-bottom: 16px;
+        }
+        
+        .empty-state-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state-subtitle {
+            font-size: 14px;
+            color: var(--neutral);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) { 
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-row {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-content { padding: 16px; }
+            .top-nav { 
+                padding: 0 16px; 
+                flex-direction: column;
+                height: auto;
+                padding: 12px 16px;
+                gap: 12px;
+            }
+            .tabs-group {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+            .actions-group { 
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 8px; 
+                justify-content: flex-end; 
+            }
+            .search-box input { 
+                width: 100%;
+                min-width: 200px;
+            }
+            .table-view { 
+                display: none; 
+                padding: 16px; 
+            }
+            .card-view { 
+                display: block; 
+            }
+            .modal-body {
+                padding: 20px;
+            }
+            .modal-header,
+            .modal-footer {
+                padding: 16px 20px;
+            }
+            .detail-section {
+                padding: 16px;
+            }
+            .btn-secondary {
+                padding: 10px 16px;
+                min-width: 100px;
+                font-size: 13px;
+            }
+            .action-title-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .action-detail-header,
+            .detail-section {
+                padding: 16px;
+            }
+            .action-detail-container {
+                padding: 16px;
+            }
+            .filter-panel {
+                padding: 16px;
+            }
+        }
+        
+        @media (max-height: 800px) {
+            .modal-body {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" data-content="actions-content">
+                <div class="favicon">A</div>
+                <span>Actions</span>
+                <span class="viewer-badge">
+                    <i class="fas fa-eye"></i>
+                    Read-Only
+                </span>
+            </div>
+        </div>
+        <div class="actions-group">
+            <div class="search-box">
+                <input type="text" placeholder="Search actions..." id="searchInput" disabled>
+            </div>
+            <button class="btn-icon" onclick="refreshActions()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="content-wrapper">
+            <!-- Actions Content -->
+            <div id="actions-content" class="page-content" style="display: block;">
+                <!-- Filter Panel -->
+                <div class="filter-panel">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Status Filter</label>
+                            <select id="statusFilter" onchange="filterByStatus(this.value)" disabled>
+                                <option value="all">All Statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="overdue">Overdue</option>
+                                <option value="approved">Approved</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Priority Filter</label>
+                            <select id="priorityFilter" onchange="filterByPriority(this.value)" disabled>
+                                <option value="all">All Priorities</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Table -->
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="actionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Action ID</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Owner</th>
+                                    <th>Asset</th>
+                                    <th>Start Date</th>
+                                    <th>Due Date</th>
+                                    <th>Progress</th>
+                                    <th>View</th>
+                                </tr>
+                            </thead>
+                            <tbody id="actionsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="card-view" id="mobileActions"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- View Action Modal -->
+    <div class="modal-overlay" id="viewActionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="viewActionTitle">Action Details</div>
+                <div class="modal-close" onclick="closeViewActionModal()">×</div>
+            </div>
+            <div class="modal-body">
+                <div class="action-detail-container" id="actionDetailContent">
+                    <!-- Action details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeViewActionModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+<script>
+// Global variables
+let allActions = [];
+let filteredActions = [];
+
+// Utility functions
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '—';
+    try {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    } catch (e) {
+        return dateString;
+    }
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return '—';
+    try {
+        return new Date(dateString).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (e) {
+        return dateString;
+    }
+}
+
+function getStatusClass(status) {
+    if (!status) return 'pill-progress';
+    status = status.toLowerCase();
+    if (status === 'completed' || status === 'approved') return 'pill-approved';
+    if (status === 'in progress' || status === 'in-progress') return 'pill-progress';
+    if (status === 'pending' || status === 'proposed') return 'pill-pending';
+    if (status === 'overdue') return 'pill-overdue';
+    if (status === 'closed') return 'pill-closed';
+    return 'pill-progress';
+}
+
+function getPriorityClass(priority) {
+    if (!priority) return '';
+    priority = priority.toLowerCase();
+    if (priority === 'high') return 'pill-overdue';
+    if (priority === 'medium') return 'pill-pending';
+    if (priority === 'low') return 'pill-approved';
+    return '';
+}
+
+function getStatusText(status) {
+    if (!status) return 'In Progress';
+    const statusMap = {
+        'pending': 'Pending',
+        'in-progress': 'In Progress',
+        'in progress': 'In Progress',
+        'completed': 'Completed',
+        'approved': 'Approved',
+        'overdue': 'Overdue',
+        'closed': 'Closed',
+        'proposed': 'Proposed'
+    };
+    return statusMap[status.toLowerCase()] || status;
+}
+
+// Load actions for viewer
+async function loadActions() {
+    const tbody = document.getElementById('actionsTableBody');
+    const mobileContainer = document.getElementById('mobileActions');
+    
+    if (!tbody || !mobileContainer) return;
+    
+    showSkeletonLoading();
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/viewer/actions', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            allActions = data.actions || data || [];
+            filteredActions = [...allActions];
+            renderActions(filteredActions);
+        } else if (response.status === 403) {
+            // Try fallback to analyst actions
+            const fallbackResponse = await fetch('/api/analyst/actions', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (fallbackResponse.ok) {
+                const fallbackData = await fallbackResponse.json();
+                allActions = fallbackData.actions || fallbackData || [];
+                filteredActions = [...allActions];
+                renderActions(filteredActions);
+            } else {
+                throw new Error('Access denied');
+            }
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+    } catch (error) {
+        console.error('Error loading actions:', error);
+        showToast('Failed to load actions. Using demo data.', 'warning');
+        // Show demo data
+        showDemoActions();
+    }
+}
+
+function showSkeletonLoading() {
+    const tbody = document.getElementById('actionsTableBody');
+    const mobileContainer = document.getElementById('mobileActions');
+    
+    if (!tbody || !mobileContainer) return;
+    
+    tbody.innerHTML = '';
+    mobileContainer.innerHTML = '';
+    
+    // Desktop skeleton
+    for (let i = 0; i < 5; i++) {
+        const row = document.createElement('tr');
+        row.className = 'skeleton-row';
+        row.innerHTML = `
+            <td><div class="skeleton skeleton-cell short"></div></td>
+            <td><div class="skeleton skeleton-cell medium"></div></td>
+            <td><div class="skeleton skeleton-cell long"></div></td>
+            <td><div class="skeleton skeleton-pill"></div></td>
+            <td><div class="skeleton skeleton-pill"></div></td>
+            <td><div class="skeleton skeleton-cell medium"></div></td>
+            <td><div class="skeleton skeleton-cell medium"></div></td>
+            <td><div class="skeleton skeleton-cell short"></div></td>
+            <td><div class="skeleton skeleton-cell short"></div></td>
+            <td><div class="skeleton skeleton-cell short"></div></td>
+            <td><div style="width:64px;height:32px;border-radius:8px;" class="skeleton"></div></td>
+        `;
+        tbody.appendChild(row);
+    }
+    
+    // Mobile skeleton
+    for (let i = 0; i < 3; i++) {
+        const card = document.createElement('div');
+        card.className = 'skeleton-card';
+        card.innerHTML = `
+            <div class="skeleton-header">
+                <div class="skeleton skeleton-title"></div>
+                <div class="skeleton" style="width:32px;height:32px;border-radius:8px;"></div>
+            </div>
+            <div class="skeleton-grid">
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+            </div>
+        `;
+        mobileContainer.appendChild(card);
+    }
+}
+
+function showDemoActions() {
+    const demoActions = [
+        {
+            _id: 'demo-1',
+            actionId: 'ACT-2024-001',
+            title: 'Quarterly Safety Inspection',
+            description: 'Complete quarterly safety inspection of all North Platform equipment',
+            status: 'in progress',
+            priority: 'high',
+            owner: 'John Smith',
+            assetName: 'North Platform',
+            startDate: '2024-01-15',
+            dueDate: '2024-03-31',
+            progress: 65,
+            cost: 15000,
+            subProject: 'Safety Audit',
+            type: 'preventive',
+            createdBy: 'Safety Manager',
+            createdAt: '2024-01-10',
+            updatedAt: '2024-02-15'
+        },
+        {
+            _id: 'demo-2',
+            actionId: 'ACT-2024-002',
+            title: 'Pipeline Maintenance Check',
+            description: 'Monthly maintenance check of pipeline valves and joints',
+            status: 'completed',
+            priority: 'medium',
+            owner: 'Sarah Johnson',
+            assetName: 'South Terminal',
+            startDate: '2024-02-01',
+            dueDate: '2024-02-28',
+            progress: 100,
+            cost: 8500,
+            subProject: 'Maintenance Phase',
+            type: 'preventive',
+            createdBy: 'Maintenance Lead',
+            createdAt: '2024-01-20',
+            updatedAt: '2024-02-25'
+        },
+        {
+            _id: 'demo-3',
+            actionId: 'ACT-2024-003',
+            title: 'Backup Power System Test',
+            description: 'Test backup power systems and document results',
+            status: 'overdue',
+            priority: 'high',
+            owner: 'Mike Wilson',
+            assetName: 'Central Hub',
+            startDate: '2024-01-01',
+            dueDate: '2024-01-31',
+            progress: 40,
+            cost: 22000,
+            subProject: 'Infrastructure',
+            type: 'recovery',
+            createdBy: 'Facilities Manager',
+            createdAt: '2024-01-05',
+            updatedAt: '2024-01-30'
+        },
+        {
+            _id: 'demo-4',
+            actionId: 'ACT-2024-004',
+            title: 'Emergency Response Training',
+            description: 'Quarterly emergency response training for all operators',
+            status: 'pending',
+            priority: 'medium',
+            owner: 'David Chen',
+            assetName: 'North Platform',
+            startDate: '2024-03-01',
+            dueDate: '2024-03-15',
+            progress: 0,
+            cost: 5000,
+            subProject: 'Training',
+            type: 'preventive',
+            createdBy: 'Training Coordinator',
+            createdAt: '2024-02-10',
+            updatedAt: '2024-02-10'
+        }
+    ];
+    
+    allActions = demoActions;
+    filteredActions = [...demoActions];
+    renderActions(filteredActions);
+}
+
+function showEmptyState() {
+    const tbody = document.getElementById('actionsTableBody');
+    const mobileContainer = document.getElementById('mobileActions');
+    
+    if (!tbody || !mobileContainer) return;
+    
+    const emptyState = `
+        <tr>
+            <td colspan="11" style="text-align:center;padding:80px 16px;color:var(--text-secondary);">
+                <div class="empty-state">
+                    <i class="fas fa-tasks empty-state-icon"></i>
+                    <div class="empty-state-title">No actions found</div>
+                    <div class="empty-state-subtitle">
+                        No actions are assigned to your assets or you don't have permission to view actions
+                    </div>
+                </div>
+            </td>
+        </tr>`;
+    
+    tbody.innerHTML = emptyState;
+    mobileContainer.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-tasks empty-state-icon"></i>
+            <div class="empty-state-title">No actions found</div>
+            <div class="empty-state-subtitle">
+                No actions are assigned to your assets or you don't have permission to view actions
+            </div>
+        </div>`;
+}
+
+function renderActions(actions) {
+    const tbody = document.getElementById('actionsTableBody');
+    const mobileContainer = document.getElementById('mobileActions');
+    
+    if (!tbody || !mobileContainer) return;
+    
+    if (!actions || actions.length === 0) {
+        showEmptyState();
+        return;
+    }
+    
+    tbody.innerHTML = '';
+    mobileContainer.innerHTML = '';
+    
+    // Desktop table
+    actions.forEach(action => {
+        const statusClass = getStatusClass(action?.status);
+        const priorityClass = getPriorityClass(action?.priority);
+        
+        // Check if overdue
+        const isOverdue = action?.status !== 'completed' && 
+                         action?.dueDate && 
+                         new Date(action.dueDate) < new Date();
+        
+        const finalStatus = isOverdue ? 'overdue' : (action?.status || 'in progress');
+        const finalStatusClass = isOverdue ? 'pill-overdue' : statusClass;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${escapeHtml(action.actionId || '—')}</td>
+            <td>${escapeHtml(action.title || '—')}</td>
+            <td>${escapeHtml(action.description?.substring(0, 50) || '')}${action.description?.length > 50 ? '...' : ''}</td>
+            <td><span class="pill ${finalStatusClass}">${getStatusText(finalStatus)}</span></td>
+            <td><span class="pill ${priorityClass}">${capitalize(action.priority || 'medium')}</span></td>
+            <td>${escapeHtml(action.owner || '—')}</td>
+            <td>${escapeHtml(action.assetName || '—')}</td>
+            <td>${formatDate(action.startDate)}</td>
+            <td>${formatDate(action.dueDate)}${isOverdue ? ' <i class="fas fa-exclamation-circle" style="color:var(--red);margin-left:4px;"></i>' : ''}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;">
+                        <div style="width:${action.progress || 0}%;height:100%;background:var(--primary);"></div>
+                    </div>
+                    <span style="font-size:11px;font-weight:600;">${action.progress || 0}%</span>
+                </div>
+            </td>
+            <td>
+                <button class="icon-btn" onclick="viewActionDetail('${action._id || action.id}')" title="View Details">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+        
+        // Mobile card
+        const card = document.createElement('div');
+        card.className = 'action-card';
+        card.innerHTML = `
+            <div class="action-card-header">
+                <div class="action-card-title" onclick="viewActionDetail('${action._id || action.id}')">
+                    ${escapeHtml(action.actionId || '—')}: ${escapeHtml(action.title || '—')}
+                    ${isOverdue ? '<i class="fas fa-exclamation-circle" style="color:var(--red);margin-left:8px;"></i>' : ''}
+                </div>
+                <button class="icon-btn" onclick="viewActionDetail('${action._id || action.id}')">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <div class="action-card-grid">
+                <div class="action-card-label">Description</div>
+                <div>${escapeHtml(action.description?.substring(0, 100) || '')}${action.description?.length > 100 ? '...' : ''}</div>
+                
+                <div class="action-card-label">Status</div>
+                <div><span class="pill ${finalStatusClass}">${getStatusText(finalStatus)}</span></div>
+                
+                <div class="action-card-label">Priority</div>
+                <div><span class="pill ${priorityClass}">${capitalize(action.priority || 'medium')}</span></div>
+                
+                <div class="action-card-label">Owner</div>
+                <div>${escapeHtml(action.owner || '—')}</div>
+                
+                <div class="action-card-label">Asset</div>
+                <div>${escapeHtml(action.assetName || '—')}</div>
+                
+                <div class="action-card-label">Start Date</div>
+                <div>${formatDate(action.startDate)}</div>
+                
+                <div class="action-card-label">Due Date</div>
+                <div>${formatDate(action.dueDate)}</div>
+                
+                <div class="action-card-label">Progress</div>
+                <div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="flex:1;height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;">
+                            <div style="width:${action.progress || 0}%;height:100%;background:var(--primary);"></div>
+                        </div>
+                        <span style="font-size:11px;font-weight:600;">${action.progress || 0}%</span>
+                    </div>
+                </div>
+                
+                <div class="action-card-label">Cost</div>
+                <div>${action.cost ? '$' + Number(action.cost).toLocaleString() : '—'}</div>
+            </div>
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="viewActionDetail('${action._id || action.id}')" style="flex: 1; padding: 8px;">
+                    <i class="fas fa-eye"></i> View Details
+                </button>
+            </div>
+        `;
+        mobileContainer.appendChild(card);
+    });
+}
+
+// Filter functions (disabled for viewer)
+function filterByStatus(status) {
+    // Disabled for viewer mode
+    showToast('Filtering disabled in viewer mode', 'info');
+}
+
+function filterByPriority(priority) {
+    // Disabled for viewer mode
+    showToast('Filtering disabled in viewer mode', 'info');
+}
+
+// View action detail
+async function viewActionDetail(actionId) {
+    try {
+        let action;
+        
+        // Check if it's a demo action
+        if (actionId.startsWith('demo-')) {
+            action = allActions.find(a => a._id === actionId);
+            if (!action) {
+                showToast('Action not found', 'error');
+                return;
+            }
+        } else {
+            // Fetch real action data
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/viewer/actions/${actionId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            action = await response.json();
+        }
+        
+        // Populate modal
+        document.getElementById('viewActionTitle').textContent = `Action: ${action.actionId || 'Details'}`;
+        const detailContent = document.getElementById('actionDetailContent');
+        
+        // Check if overdue
+        const isOverdue = action?.status !== 'completed' && 
+                         action?.dueDate && 
+                         new Date(action.dueDate) < new Date();
+        const statusClass = isOverdue ? 'pill-overdue' : getStatusClass(action?.status);
+        const statusText = isOverdue ? 'Overdue' : getStatusText(action?.status);
+        
+        // Build detail HTML
+        let html = `
+            <div class="action-detail-header">
+                <div class="action-title-row">
+                    <h2 class="action-main-title">${escapeHtml(action.title || '—')}</h2>
+                    <div style="display: flex; gap: 12px;">
+                        <span class="pill ${statusClass}">
+                            ${statusText}
+                        </span>
+                        <span class="pill ${getPriorityClass(action.priority)}">
+                            ${capitalize(action.priority || 'medium')}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="action-meta">
+                    <div class="action-meta-item">
+                        <span class="action-meta-label">Action ID</span>
+                        <span class="action-meta-value">${escapeHtml(action.actionId || '—')}</span>
+                    </div>
+                    <div class="action-meta-item">
+                        <span class="action-meta-label">Asset</span>
+                        <span class="action-meta-value">${escapeHtml(action.assetName || '—')}</span>
+                    </div>
+                    <div class="action-meta-item">
+                        <span class="action-meta-label">Owner</span>
+                        <span class="action-meta-value">${escapeHtml(action.owner || '—')}</span>
+                    </div>
+                    <div class="action-meta-item">
+                        <span class="action-meta-label">Sub-Project</span>
+                        <span class="action-meta-value">${escapeHtml(action.subProject || '—')}</span>
+                    </div>
+                    <div class="action-meta-item">
+                        <span class="action-meta-label">Action Type</span>
+                        <span class="action-meta-value">${capitalize(action.type || '—')}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3 class="section-title"><i class="fas fa-info-circle"></i> Action Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Description</span>
+                        <span class="detail-value disabled">${escapeHtml(action.description || 'No description provided')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Objectives</span>
+                        <span class="detail-value disabled">${escapeHtml(action.objectives || 'No objectives defined')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Success Criteria</span>
+                        <span class="detail-value disabled">${escapeHtml(action.successCriteria || 'No success criteria defined')}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3 class="section-title"><i class="fas fa-calendar-alt"></i> Timeline & Progress</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Start Date</span>
+                        <span class="detail-value">${formatDate(action.startDate)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Due Date</span>
+                        <span class="detail-value">
+                            ${formatDate(action.dueDate)}
+                            ${isOverdue ? '<i class="fas fa-exclamation-circle" style="color:var(--red);margin-left:8px;"></i> Overdue' : ''}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Actual Completion</span>
+                        <span class="detail-value">${formatDate(action.completionDate) || '—'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Progress</span>
+                        <span class="detail-value">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="flex:1;height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;">
+                                    <div style="width:${action.progress || 0}%;height:100%;background:var(--primary);"></div>
+                                </div>
+                                <span style="font-size:14px;font-weight:600;">${action.progress || 0}%</span>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3 class="section-title"><i class="fas fa-chart-bar"></i> Financial Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Estimated Cost</span>
+                        <span class="detail-value">${action.cost ? '$' + Number(action.cost).toLocaleString() : '—'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Actual Cost</span>
+                        <span class="detail-value">${action.actualCost ? '$' + Number(action.actualCost).toLocaleString() : '—'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Budget Code</span>
+                        <span class="detail-value">${escapeHtml(action.budgetCode || '—')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Cost Variance</span>
+                        <span class="detail-value">
+                            ${action.cost && action.actualCost ? 
+                                '$' + Math.abs(action.cost - action.actualCost).toLocaleString() + 
+                                ' (' + ((action.actualCost - action.cost) / action.cost * 100).toFixed(1) + '%)' : 
+                                '—'}
+                        </span>
+                    </div>
+                </div>
+            </div>`;
+        
+        // Add linked risk info if available
+        if (action.riskId && action.riskId !== '000000000000000000000000') {
+            html += `
+                <div class="detail-section">
+                    <h3 class="section-title"><i class="fas fa-link"></i> Linked Risk</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Risk ID</span>
+                            <span class="detail-value">${escapeHtml(action.riskId || '—')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Risk Title</span>
+                            <span class="detail-value">${escapeHtml(action.riskTitle || '—')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Action Type</span>
+                            <span class="detail-value">
+                                <span class="pill ${action.type === 'preventive' ? 'pill-approved' : 'pill-progress'}">
+                                    ${capitalize(action.type || '—')}
+                                </span>
+                                ${action.type === 'preventive' ? ' (Prevents risk)' : ' (Recovers from risk)'}
+                            </span>
+                        </div>
+                    </div>
+                </div>`;
+        }
+        
+        // Add audit trail if available
+        html += `
+            <div class="detail-section">
+                <h3 class="section-title"><i class="fas fa-history"></i> Audit Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Created</span>
+                        <span class="detail-value">${formatDateTime(action.createdAt)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Last Updated</span>
+                        <span class="detail-value">${formatDateTime(action.updatedAt)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Created By</span>
+                        <span class="detail-value">${escapeHtml(action.createdBy || action.createdByName || '—')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Last Updated By</span>
+                        <span class="detail-value">${escapeHtml(action.updatedBy || action.updatedByName || '—')}</span>
+                    </div>
+                </div>
+            </div>`;
+        
+        detailContent.innerHTML = html;
+        
+        // Show modal
+        document.getElementById('viewActionModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        
+    } catch (error) {
+        console.error('Error fetching action details:', error);
+        showToast('Failed to load action details', 'error');
+    }
+}
+
+function closeViewActionModal() {
+    document.getElementById('viewActionModal').classList.remove('open');
+    document.body.style.overflow = 'auto';
+}
+
+// Refresh all data
+function refreshActions() {
+    loadActions();
+    showToast('Refreshing data...', 'info');
+}
+
+// Toast notification system
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                         type === 'error' ? 'fa-exclamation-circle' : 
+                         type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'} toast-icon"></i>
+        <div class="toast-message">${message}</div>
+    `;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Actions Viewer page loaded');
+    
+    // Check authentication
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast('Please login to continue', 'warning');
+        return;
+    }
+    
+    // Apply viewer mode styling
+    document.body.classList.add('viewer-mode');
+    
+    // Disable search input
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.disabled = true;
+        searchInput.placeholder = 'Search disabled in viewer mode';
+    }
+    
+    // Disable filter dropdowns
+    document.getElementById('statusFilter').disabled = true;
+    document.getElementById('priorityFilter').disabled = true;
+    
+    // Load initial data
+    loadActions();
+    
+    // Close modal on overlay click
+    document.getElementById('viewActionModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeViewActionModal();
+        }
+    });
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeViewActionModal();
+        }
+    });
+});
+
+// Make functions globally available
+window.viewActionDetail = viewActionDetail;
+window.closeViewActionModal = closeViewActionModal;
+window.refreshActions = refreshActions;
+window.filterByStatus = filterByStatus;
+window.filterByPriority = filterByPriority;
+</script>
+</body>
+</html>

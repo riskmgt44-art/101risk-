@@ -1,0 +1,1552 @@
+<!-- frontend/administration.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --primary-light: rgba(93,161,161,0.1);
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            --radius: 12px;
+            --transition: all 0.25s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; } /* Prevent iframe scroll issues */
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 68px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 44px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .nav-tab.active { color: var(--text-primary); font-weight: 600; border-bottom-color: var(--primary); }
+        .nav-tab:hover:not(.active) { color: var(--text-primary); background: rgba(93,161,161,0.06); border-radius: 8px 8px 0 0; }
+
+        .favicon {
+            width: 20px; height: 20px; background: var(--primary); border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700;
+        }
+
+        .actions-group { display: flex; align-items: center; gap: 16px; }
+        .search-box input {
+            width: 340px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 10px;
+            font-size: 13px; background: #f9fafb; transition: var(--transition);
+        }
+        .search-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(93,161,161,0.12); }
+
+        .btn-icon {
+            width: 40px; height: 40px; border-radius: 10px; background: transparent; border: 1px solid var(--border);
+            color: var(--neutral); display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .btn-icon:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+
+        .btn-primary {
+            padding: 9px 18px; background: var(--primary); color: white; border: none; border-radius: 10px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .main { margin-top: 68px; height: calc(100vh - 68px); overflow: hidden; }
+        #contentContainer { height: 100%; position: relative; }
+        #usersContent { height: 100%; overflow-y: auto; padding: 32px 40px; }
+        #iframeContent { width: 100%; height: 100%; border: none; display: none; }
+
+        .section-title { font-size: 22px; font-weight: 700; margin-bottom: 28px; }
+
+        .table-actions {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
+        }
+
+        .search-input {
+            padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); width: 320px;
+            font-size: 14px; background: white;
+        }
+        .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+        .action-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 9px 16px; border-radius: var(--radius); font-size: 13.5px; font-weight: 500;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+        }
+
+        .btn-secondary {
+            background: white; border: 1px solid var(--border); color: var(--neutral);
+        }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+        .users-table {
+            width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card-bg);
+            border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);
+        }
+
+        .users-table thead { background: rgba(93,161,161,0.04); }
+        .users-table th {
+            text-align: left; padding: 16px 20px; font-weight: 600; font-size: 13px;
+            color: var(--neutral); border-bottom: 1px solid var(--border);
+        }
+        .users-table td {
+            padding: 16px 20px; font-size: 14px; color: var(--text-primary); border-top: 1px solid var(--border);
+        }
+        .users-table tr:hover td { background: rgba(93,161,161,0.03); }
+
+        .status-active { color: var(--green); font-weight: 600; }
+        .status-suspended { color: var(--red); font-weight: 600; }
+        .status-invited { color: var(--amber); font-weight: 600; }
+
+        .mfa-enabled { color: var(--green); font-weight: 500; }
+        .mfa-disabled { color: var(--neutral); font-weight: 500; }
+
+        .table-actions-cell { display: flex; gap: 14px; }
+
+        .action-link {
+            color: var(--primary); cursor: pointer; font-size: 13.5px; font-weight: 500;
+        }
+        .action-link:hover { color: var(--primary-hover); text-decoration: underline; }
+
+        /* ── FIXED MODAL FOR IFRAME ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000; /* Very high z-index to appear above iframe content */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            padding: 20px; /* Add padding for small screens */
+            overflow-y: auto; /* Allow scrolling if modal is too tall */
+        }
+        .modal-overlay.active { 
+            opacity: 1; 
+            visibility: visible; 
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 960px;
+            min-width: 300px; /* Slightly smaller min-width */
+            max-height: 90vh; /* Limit height to 90% of viewport */
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transform: scale(0.94);
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-overlay.active .modal-content { 
+            transform: scale(1); 
+            opacity: 1; 
+        }
+
+        .modal-header {
+            padding: 18px 24px; /* Reduced padding */
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #f8fafc, #ffffff);
+            flex-shrink: 0; /* Prevent header from shrinking */
+        }
+        .modal-title { 
+            font-size: 18px; /* Smaller font */
+            font-weight: 700; 
+            line-height: 1.3;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px; /* Smaller close button */
+            color: var(--neutral);
+            cursor: pointer;
+            line-height: 1;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        .modal-close:hover { 
+            color: var(--text-primary);
+            background: rgba(0,0,0,0.05);
+        }
+
+        .modal-body {
+            padding: 24px; /* Reduced padding */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Smaller minmax */
+            gap: 20px 24px; /* Reduced gaps */
+            overflow-y: auto; /* Allow scrolling within modal body */
+            flex: 1; /* Take available space */
+        }
+
+        .modal-body.view-mode .form-input,
+        .modal-body.view-mode .form-select {
+            background: #f8fafc;
+            border-color: var(--border);
+            color: var(--text-primary);
+            pointer-events: none;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+        .form-label {
+            margin-bottom: 6px; /* Reduced margin */
+            font-weight: 500; 
+            color: var(--text-secondary); 
+            font-size: 13px; /* Smaller font */
+        }
+        .form-input, .form-select {
+            padding: 10px 14px; /* Reduced padding */
+            border: 1px solid var(--border); 
+            border-radius: 8px; /* Smaller radius */
+            font-size: 13px; /* Smaller font */
+            transition: all 0.2s; 
+            width: 100%;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none; 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .modal-footer {
+            padding: 16px 24px; /* Reduced padding */
+            border-top: 1px solid var(--border);
+            background: #f8fafc; 
+            display: flex; 
+            justify-content: flex-end; 
+            gap: 12px; /* Reduced gap */
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            flex-shrink: 0; /* Prevent footer from shrinking */
+        }
+        .btn-modal {
+            padding: 10px 20px; /* Reduced padding */
+            border-radius: 8px; /* Smaller radius */
+            font-weight: 600;
+            cursor: pointer; 
+            transition: all 0.2s; 
+            font-size: 13px; /* Smaller font */
+            min-width: 100px; /* Smaller min-width */
+        }
+        .btn-cancel { background: #f1f5f9; color: var(--text-primary); border: none; }
+        .btn-cancel:hover { background: #e2e8f0; }
+        .btn-save { background: var(--primary); color: white; border: none; }
+        .btn-save:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--red); color: white; border: none; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* User profile header in modal */
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px; /* Reduced gap */
+            margin-bottom: 20px; /* Reduced margin */
+            padding-bottom: 16px; /* Reduced padding */
+            border-bottom: 1px solid var(--border);
+            grid-column: 1 / -1; /* Make it span full width */
+        }
+
+        .user-avatar {
+            width: 60px; /* Smaller avatar */
+            height: 60px; /* Smaller avatar */
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px; /* Smaller font */
+            font-weight: 700;
+            flex-shrink: 0;
+            overflow: hidden;
+            line-height: 1;
+        }
+
+        .user-info h3 {
+            font-size: 20px; /* Smaller font */
+            font-weight: 700;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .user-info .user-role {
+            display: inline-block;
+            padding: 3px 10px; /* Reduced padding */
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 12px; /* Smaller font */
+            font-weight: 600;
+            margin-bottom: 6px; /* Reduced margin */
+        }
+
+        .user-info .user-status {
+            display: inline-block;
+            padding: 3px 10px; /* Reduced padding */
+            border-radius: 20px;
+            font-size: 12px; /* Smaller font */
+            font-weight: 600;
+            margin-left: 6px; /* Reduced margin */
+        }
+
+        .user-info .user-status.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--green);
+        }
+
+        .user-info .user-status.suspended {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--red);
+        }
+
+        /* Confirmation Modal */
+        .confirm-modal {
+            max-width: 500px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .modal-body {
+                grid-template-columns: 1fr; /* Single column on smaller screens */
+                gap: 16px;
+            }
+            
+            .search-box input {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0 16px;
+            }
+            
+            .modal-content { 
+                width: 95%;
+                max-height: 95vh;
+            }
+            
+            .modal-header {
+                padding: 16px 20px;
+            }
+            
+            .modal-body { 
+                padding: 20px; 
+                gap: 16px; 
+            }
+            
+            .modal-footer { 
+                padding: 16px 20px; 
+                flex-direction: column; 
+            }
+            
+            .btn-modal { 
+                width: 100%; 
+            }
+            
+            .user-profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+            
+            .search-box input {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-header, 
+            .modal-body, 
+            .modal-footer { 
+                padding-left: 16px; 
+                padding-right: 16px; 
+            }
+            
+            .modal-title {
+                font-size: 16px;
+            }
+            
+            .search-box {
+                display: none; /* Hide search on very small screens */
+            }
+            
+            .table-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* FIXED TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 20px; /* Fixed position from top */
+            right: 20px; /* Fixed position from right */
+            padding: 14px 18px; /* Slightly smaller padding */
+            border-radius: var(--radius);
+            background: white;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--primary);
+            z-index: 30000; /* Very high z-index to appear above modals */
+            max-width: 350px; /* Slightly smaller max-width */
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            font-size: 14px;
+            line-height: 1.4;
+            pointer-events: none; /* Allow clicks through when not showing */
+        }
+        .toast.show { 
+            transform: translateX(0); 
+            pointer-events: auto; /* Enable clicks when showing */
+        }
+        .toast.error { border-left-color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+        .toast.warning { border-left-color: var(--amber); }
+        
+        /* Toast close button */
+        .toast-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: var(--neutral);
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .toast-close:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--text-primary);
+        }
+        
+        /* Toast icon */
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .toast.error .toast-icon { color: var(--red); }
+        .toast.success .toast-icon { color: var(--green); }
+        .toast.warning .toast-icon { color: var(--amber); }
+        
+        /* Toast content wrapper */
+        .toast-content {
+            padding-right: 24px; /* Space for close button */
+        }
+        
+        /* Toast title */
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        /* Toast message */
+        .toast-message {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        /* Toast progress bar */
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--primary);
+            width: 100%;
+            transform-origin: left;
+            animation: toastProgress 5s linear forwards;
+        }
+        
+        .toast.error .toast-progress { background: var(--red); }
+        .toast.success .toast-progress { background: var(--green); }
+        .toast.warning .toast-progress { background: var(--amber); }
+        
+        @keyframes toastProgress {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+        
+        /* Prevent body scroll when modal is open */
+        body.modal-open {
+            overflow: hidden;
+        }
+        
+        /* Table responsive adjustments */
+        @media (max-width: 768px) {
+            .users-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .table-actions-cell {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" data-section="users"><div class="favicon">U</div><span>Users</span></div>
+            <div class="nav-tab" data-page="system-settings.html"><div class="favicon">S</div><span>Settings</span></div>
+        </div>
+
+        <div class="actions-group">
+            <div class="search-box"><input type="text" placeholder="Search anything..." id="globalSearch"></div>
+            <button class="btn-icon" title="Filter"><i class="fas fa-filter"></i></button>
+            <button class="btn-primary"><i class="fas fa-file-export"></i> Export</button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div id="contentContainer">
+            <div id="usersContent">
+                <h2 class="section-title">User Management</h2>
+
+                <div class="table-actions">
+                    <input type="text" class="search-input" placeholder="Search by name, email or role..." id="usersSearch">
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary"><i class="fas fa-shield-alt"></i> Reset MFA</button>
+                        <button class="btn btn-secondary"><i class="fas fa-user-slash"></i> Deactivate Selected</button>
+                        <button class="btn btn-primary" id="addUserBtn"><i class="fas fa-user-plus"></i> Add New User</button>
+                    </div>
+                </div>
+
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll"></th>
+                            <th>User Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>MFA</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody"></tbody>
+                </table>
+            </div>
+
+            <iframe id="iframeContent" src="" frameborder="0"></iframe>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Add User Modal -->
+    <div class="modal-overlay" id="addUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Invite New Team Member</h3>
+                <button class="modal-close" id="closeModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="firstName">First Name</label>
+                    <input type="text" class="form-input" id="firstName" placeholder="John" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="lastName">Last Name</label>
+                    <input type="text" class="form-input" id="lastName" placeholder="Doe" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" class="form-input" id="email" placeholder="john.doe@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="jobTitle">Job Title</label>
+                    <input type="text" class="form-input" id="jobTitle" placeholder="Risk Analyst" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="role">Role</label>
+                    <select class="form-select" id="role" required>
+                        <option value="superadmin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="risk_manager">Risk Manager</option>
+                        <option value="user" selected>User</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone (optional)</label>
+                    <input type="text" class="form-input" id="phone" placeholder="+1 (555) 123-4567">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" id="cancelModal">Cancel</button>
+                <button class="btn-modal btn-save" id="saveUser">Send Invitation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View/Edit User Modal -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="userModalTitle">User Details</h3>
+                <button class="modal-close" onclick="closeUserModal()">×</button>
+            </div>
+            <div class="modal-body" id="userModalBody">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="modal-footer" id="userModalFooter">
+                <!-- Dynamic buttons will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirmModalTitle">Confirm Action</h3>
+                <button class="modal-close" onclick="closeConfirmModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmModalMessage">Are you sure you want to perform this action?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn-modal btn-danger" id="confirmActionBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const usersContent = document.getElementById('usersContent');
+    const iframeContent = document.getElementById('iframeContent');
+    const usersTableBody = document.getElementById('usersTableBody');
+    const usersSearch = document.getElementById('usersSearch');
+    const addUserModal = document.getElementById('addUserModal');
+    const userModal = document.getElementById('userModal');
+    const confirmModal = document.getElementById('confirmModal');
+    const addUserBtn = document.getElementById('addUserBtn');
+    const closeModalBtn = document.getElementById('closeModal');
+    const cancelModalBtn = document.getElementById('cancelModal');
+    const saveUserBtn = document.getElementById('saveUser');
+    const toast = document.getElementById('toast');
+    const confirmActionBtn = document.getElementById('confirmActionBtn');
+    const confirmModalMessage = document.getElementById('confirmModalMessage');
+    const confirmModalTitle = document.getElementById('confirmModalTitle');
+    const userModalBody = document.getElementById('userModalBody');
+    const userModalTitle = document.getElementById('userModalTitle');
+    const userModalFooter = document.getElementById('userModalFooter');
+
+    // State management
+    let currentUserId = null;
+    let currentUserStatus = null;
+    let modalMode = 'view'; // 'view' or 'edit'
+    let toastTimeout = null;
+
+    // Enhanced Toast notification function
+    function showToast(message, type = 'info', duration = 5000) {
+        // Clear any existing toast timeout
+        if (toastTimeout) {
+            clearTimeout(toastTimeout);
+            toastTimeout = null;
+        }
+        
+        // Remove any existing progress bars
+        const existingProgress = toast.querySelector('.toast-progress');
+        if (existingProgress) {
+            existingProgress.remove();
+        }
+        
+        // Set toast content based on type
+        let icon = 'ℹ️';
+        let title = 'Information';
+        
+        switch(type) {
+            case 'success':
+                icon = '✅';
+                title = 'Success';
+                break;
+            case 'error':
+                icon = '❌';
+                title = 'Error';
+                break;
+            case 'warning':
+                icon = '⚠️';
+                title = 'Warning';
+                break;
+        }
+        
+        // Create toast HTML
+        toast.innerHTML = `
+            <div class="toast-content">
+                <div class="toast-title">
+                    <span class="toast-icon">${icon}</span> ${title}
+                </div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="hideToast()">×</button>
+            <div class="toast-progress"></div>
+        `;
+        
+        // Set toast class
+        toast.className = 'toast';
+        toast.classList.add(type);
+        
+        // Show toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+        
+        // Auto-hide after duration
+        toastTimeout = setTimeout(() => {
+            hideToast();
+        }, duration);
+        
+        // Add body class to prevent scrolling under toast
+        document.body.classList.add('toast-visible');
+    }
+
+    // Hide toast function
+    function hideToast() {
+        toast.classList.remove('show');
+        document.body.classList.remove('toast-visible');
+        
+        // Clear timeout if exists
+        if (toastTimeout) {
+            clearTimeout(toastTimeout);
+            toastTimeout = null;
+        }
+        
+        // Remove progress bar
+        const progress = toast.querySelector('.toast-progress');
+        if (progress) {
+            progress.style.animation = 'none';
+        }
+    }
+
+    // Function to handle modal open/close for body scroll
+    function handleModalOpen() {
+        document.body.classList.add('modal-open');
+        // Prevent iframe from capturing scroll events
+        iframeContent.style.pointerEvents = 'none';
+    }
+    
+    function handleModalClose() {
+        document.body.classList.remove('modal-open');
+        // Restore iframe pointer events
+        iframeContent.style.pointerEvents = 'auto';
+    }
+
+    // Tab switching
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            const page = this.dataset.page;
+            const isUsers = this.dataset.section === 'users';
+
+            usersContent.style.display = isUsers ? 'block' : 'none';
+            iframeContent.style.display = isUsers ? 'none' : 'block';
+            if (!isUsers && page) iframeContent.src = page;
+        });
+    });
+
+    // Modal controls
+    function openModal() { 
+        addUserModal.classList.add('active'); 
+        handleModalOpen();
+        document.getElementById('firstName')?.focus(); 
+    }
+    
+    function closeModal() {
+        addUserModal.classList.remove('active');
+        handleModalClose();
+        document.querySelectorAll('#addUserModal input, #addUserModal select').forEach(el => el.value = '');
+        document.getElementById('role').value = 'user';
+    }
+
+    function closeUserModal() {
+        userModal.classList.remove('active');
+        handleModalClose();
+        currentUserId = null;
+        modalMode = 'view';
+    }
+
+    function closeConfirmModal() {
+        confirmModal.classList.remove('active');
+        handleModalClose();
+        currentUserId = null;
+        currentUserStatus = null;
+    }
+
+    // Event listeners for modals
+    addUserBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+    
+    // Close modal when clicking outside
+    addUserModal.addEventListener('click', e => { 
+        if (e.target === addUserModal) closeModal(); 
+    });
+    userModal.addEventListener('click', e => {
+        if (e.target === userModal) closeUserModal();
+    });
+    confirmModal.addEventListener('click', e => {
+        if (e.target === confirmModal) closeConfirmModal();
+    });
+
+    // Close modals with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (addUserModal.classList.contains('active')) closeModal();
+            if (userModal.classList.contains('active')) closeUserModal();
+            if (confirmModal.classList.contains('active')) closeConfirmModal();
+            hideToast();
+        }
+    });
+
+    // Load users (real data)
+    async function loadUsers() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/users', {
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                cache: 'no-store'
+            });
+            
+            // Handle authentication errors
+            if (res.status === 401 || res.status === 403) {
+                showToast('Session expired. Please login again.', 'error');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 2000);
+                return;
+            }
+            
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`HTTP ${res.status}: ${errorText}`);
+            }
+            
+            const response = await res.json();
+            console.log('API Response:', response);
+            
+            // Handle both response formats
+            let users = [];
+            if (Array.isArray(response)) {
+                users = response;
+            } else if (response && response.users) {
+                users = response.users;
+            } else if (response && Array.isArray(response.data)) {
+                users = response.data;
+            }
+            
+            console.log('Users loaded:', users.length, 'users');
+
+            if (!users || users.length === 0) {
+                usersTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align:center;padding:40px 20px;color:#666;">
+                            <i class="fas fa-users" style="font-size:24px;margin-bottom:10px;opacity:0.5;"></i><br>
+                            No users found in your organization
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Render users table
+            usersTableBody.innerHTML = users.map(u => {
+                const userId = u._id || u.id || '';
+                const firstName = u.firstName || '';
+                const lastName = u.lastName || '';
+                const fullName = `${firstName} ${lastName}`.trim() || '—';
+                const email = u.email || '—';
+                const role = u.role || 'user';
+                const jobTitle = u.jobTitle || '—';
+                const phone = u.phone || '';
+                const status = u.status || (u.deletedAt ? 'suspended' : 'active');
+                const mfaEnabled = u.mfaEnabled || false;
+                const lastLogin = u.lastLogin || null;
+                
+                // Format role for display
+                const roleDisplay = role === 'risk_manager' ? 'Risk Manager' : 
+                                  role === 'superadmin' ? 'Super Admin' : 
+                                  role.charAt(0).toUpperCase() + role.slice(1);
+                
+                // Get initials for avatar
+                const initials = `${firstName.charAt(0) || ''}${lastName.charAt(0) || ''}`.toUpperCase() || 'U';
+                
+                return `
+                    <tr>
+                        <td><input type="checkbox" class="user-checkbox" data-id="${userId}"></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="
+                                    width: 32px;
+                                    height: 32px;
+                                    border-radius: 50%;
+                                    background: var(--primary);
+                                    color: white;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-weight: 600;
+                                    flex-shrink: 0;
+                                    overflow: hidden;
+                                    line-height: 1;
+                                    font-size: 13px;
+                                ">
+                                    ${initials}
+                                </div>
+                                <div>
+                                    <div style="font-weight:500;">${fullName}</div>
+                                    ${phone ? `<small style="color:var(--neutral);font-size:12px;">${phone}</small>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td>${email}</td>
+                        <td><span style="text-transform:capitalize;">${roleDisplay}</span></td>
+                        <td>${jobTitle}</td>
+                        <td class="status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</td>
+                        <td class="${mfaEnabled ? 'mfa-enabled' : 'mfa-disabled'}">
+                            ${mfaEnabled ? '<i class="fas fa-check-circle"></i> Enabled' : '<i class="fas fa-times-circle"></i> Disabled'}
+                        </td>
+                        <td>${lastLogin ? formatDate(lastLogin) : 'Never'}</td>
+                        <td class="table-actions-cell">
+                            <span class="action-link" onclick="viewUser('${userId}')">View</span>
+                            <span class="action-link" onclick="editUser('${userId}')">Edit</span>
+                            <span class="action-link" onclick="showSuspendModal('${userId}', '${status}')">
+                                ${status === 'suspended' ? 'Activate' : 'Suspend'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+        } catch (err) {
+            console.error('Users fetch error:', err);
+            usersTableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align:center;padding:40px 20px;color:#ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:24px;margin-bottom:10px;"></i><br>
+                        Failed to load users<br>
+                        <small style="opacity:0.7;">${err.message}</small>
+                        <br><br>
+                        <button onclick="loadUsers()" style="
+                            background: var(--primary);
+                            color: white;
+                            border: none;
+                            padding: 8px 16px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                        ">Retry</button>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Format date helper
+    function formatDate(dateString) {
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return 'Invalid date';
+            }
+            
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays}d ago`;
+            
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: diffDays > 365 ? 'numeric' : undefined
+            });
+        } catch (err) {
+            return 'Invalid date';
+        }
+    }
+
+    // Auto-refresh every 12 seconds
+    function startAutoRefresh() {
+        loadUsers();
+        setInterval(loadUsers, 12000);
+    }
+
+    // Live search
+    usersSearch.addEventListener('input', e => {
+        const term = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('#usersTableBody tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(term) ? '' : 'none';
+        });
+    });
+
+    // Select all checkbox
+    document.getElementById('selectAll')?.addEventListener('change', e => {
+        document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = e.target.checked);
+    });
+
+    // View user
+    async function viewUser(userId) {
+        console.log('viewUser called with ID:', userId);
+        
+        try {
+            const token = localStorage.getItem('token');
+            console.log('Making request to:', `/api/users/${userId}`);
+            
+            const res = await fetch(`/api/users/${userId}`, {
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('Response status:', res.status);
+            
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('API Error:', errorText);
+                throw new Error(`HTTP ${res.status}: ${errorText}`);
+            }
+            
+            const user = await res.json();
+            console.log('User data received:', user);
+            
+            currentUserId = userId;
+            modalMode = 'view';
+            renderUserModal(user);
+            
+        } catch (err) {
+            console.error('View user error:', err);
+            showToast('Failed to load user details: ' + err.message, 'error');
+        }
+    }
+
+    // Edit user
+    async function editUser(userId) {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/users/${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (res.ok) {
+                const user = await res.json();
+                currentUserId = userId;
+                modalMode = 'edit';
+                renderUserModal(user);
+            } else {
+                throw new Error('Failed to load user details');
+            }
+        } catch (err) {
+            showToast('Failed to load user details: ' + err.message, 'error');
+        }
+    }
+
+    // Render user modal
+    function renderUserModal(user) {
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        const email = user.email || '—';
+        const role = user.role || 'user';
+        const jobTitle = user.jobTitle || '—';
+        const phone = user.phone || '—';
+        const status = user.status || (user.deletedAt ? 'suspended' : 'active');
+        const mfaEnabled = user.mfaEnabled || false;
+        const lastLogin = user.lastLogin || null;
+        const createdAt = user.createdAt || new Date();
+        const updatedAt = user.updatedAt || new Date();
+        
+        // Get initials for avatar
+        const initials = `${firstName.charAt(0) || ''}${lastName.charAt(0) || ''}`.toUpperCase() || 'U';
+        
+        // Format role for display
+        const roleDisplay = role === 'risk_manager' ? 'Risk Manager' : 
+                          role === 'superadmin' ? 'Super Admin' : 
+                          role.charAt(0).toUpperCase() + role.slice(1);
+        
+        // Set modal title
+        userModalTitle.textContent = modalMode === 'view' ? 'User Details' : 'Edit User';
+        
+        // Set modal body
+        const isViewMode = modalMode === 'view';
+        userModalBody.className = `modal-body ${isViewMode ? 'view-mode' : ''}`;
+        
+        userModalBody.innerHTML = `
+            <div class="user-profile-header">
+                <div class="user-avatar">
+                    ${initials}
+                </div>
+                <div class="user-info">
+                    <h3>${fullName}</h3>
+                    <span class="user-role">${roleDisplay}</span>
+                    <span class="user-status ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                    <div style="margin-top: 8px; color: var(--neutral); font-size: 13px;">
+                        <i class="fas fa-envelope"></i> ${email}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="modalFirstName">First Name</label>
+                <input type="text" class="form-input" id="modalFirstName" value="${firstName}" ${isViewMode ? 'readonly' : ''}>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="modalLastName">Last Name</label>
+                <input type="text" class="form-input" id="modalLastName" value="${lastName}" ${isViewMode ? 'readonly' : ''}>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="modalEmail">Email Address</label>
+                <input type="email" class="form-input" id="modalEmail" value="${email}" ${isViewMode ? 'readonly' : ''}>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="modalJobTitle">Job Title</label>
+                <input type="text" class="form-input" id="modalJobTitle" value="${jobTitle}" ${isViewMode ? 'readonly' : ''}>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="modalRole">Role</label>
+                <select class="form-select" id="modalRole" ${isViewMode ? 'disabled' : ''}>
+                    <option value="superadmin" ${role === 'superadmin' ? 'selected' : ''}>Super Admin</option>
+                    <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
+                    <option value="risk_manager" ${role === 'risk_manager' ? 'selected' : ''}>Risk Manager</option>
+                    <option value="user" ${role === 'user' ? 'selected' : ''}>User</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="modalPhone">Phone</label>
+                <input type="text" class="form-input" id="modalPhone" value="${phone}" ${isViewMode ? 'readonly' : ''}>
+            </div>
+            <div class="form-group">
+                <label class="form-label">MFA Status</label>
+                <div style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: ${isViewMode ? '#f8fafc' : 'white'};">
+                    ${mfaEnabled ? 
+                        '<span style="color: var(--green);"><i class="fas fa-check-circle"></i> Enabled</span>' : 
+                        '<span style="color: var(--neutral);"><i class="fas fa-times-circle"></i> Disabled</span>'
+                    }
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Account Created</label>
+                <div style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc;">
+                    ${formatDate(createdAt)}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Last Updated</label>
+                <div style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc;">
+                    ${formatDate(updatedAt)}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Last Login</label>
+                <div style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc;">
+                    ${lastLogin ? formatDate(lastLogin) : 'Never logged in'}
+                </div>
+            </div>
+        `;
+        
+        // Set modal footer buttons
+        if (isViewMode) {
+            userModalFooter.innerHTML = `
+                <button class="btn-modal btn-cancel" onclick="closeUserModal()">Close</button>
+                <button class="btn-modal btn-save" onclick="editUser('${currentUserId}')">Edit User</button>
+                <button class="btn-modal ${status === 'active' ? 'btn-danger' : 'btn-save'}" 
+                        onclick="showSuspendModal('${currentUserId}', '${status}')">
+                    ${status === 'active' ? 'Suspend User' : 'Activate User'}
+                </button>
+            `;
+        } else {
+            userModalFooter.innerHTML = `
+                <button class="btn-modal btn-cancel" onclick="viewUser('${currentUserId}')">Cancel</button>
+                <button class="btn-modal btn-save" onclick="saveUserChanges()">Save Changes</button>
+            `;
+        }
+        
+        userModal.classList.add('active');
+        handleModalOpen();
+    }
+
+    // Save user changes
+    async function saveUserChanges() {
+        const firstName = document.getElementById('modalFirstName').value.trim();
+        const lastName = document.getElementById('modalLastName').value.trim();
+        const email = document.getElementById('modalEmail').value.trim();
+        const jobTitle = document.getElementById('modalJobTitle').value.trim();
+        const role = document.getElementById('modalRole').value;
+        const phone = document.getElementById('modalPhone').value.trim();
+
+        // Validation
+        if (!firstName || !lastName || !email || !jobTitle) {
+            showToast('Please fill all required fields', 'error');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            showToast('Please enter a valid email address', 'error');
+            return;
+        }
+
+        const userData = {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            jobTitle: jobTitle,
+            role: role,
+            phone: phone || undefined
+        };
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/users/${currentUserId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.message || 'Failed to update user');
+            }
+
+            const result = await res.json();
+            
+            showToast('User updated successfully!', 'success');
+            viewUser(currentUserId); // Switch back to view mode
+            loadUsers(); // Refresh the table
+            
+        } catch (err) {
+            console.error('Update error:', err);
+            showToast('Error: ' + err.message, 'error');
+        }
+    }
+
+    // Show suspend/activate confirmation modal
+    function showSuspendModal(userId, currentStatus) {
+        currentUserId = userId;
+        currentUserStatus = currentStatus;
+        const action = currentStatus === 'suspended' ? 'activate' : 'suspend';
+        
+        console.log('Show suspend modal - User ID:', userId, 'Current status:', currentStatus, 'Action:', action);
+        
+        confirmModalTitle.textContent = `${action.charAt(0).toUpperCase() + action.slice(1)} User`;
+        confirmModalMessage.textContent = `Are you sure you want to ${action} this user? ${action === 'suspend' ? 'They will not be able to access the system until activated.' : 'They will regain access to the system.'}`;
+        
+        // Set confirm button text and action
+        confirmActionBtn.textContent = action.charAt(0).toUpperCase() + action.slice(1);
+        confirmActionBtn.onclick = () => toggleUserStatus(userId, currentStatus);
+        
+        confirmModal.classList.add('active');
+        handleModalOpen();
+    }
+
+    // Toggle user status (suspend/activate)
+    async function toggleUserStatus(userId, currentStatus) {
+        const action = currentStatus === 'suspended' ? 'activate' : 'suspend';
+        
+        console.log(`toggleUserStatus - UserID: ${userId}, Current Status: ${currentStatus}, Action: ${action}`);
+        
+        try {
+            const token = localStorage.getItem('token');
+            
+            if (action === 'activate') {
+                // Activate user
+                console.log('Activating user...');
+                
+                const userRes = await fetch(`/api/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!userRes.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+                
+                const userData = await userRes.json();
+                
+                // Prepare update
+                const simpleRequestBody = {
+                    firstName: userData.firstName || '',
+                    lastName: userData.lastName || '',
+                    email: userData.email || '',
+                    jobTitle: userData.jobTitle || 'User',
+                    role: userData.role || 'user',
+                    deletedAt: null,
+                    status: 'active',
+                    updatedAt: new Date().toISOString()
+                };
+                
+                const simpleRes = await fetch(`/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(simpleRequestBody)
+                });
+                
+                if (simpleRes.ok) {
+                    const result = await simpleRes.json();
+                    console.log('Activation successful:', result);
+                    showToast(`User activated successfully`, 'success');
+                    closeConfirmModal();
+                    
+                    if (userModal.classList.contains('active')) {
+                        setTimeout(() => viewUser(userId), 500);
+                    }
+                    setTimeout(() => loadUsers(), 500);
+                } else {
+                    const simpleErrorText = await simpleRes.text();
+                    console.error('Activation failed:', simpleErrorText);
+                    throw new Error(`Failed to activate user: ${simpleErrorText}`);
+                }
+            } else {
+                // Suspend user
+                console.log('Suspending user...');
+                
+                const res = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Suspension response status:', res.status);
+                
+                if (res.ok) {
+                    const result = await res.json();
+                    console.log('Suspension successful:', result);
+                    showToast(`User suspended successfully`, 'success');
+                    closeConfirmModal();
+                    
+                    if (userModal.classList.contains('active')) {
+                        setTimeout(() => viewUser(userId), 500);
+                    }
+                    setTimeout(() => loadUsers(), 500);
+                } else {
+                    const errorText = await res.text();
+                    console.error('Suspension failed:', errorText);
+                    throw new Error(`Failed to suspend user: ${errorText}`);
+                }
+            }
+        } catch (err) {
+            console.error('Toggle status error:', err);
+            showToast('Error: ' + err.message, 'error');
+            closeConfirmModal();
+        }
+    }
+
+    // Save new user from modal
+    saveUserBtn.addEventListener('click', async () => {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const jobTitle = document.getElementById('jobTitle').value.trim();
+        const role = document.getElementById('role').value;
+        const phone = document.getElementById('phone').value.trim();
+
+        // Validation
+        if (!firstName || !lastName || !email || !jobTitle) {
+            showToast('Please fill all required fields', 'error');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            showToast('Please enter a valid email address', 'error');
+            return;
+        }
+
+        const userData = {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            jobTitle: jobTitle,
+            role: role,
+            phone: phone || undefined
+        };
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/users/invite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify([userData])
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.message || 'Failed to invite user');
+            }
+
+            const result = await res.json();
+            
+            closeModal();
+            loadUsers();
+            showToast('User invited successfully!', 'success');
+            
+            console.log('Invite result:', result);
+        } catch (err) {
+            console.error('Invite error:', err);
+            showToast('Error: ' + err.message, 'error');
+        }
+    });
+
+    // Email validation helper
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    // Test API connection
+    async function testApiConnection() {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('/api/user/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (res.ok) {
+                const userData = await res.json();
+                console.log('Current user:', userData);
+                return true;
+            } else {
+                const error = await res.text();
+                console.error('API connection failed:', error);
+                return false;
+            }
+        } catch (err) {
+            console.error('Connection failed:', err);
+            return false;
+        }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login.html';
+            return;
+        }
+        
+        // Test connection first
+        const connected = await testApiConnection();
+        if (connected) {
+            loadUsers();
+            startAutoRefresh();
+            console.log('Administration page initialized successfully');
+        } else {
+            showToast('Authentication failed. Please login again.', 'error');
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 3000);
+        }
+    });
+    </script>
+</body>
+</html>

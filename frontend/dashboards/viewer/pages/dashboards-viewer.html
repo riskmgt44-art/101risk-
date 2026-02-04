@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viewer Dashboard • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --viewer-bg: #f8fafc;
+            --viewer-border: rgba(93, 161, 161, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+        body::-webkit-scrollbar, ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
+        html, body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .top-bar {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+        }
+        .top-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .viewer-badge {
+            background: var(--viewer-bg);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--viewer-border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .select-control, .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            background: var(--bg);
+            cursor: pointer;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+        }
+        .btn:hover { border-color: var(--primary); color: var(--primary); }
+        .refresh-time {
+            font-size: 12px;
+            color: var(--neutral);
+            white-space: nowrap;
+        }
+        
+        /* Disabled states for viewer */
+        .btn:disabled, 
+        .select-control:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: var(--viewer-bg);
+            border-color: var(--viewer-border);
+        }
+        .btn:disabled:hover {
+            border-color: var(--viewer-border);
+            color: inherit;
+        }
+
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 32px 80px 32px;
+            background: linear-gradient(135deg, var(--viewer-bg) 0%, var(--bg) 100%);
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--viewer-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            transition: var(--transition);
+            position: relative;
+            border-left: 4px solid var(--viewer-border);
+        }
+        .kpi-card:hover { border-color: var(--primary); }
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .kpi-label {
+            font-size: 13px;
+            color: var(--neutral);
+        }
+        .kpi-trend {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .trend-up { color: var(--red); }
+        .trend-down { color: var(--green); }
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            transition: color 0.4s ease;
+        }
+        .kpi-sub {
+            font-size: 13px;
+            color: var(--neutral);
+        }
+        
+        /* Viewer-only watermark on cards */
+        .viewer-watermark {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 10px;
+            color: var(--primary);
+            background: rgba(93, 161, 161, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--viewer-border);
+            font-weight: 600;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--viewer-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-left: 4px solid var(--viewer-border);
+        }
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-title i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            flex: 1;
+            min-height: 320px;
+        }
+        
+        /* Chart viewer label */
+        .chart-viewer-label {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 10px;
+            color: var(--primary);
+            background: var(--viewer-bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--viewer-border);
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .secondary-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .attention-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--viewer-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            border-left: 4px solid var(--viewer-border);
+        }
+        .attention-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .attention-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .attention-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(93, 161, 161, 0.05);
+            border-radius: 8px;
+            font-size: 14px;
+            border: 1px solid var(--viewer-border);
+        }
+        .attention-empty {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--neutral);
+            font-style: italic;
+            font-size: 15px;
+        }
+        .attention-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            background: var(--viewer-bg);
+            padding: 4px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--viewer-border);
+        }
+        .attention-link:hover { 
+            background: rgba(93, 161, 161, 0.1);
+            text-decoration: none;
+        }
+
+        .assets-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--viewer-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            margin-top: 32px;
+            border-left: 4px solid var(--viewer-border);
+        }
+        .assets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .assets-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .assets-count {
+            background: var(--viewer-bg);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--viewer-border);
+        }
+        .assets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        .asset-card {
+            background: var(--card-bg);
+            border: 1px solid var(--viewer-border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        .asset-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .asset-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .asset-category {
+            font-size: 12px;
+            color: var(--neutral);
+            background: rgba(93, 161, 161, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        .asset-details {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .asset-detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .asset-detail i {
+            color: var(--neutral);
+            width: 16px;
+        }
+        .asset-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+        .status-healthy { background: rgba(16, 185, 129, 0.1); color: var(--green); }
+        .status-warning { background: rgba(245, 158, 11, 0.1); color: var(--amber); }
+        .status-critical { background: rgba(239, 68, 68, 0.1); color: var(--red); }
+        
+        /* Viewer info panel */
+        .viewer-info {
+            background: var(--viewer-bg);
+            border: 1px solid var(--viewer-border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .viewer-info i {
+            color: var(--primary);
+            font-size: 24px;
+        }
+        .viewer-info-text h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+        .viewer-info-text p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1024px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+            .assets-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .top-bar { padding: 16px; flex-direction: column; align-items: stretch; gap: 16px; }
+            .top-controls { justify-content: stretch; }
+            .select-control, .btn { width: 100%; justify-content: center; }
+            .main { padding: 20px 16px 80px 16px; }
+            .kpi-row, .secondary-row { grid-template-columns: 1fr; }
+            .analytics-grid { gap: 24px; }
+            .chart-container { min-height: 280px; }
+            .assets-grid { grid-template-columns: 1fr; }
+            .viewer-info { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-title">
+            Viewer Dashboard
+            <span class="viewer-badge">
+                <i class="fas fa-eye"></i>
+                Read-Only Access
+            </span>
+        </div>
+        <div class="top-controls">
+            <select class="select-control" id="asset-filter" disabled>
+                <option value="all">All Assets (Viewer Mode)</option>
+            </select>
+            <button class="btn" onclick="refreshDashboard()" disabled>
+                <i class="fas fa-sync-alt"></i> Auto-Refresh Only
+            </button>
+            <div class="refresh-time" id="refresh-time">Last updated: —</div>
+        </div>
+    </div>
+
+    <main class="main">
+      
+
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="viewer-watermark">VIEW</div>
+                <div class="kpi-header">
+                    <div class="kpi-label">Total Risks</div>
+                    <div class="kpi-trend" id="risks-trend">—</div>
+                </div>
+                <div class="kpi-value" id="total-risks">—</div>
+                <div class="kpi-sub">Across all viewable assets</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="viewer-watermark">VIEW</div>
+                <div class="kpi-header">
+                    <div class="kpi-label">High Severity Risks</div>
+                    <div class="kpi-trend trend-up" id="high-risks-trend">—</div>
+                </div>
+                <div class="kpi-value" id="high-risks">—</div>
+                <div class="kpi-sub">View only - no actions</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="viewer-watermark">VIEW</div>
+                <div class="kpi-header">
+                    <div class="kpi-label">Open Actions</div>
+                    <div class="kpi-trend" id="actions-trend">—</div>
+                </div>
+                <div class="kpi-value" id="open-actions">—</div>
+                <div class="kpi-sub"><span id="overdue-count">0</span> overdue (View Only)</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="viewer-watermark">VIEW</div>
+                <div class="kpi-header">
+                    <div class="kpi-label">Viewable Assets</div>
+                </div>
+                <div class="kpi-value" id="viewable-assets">—</div>
+                <div class="kpi-sub">Assets you can view</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="viewer-watermark">VIEW</div>
+                <div class="kpi-header">
+                    <div class="kpi-label">Recent Activity</div>
+                </div>
+                <div class="kpi-value" id="recent-activity">—</div>
+                <div class="kpi-sub">Last 24 hours (View Only)</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="analytics-grid">
+            <div class="chart-card">
+                <div class="chart-viewer-label">VIEW ONLY</div>
+                <div class="chart-title"><i class="fas fa-chart-pie"></i> Risk Severity Distribution</div>
+                <div class="chart-container">
+                    <canvas id="severityChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-viewer-label">VIEW ONLY</div>
+                <div class="chart-title"><i class="fas fa-chart-line"></i> Risk Trend (Last 7 Days)</div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-viewer-label">VIEW ONLY</div>
+                <div class="chart-title"><i class="fas fa-tasks"></i> Action Status Breakdown</div>
+                <div class="chart-container">
+                    <canvas id="actionChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-viewer-label">VIEW ONLY</div>
+                <div class="chart-title"><i class="fas fa-chart-bar"></i> Status Distribution</div>
+                <div class="chart-container">
+                    <canvas id="submissionsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attention Required -->
+        <div class="attention-panel">
+            <div class="attention-title"><i class="fas fa-bell"></i> Attention Items (View Only)</div>
+            <div class="attention-list" id="attention-list">
+                <!-- Items will be inserted here dynamically -->
+            </div>
+            <div id="attention-empty" class="attention-empty" style="display: none;">
+                No immediate attention items to view — all monitored items are on track.
+            </div>
+        </div>
+
+        <!-- Viewable Assets -->
+        <div class="assets-panel">
+            <div class="assets-header">
+                <div class="assets-title">Viewable Assets</div>
+                <span class="assets-count" id="assets-count">0</span>
+            </div>
+            <div class="assets-grid" id="assets-grid">
+                <!-- Asset cards will be inserted here -->
+            </div>
+            <div id="assets-empty" class="attention-empty" style="display: none; margin-top: 16px;">
+                No assets available for viewing.
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Chart colors matching your color scheme
+        const COLORS = {
+            primary: '#5DA1A1',
+            red: '#ef4444',
+            green: '#10b981',
+            amber: '#f59e0b',
+            blue: '#3b82f6',
+            neutral: '#6b7280'
+        };
+
+        // Common chart options for viewer mode
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'bottom', 
+                    labels: { 
+                        font: { 
+                            family: 'Inter', 
+                            size: 12 
+                        } 
+                    } 
+                },
+                tooltip: { 
+                    backgroundColor: 'rgba(0,0,0,0.8)', 
+                    titleFont: { family: 'Inter' }, 
+                    bodyFont: { family: 'Inter' }, 
+                    cornerRadius: 8,
+                    enabled: true // Keep tooltips for viewers
+                }
+            },
+            interaction: { 
+                intersect: false, 
+                mode: 'index',
+                // Disable dataset hover effects for viewer mode
+                events: []
+            }
+        };
+
+        // Initialize charts with empty data
+        let severityChart = null;
+        let trendChart = null;
+        let actionChart = null;
+        let submissionsChart = null;
+
+        // Initialize charts when DOM is ready
+        function initializeCharts() {
+            // Only initialize if canvas elements exist
+            const severityCanvas = document.getElementById('severityChart');
+            const trendCanvas = document.getElementById('trendChart');
+            const actionCanvas = document.getElementById('actionChart');
+            const submissionsCanvas = document.getElementById('submissionsChart');
+            
+            if (severityCanvas) {
+                severityChart = new Chart(severityCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: [],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        cutout: '70%',
+                        onClick: null // Disable click events for viewer
+                    }
+                });
+            }
+            
+            if (trendCanvas) {
+                trendChart = new Chart(trendCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: []
+                    },
+                    options: {
+                        ...commonOptions,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Risks'
+                                }
+                            }
+                        },
+                        onClick: null // Disable click events for viewer
+                    }
+                });
+            }
+            
+            if (actionCanvas) {
+                actionChart = new Chart(actionCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: []
+                    },
+                    options: {
+                        ...commonOptions,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Actions'
+                                }
+                            }
+                        },
+                        onClick: null // Disable click events for viewer
+                    }
+                });
+            }
+            
+            if (submissionsCanvas) {
+                submissionsChart = new Chart(submissionsCanvas, {
+                    type: 'pie',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: []
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        onClick: null // Disable click events for viewer
+                    }
+                });
+            }
+        }
+
+        // API endpoints for VIEWER
+        const API_ENDPOINTS = {
+            dashboard: '/api/viewer/dashboard',
+            assignedAssets: '/api/viewer/assets',
+            overview: '/api/viewer/overview',
+            charts: '/api/viewer/charts'
+        };
+
+        // Format number with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Update high risks color based on count (viewer version)
+        function updateHighRisksColor(count) {
+            const element = document.getElementById('high-risks');
+            if (!element) return;
+            
+            if (count >= 30) {
+                element.style.color = 'var(--red)';
+            } else if (count >= 15) {
+                element.style.color = 'var(--amber)';
+            } else {
+                element.style.color = 'var(--green)';
+            }
+        }
+
+        // Fetch chart data for VIEWER
+        async function fetchChartData(token) {
+            try {
+                console.log('Fetching viewer chart data...');
+                const chartRes = await fetch(API_ENDPOINTS.charts, {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                console.log('Viewer chart response status:', chartRes.status);
+                
+                if (chartRes.ok) {
+                    const data = await chartRes.json();
+                    console.log('Viewer chart data received');
+                    return data;
+                } else {
+                    console.warn('Viewer chart endpoint returned status:', chartRes.status);
+                    return null;
+                }
+                
+            } catch (error) {
+                console.error('Error fetching viewer chart data:', error);
+                return null;
+            }
+        }
+
+        // Update charts with real data from viewer endpoint
+        function updateChartsWithRealData(dashboardData, chartData) {
+            console.log('Updating viewer charts with data:', { dashboardData, chartData });
+            
+            // Update severity chart with actual data
+            if (severityChart) {
+                if (chartData && chartData.severityDistribution) {
+                    severityChart.data.labels = chartData.severityDistribution.labels || [];
+                    severityChart.data.datasets[0].data = chartData.severityDistribution.values || [];
+                    severityChart.data.datasets[0].backgroundColor = chartData.severityDistribution.colors || [
+                        COLORS.red, COLORS.amber, COLORS.green
+                    ];
+                    severityChart.update();
+                } else if (dashboardData.totalRisks > 0) {
+                    // Fallback to basic data
+                    const highCount = dashboardData.highSeverityRisks || 0;
+                    const mediumCount = Math.max(0, Math.floor(dashboardData.totalRisks * 0.4));
+                    const lowCount = Math.max(0, dashboardData.totalRisks - highCount - mediumCount);
+                    
+                    severityChart.data.labels = ['High', 'Medium', 'Low'];
+                    severityChart.data.datasets[0].data = [highCount, mediumCount, lowCount];
+                    severityChart.data.datasets[0].backgroundColor = [COLORS.red, COLORS.amber, COLORS.green];
+                    severityChart.update();
+                } else {
+                    // Show empty state
+                    severityChart.data.labels = ['No Data Available'];
+                    severityChart.data.datasets[0].data = [1];
+                    severityChart.data.datasets[0].backgroundColor = [COLORS.neutral];
+                    severityChart.update();
+                }
+            }
+            
+            // Update trend chart
+            if (trendChart) {
+                if (chartData && chartData.trendData) {
+                    trendChart.data.labels = chartData.trendData.labels || [];
+                    trendChart.data.datasets = chartData.trendData.datasets || [];
+                    trendChart.update();
+                } else if (chartData && chartData.monthlyTrend) {
+                    // Alternative: use monthly trend data
+                    const labels = Object.keys(chartData.monthlyTrend || {});
+                    const values = Object.values(chartData.monthlyTrend || {});
+                    
+                    trendChart.data.labels = labels;
+                    trendChart.data.datasets = [{
+                        label: 'Risks',
+                        data: values,
+                        borderColor: COLORS.primary,
+                        backgroundColor: COLORS.primary + '20',
+                        tension: 0.4,
+                        fill: true
+                    }];
+                    trendChart.update();
+                } else {
+                    // Show empty state
+                    trendChart.data.labels = ['No Trend Data Available'];
+                    trendChart.data.datasets = [{
+                        label: 'Risks',
+                        data: [0],
+                        borderColor: COLORS.neutral,
+                        backgroundColor: COLORS.neutral + '20',
+                        fill: true
+                    }];
+                    trendChart.update();
+                }
+            }
+            
+            // Update action chart
+            if (actionChart) {
+                if (chartData && chartData.actionStatus) {
+                    actionChart.data.labels = chartData.actionStatus.labels || [];
+                    actionChart.data.datasets = chartData.actionStatus.datasets || [];
+                    actionChart.update();
+                } else if (dashboardData.openActions > 0) {
+                    // Basic action chart as fallback
+                    const overdue = dashboardData.overdueActions || 0;
+                    const open = Math.max(0, dashboardData.openActions - overdue);
+                    
+                    actionChart.data.labels = ['Open', 'Overdue'];
+                    actionChart.data.datasets = [{
+                        label: 'Actions',
+                        data: [open, overdue],
+                        backgroundColor: [COLORS.primary, COLORS.red]
+                    }];
+                    actionChart.update();
+                } else if (chartData && chartData.statusDistribution) {
+                    // Use status distribution if available
+                    actionChart.data.labels = Object.keys(chartData.statusDistribution || {});
+                    actionChart.data.datasets = [{
+                        label: 'Risks by Status',
+                        data: Object.values(chartData.statusDistribution || {}),
+                        backgroundColor: [COLORS.primary, COLORS.amber, COLORS.green, COLORS.neutral]
+                    }];
+                    actionChart.update();
+                } else {
+                    // Show empty state
+                    actionChart.data.labels = ['No Action Data Available'];
+                    actionChart.data.datasets = [{
+                        label: 'Actions',
+                        data: [1],
+                        backgroundColor: [COLORS.neutral]
+                    }];
+                    actionChart.update();
+                }
+            }
+            
+            // Update submissions chart
+            if (submissionsChart) {
+                if (chartData && chartData.riskStatus) {
+                    submissionsChart.data.labels = chartData.riskStatus.labels || [];
+                    submissionsChart.data.datasets[0].data = chartData.riskStatus.values || [];
+                    submissionsChart.data.datasets[0].backgroundColor = chartData.riskStatus.colors || [COLORS.green, COLORS.amber, COLORS.neutral];
+                    submissionsChart.update();
+                } else {
+                    // Show empty state
+                    submissionsChart.data.labels = ['No Status Data'];
+                    submissionsChart.data.datasets[0].data = [1];
+                    submissionsChart.data.datasets[0].backgroundColor = [COLORS.neutral];
+                    submissionsChart.update();
+                }
+            }
+        }
+
+        // Update attention list for VIEWER
+        function updateAttentionList(data) {
+            const container = document.getElementById('attention-list');
+            const emptyMsg = document.getElementById('attention-empty');
+            
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const attentionItems = [];
+            
+            // Check for overdue actions (view only)
+            if (data.overdueActions && data.overdueActions > 0) {
+                attentionItems.push({
+                    title: `${data.overdueActions} overdue action(s) requiring attention`,
+                    action: 'View Actions',
+                    link: '#',
+                    onClick: (e) => {
+                        e.preventDefault();
+                        alert('Viewer mode: You can view but not take action on overdue items.');
+                    }
+                });
+            }
+            
+            // Check for high severity risks (view only)
+            if (data.highSeverityRisks && data.highSeverityRisks > 0) {
+                attentionItems.push({
+                    title: `${data.highSeverityRisks} high severity risks in viewable assets`,
+                    action: 'View Risks',
+                    link: '#',
+                    onClick: (e) => {
+                        e.preventDefault();
+                        alert('Viewer mode: You can view but not edit high severity risks.');
+                    }
+                });
+            }
+            
+            // Check for open actions (view only)
+            if (data.openActions && data.openActions > 0) {
+                attentionItems.push({
+                    title: `${data.openActions} open actions requiring follow-up`,
+                    action: 'View Details',
+                    link: '#',
+                    onClick: (e) => {
+                        e.preventDefault();
+                        alert('Viewer mode: You can view open actions but cannot update them.');
+                    }
+                });
+            }
+            
+            if (attentionItems.length > 0) {
+                if (emptyMsg) emptyMsg.style.display = 'none';
+                attentionItems.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'attention-item';
+                    
+                    const link = document.createElement('a');
+                    link.className = 'attention-link';
+                    link.href = item.link || '#';
+                    link.textContent = item.action;
+                    link.onclick = item.onClick || (() => {});
+                    
+                    div.innerHTML = `<div>${item.title}</div>`;
+                    div.appendChild(link);
+                    
+                    container.appendChild(div);
+                });
+            } else {
+                if (emptyMsg) emptyMsg.style.display = 'block';
+            }
+        }
+
+        // Update viewable assets display for VIEWER
+        function updateAssetsDisplay(assets) {
+            const container = document.getElementById('assets-grid');
+            const emptyMsg = document.getElementById('assets-empty');
+            const countElement = document.getElementById('assets-count');
+            
+            if (!container || !countElement) return;
+            
+            container.innerHTML = '';
+            
+            if (assets && assets.length > 0) {
+                if (emptyMsg) emptyMsg.style.display = 'none';
+                countElement.textContent = assets.length.toString();
+                
+                assets.forEach(asset => {
+                    const assetCard = document.createElement('div');
+                    assetCard.className = 'asset-card';
+                    assetCard.onclick = () => {
+                        alert(`Viewer mode: You can view details of "${asset.name}" but cannot edit it.`);
+                    };
+                    
+                    // Determine status class
+                    let statusClass = 'status-healthy';
+                    let statusText = 'Healthy';
+                    
+                    if (asset.status === 'inactive') {
+                        statusClass = 'status-warning';
+                        statusText = 'Inactive';
+                    } else if (asset.health === 'Critical' || asset.status === 'critical') {
+                        statusClass = 'status-critical';
+                        statusText = 'Critical';
+                    } else if (asset.health === 'Warning' || asset.status === 'warning') {
+                        statusClass = 'status-warning';
+                        statusText = 'Warning';
+                    }
+                    
+                    assetCard.innerHTML = `
+                        <div class="asset-name">${asset.name || 'Unnamed Asset'}</div>
+                        <div class="asset-category">${asset.category || 'Uncategorized'}</div>
+                        <div class="asset-details">
+                            ${asset.location ? `<div class="asset-detail"><i class="fas fa-map-marker-alt"></i> ${asset.location}</div>` : ''}
+                            ${asset.owner ? `<div class="asset-detail"><i class="fas fa-user"></i> ${asset.owner}</div>` : ''}
+                            ${asset.updatedAt ? `<div class="asset-detail"><i class="fas fa-clock"></i> Last Updated: ${new Date(asset.updatedAt).toLocaleDateString()}</div>` : ''}
+                        </div>
+                        <div class="asset-status ${statusClass}">${statusText}</div>
+                    `;
+                    
+                    container.appendChild(assetCard);
+                });
+            } else {
+                if (emptyMsg) emptyMsg.style.display = 'block';
+                countElement.textContent = '0';
+            }
+        }
+
+        // Main dashboard update function for VIEWER
+        async function updateDashboard() {
+            try {
+                console.log('Fetching viewer dashboard data...');
+                
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+
+                // Check user role - only allow viewer
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const userRole = payload.role || 'viewer';
+                    if (userRole.toLowerCase() !== 'viewer') {
+                        console.warn(`User role ${userRole} accessing viewer dashboard`);
+                    }
+                } catch (e) {
+                    console.warn('Could not decode token for role check');
+                }
+
+                // Fetch main viewer dashboard data
+                const res = await fetch(API_ENDPOINTS.dashboard, {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`, 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Viewer response status:', res.status);
+                
+                if (!res.ok) {
+                    // Try fallback for viewer
+                    if (res.status === 404 || res.status === 403) {
+                        console.log('Trying fallback endpoint for viewer...');
+                        const fallbackRes = await fetch('/api/dashboard/viewer-data', {
+                            headers: { 
+                                'Authorization': `Bearer ${token}`, 
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (fallbackRes.ok) {
+                            const data = await fallbackRes.json();
+                            updateDashboardWithData(data);
+                            return;
+                        }
+                    }
+                    
+                    const errorText = await res.text();
+                    console.error('Viewer server error response:', errorText);
+                    throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 100)}`);
+                }
+
+                const data = await res.json();
+                console.log('Viewer dashboard data received:', data);
+                
+                updateDashboardWithData(data);
+                
+
+            } catch (err) {
+                console.error('Viewer dashboard refresh failed:', err);
+                // Update timestamp with error
+                const refreshTimeEl = document.getElementById('refresh-time');
+                if (refreshTimeEl) {
+                    refreshTimeEl.textContent = `Update failed: ${err.message}`;
+                }
+                
+                // Show error in attention panel
+                const attentionList = document.getElementById('attention-list');
+                const emptyMsg = document.getElementById('attention-empty');
+                if (attentionList) {
+                    attentionList.innerHTML = '';
+                    if (emptyMsg) emptyMsg.style.display = 'none';
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'attention-item';
+                    errorDiv.innerHTML = `
+                        <div>Unable to load viewer data: ${err.message}</div>
+                        <a class="attention-link" href="#" onclick="updateDashboard();return false;">Retry</a>
+                    `;
+                    attentionList.appendChild(errorDiv);
+                }
+                
+                // Show empty state for assets
+                updateAssetsDisplay([]);
+                
+                // Use demo data as fallback
+                useDemoData();
+            }
+        }
+        
+        // Helper function to update dashboard with data
+        function updateDashboardWithData(data) {
+            // Update KPIs with viewer data
+            const totalRisksEl = document.getElementById('total-risks');
+            const highRisksEl = document.getElementById('high-risks');
+            const openActionsEl = document.getElementById('open-actions');
+            const overdueCountEl = document.getElementById('overdue-count');
+            const viewableAssetsEl = document.getElementById('viewable-assets');
+            const recentActivityEl = document.getElementById('recent-activity');
+            
+            if (totalRisksEl) totalRisksEl.textContent = formatNumber(data.totalRisks || 0);
+            if (highRisksEl) highRisksEl.textContent = formatNumber(data.highSeverityRisks || 0);
+            if (openActionsEl) openActionsEl.textContent = formatNumber(data.openActions || 0);
+            if (overdueCountEl) overdueCountEl.textContent = formatNumber(data.overdueActions || 0);
+            if (viewableAssetsEl) viewableAssetsEl.textContent = formatNumber(data.viewableAssets || data.assignedAssets || 0);
+            if (recentActivityEl) recentActivityEl.textContent = formatNumber(data.recentActivity || data.recentActivity24h || 0);
+            
+            // Update colors based on viewer data
+            updateHighRisksColor(data.highSeverityRisks || 0);
+            
+            // Update trend indicators if available
+            if (data.totalRisksTrend) {
+                const trendElement = document.getElementById('risks-trend');
+                if (trendElement) {
+                    trendElement.textContent = data.totalRisksTrend;
+                    trendElement.className = data.totalRisksTrend.includes('+') ? 'kpi-trend trend-up' : 'kpi-trend trend-down';
+                }
+            }
+            
+            if (data.highSeverityTrend) {
+                const trendElement = document.getElementById('high-risks-trend');
+                if (trendElement) {
+                    trendElement.textContent = data.highSeverityTrend;
+                    trendElement.className = data.highSeverityTrend.includes('+') ? 'kpi-trend trend-up' : 'kpi-trend trend-down';
+                }
+            }
+            
+            // Update Attention Required list for viewer
+            updateAttentionList(data);
+            
+            // Fetch and update chart data for viewer
+            const token = localStorage.getItem('token');
+            if (token) {
+                fetchChartData(token).then(chartData => {
+                    updateChartsWithRealData(data, chartData);
+                }).catch(chartError => {
+                    console.warn('Could not fetch viewer chart data:', chartError);
+                    updateChartsWithRealData(data, null);
+                });
+            } else {
+                updateChartsWithRealData(data, null);
+            }
+            
+            // Update viewable assets for viewer
+            if (data.viewableAssetDetails && Array.isArray(data.viewableAssetDetails)) {
+                updateAssetsDisplay(data.viewableAssetDetails);
+            } else if (data.assignedAssetDetails && Array.isArray(data.assignedAssetDetails)) {
+                updateAssetsDisplay(data.assignedAssetDetails);
+            } else {
+                updateAssetsDisplay([]);
+            }
+
+            // Update timestamp
+            const now = new Date();
+            const refreshTimeEl = document.getElementById('refresh-time');
+            if (refreshTimeEl) {
+                refreshTimeEl.textContent =
+                    `Last updated: ${now.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}`;
+            }
+
+            console.log('Viewer dashboard updated');
+        }
+        
+        // Demo data for viewer fallback
+        function useDemoData() {
+            console.log('Using demo data for viewer dashboard');
+            
+            const demoData = {
+                totalRisks: 42,
+                highSeverityRisks: 12,
+                openActions: 28,
+                overdueActions: 5,
+                viewableAssets: 8,
+                recentActivity: 15,
+                totalRisksTrend: "+2",
+                highSeverityTrend: "+1",
+                viewableAssetDetails: [
+                    { 
+                        name: "North Platform", 
+                        category: "Production", 
+                        location: "Site A", 
+                        owner: "Operations Team",
+                        updatedAt: new Date().toISOString(),
+                        status: "active",
+                        health: "Healthy"
+                    },
+                    { 
+                        name: "South Terminal", 
+                        category: "Storage", 
+                        location: "Site B", 
+                        owner: "Logistics Team",
+                        updatedAt: new Date().toISOString(),
+                        status: "warning",
+                        health: "Warning"
+                    },
+                    { 
+                        name: "Central Hub", 
+                        category: "Processing", 
+                        location: "Site C", 
+                        owner: "IT Department",
+                        updatedAt: new Date().toISOString(),
+                        status: "active",
+                        health: "Healthy"
+                    }
+                ]
+            };
+            
+            updateDashboardWithData(demoData);
+        }
+
+        // Alias for refreshDashboard
+        function refreshDashboard() {
+            console.log('Auto-refresh triggered for viewer');
+            updateDashboard();
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            console.log('Viewer dashboard page loaded, initializing...');
+            
+            // Initialize charts
+            initializeCharts();
+            
+            // Check for authentication
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No authentication token found');
+                const attentionList = document.getElementById('attention-list');
+                const emptyMsg = document.getElementById('attention-empty');
+                if (attentionList) {
+                    attentionList.innerHTML = '';
+                    if (emptyMsg) emptyMsg.style.display = 'none';
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'attention-item';
+                    errorDiv.innerHTML = `
+                        <div>Authentication required. Please log in.</div>
+                        <a class="attention-link" href="/login">Login</a>
+                    `;
+                    attentionList.appendChild(errorDiv);
+                }
+                return;
+            }
+            
+            // Disable all interactive elements for viewer
+            document.querySelectorAll('button, select, input').forEach(el => {
+                if (!el.id.includes('refresh') && !el.classList.contains('attention-link')) {
+                    el.disabled = true;
+                }
+            });
+            
+            updateDashboard();
+            
+            // Set up auto-refresh every 60 seconds (less frequent for viewer)
+            setInterval(updateDashboard, 60000);
+            
+            // Disable keyboard shortcuts for viewer
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    // Show message that auto-refresh is enabled
+                    const refreshTimeEl = document.getElementById('refresh-time');
+                    if (refreshTimeEl) {
+                        const originalText = refreshTimeEl.textContent;
+                        refreshTimeEl.textContent = 'Auto-refresh enabled (every 60s)';
+                        setTimeout(() => {
+                            refreshTimeEl.textContent = originalText;
+                        }, 2000);
+                    }
+                }
+            });
+        });
+
+        // Export functions
+        window.updateDashboard = updateDashboard;
+        window.refreshDashboard = refreshDashboard;
+    </script>
+</body>
+</html>
