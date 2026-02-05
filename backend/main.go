@@ -34,7 +34,6 @@ func main() {
 	}
 
 	// IMPORTANT: Initialize ALL collections early
-	// FIXED: Changed from InitCollections() to InitializeCollections()
 	handlers.InitializeCollections()
 
 	// Start WebSocket hub
@@ -61,6 +60,7 @@ func main() {
 			"status":  "ok",
 			"version": "1.0.0",
 			"service": "riskmgt-backend",
+			"port":    os.Getenv("PORT"), // Add this for debugging
 		})
 	}).Methods("GET", "OPTIONS")
 
@@ -79,22 +79,29 @@ func main() {
 	// SERVE STATIC FILES (SPA fallback)
 	// ============================================
 	
-	// First, try to serve static files
-	fs := http.FileServer(http.Dir("../frontend"))
-	router.PathPrefix("/").Handler(fs)
-	
-	// If you want more control over static files:
-	// router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
-	// router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//     // Serve index.html for SPA routing
-	//     http.ServeFile(w, r, "../frontend/index.html")
-	// })
+	// Only serve static files if they exist
+	if _, err := os.Stat("../frontend"); !os.IsNotExist(err) {
+		fs := http.FileServer(http.Dir("../frontend"))
+		router.PathPrefix("/").Handler(fs)
+		log.Println("Static file serving enabled for ../frontend")
+	} else {
+		log.Println("Static files directory not found, API-only mode")
+	}
 
 	// ============================================
 	// HTTP SERVER CONFIGURATION
 	// ============================================
+	// CRITICAL FIX: Get port from environment variable for Render
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = config.Port // Fallback to your config
+		if port == "" {
+			port = "8080" // Final fallback
+		}
+	}
+	
 	srv := &http.Server{
-		Addr:         ":" + config.Port,
+		Addr:         ":" + port,
 		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -108,12 +115,10 @@ func main() {
 		log.Printf("╔══════════════════════════════════════════════════════════╗")
 		log.Printf("║                 RiskMGT Backend + Frontend              ║")
 		log.Printf("╠══════════════════════════════════════════════════════════╣")
-		log.Printf("║ Server running on: http://localhost:%s                  ║", config.Port)
-		log.Printf("║ Health Check:     http://localhost:%s/health           ║", config.Port)
-		log.Printf("║ Create Org:       http://localhost:%s/create-organization.html ║", config.Port)
-		log.Printf("║ Executive Dash:   http://localhost:%s/dashboards/executive/ ║", config.Port)
-		log.Printf("║ API Endpoint:     http://localhost:%s/api              ║", config.Port)
-		log.Printf("║ WebSocket:        ws://localhost:%s/ws                 ║", config.Port)
+		log.Printf("║ Server running on port: %s                              ║", port)
+		log.Printf("║ Health Check:     http://localhost:%s/health           ║", port)
+		log.Printf("║ WebSocket:        ws://localhost:%s/ws                 ║", port)
+		log.Printf("║ API Endpoint:     http://localhost:%s/api              ║", port)
 		log.Printf("╚══════════════════════════════════════════════════════════╝")
 		
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
