@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset List • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Enable scrolling on entire page */
+        html, body {
+            height: 100%;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            padding: 32px;
+            min-height: 100vh;
+            /* Enable vertical scrolling */
+            overflow-y: auto;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+        
+        .table-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 60px; /* Space at bottom for scrolling */
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Fixed layout for consistent column widths */
+        }
+        
+        /* Define column widths */
+        table th:nth-child(1), table td:nth-child(1) { width: 25%; } /* Asset Name */
+        table th:nth-child(2), table td:nth-child(2) { width: 15%; } /* Category */
+        table th:nth-child(3), table td:nth-child(3) { width: 12%; } /* Nature */
+        table th:nth-child(4), table td:nth-child(4) { width: 12%; } /* Location */
+        table th:nth-child(5), table td:nth-child(5) { width: 12%; } /* Owner */
+        table th:nth-child(6), table td:nth-child(6) { width: 12%; } /* Created */
+        table th:nth-child(7), table td:nth-child(7) { width: 12%; } /* Actions */
+        
+        thead {
+            background: rgba(93,161,161,0.06);
+        }
+        
+        th {
+            text-align: left;
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+            vertical-align: middle;
+            line-height: 1.5;
+        }
+        
+        tr:hover {
+            background: rgba(93,161,161,0.03);
+        }
+        
+        .asset-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .asset-name:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+        
+        .category-badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            background: rgba(93,161,161,0.15);
+            color: var(--primary);
+            border-radius: 6px;
+            font-weight: 500;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .no-assets {
+            text-align: center;
+            padding: 80px 32px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 80px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+        
+        /* Scrollable table container for many rows */
+        .table-wrapper {
+            max-height: calc(100vh - 200px); /* Limit height to enable scrolling */
+            overflow-y: auto;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        
+        /* Custom scrollbar for table */
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-hover);
+        }
+        
+        /* Cell content truncation */
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+        
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+        
+        .action-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background: rgba(93,161,161,0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        
+        /* Search and filter controls */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+            min-width: 250px;
+            position: relative;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+            background-color: white;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        
+        .filter-options {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            min-width: 140px;
+            position: relative;
+        }
+        
+        .filter-select:nth-child(1) {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M7 12h10'/%3E%3Cpath d='M10 18h4'/%3E%3C/svg%3E") no-repeat 12px center;
+            background-color: white;
+        }
+        
+        .filter-select:nth-child(2) {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cpolyline points='12 6 12 12 16 14'%3E%3C/polyline%3E%3C/svg%3E") no-repeat 12px center;
+            background-color: white;
+        }
+        
+        /* Clear filters button */
+        .clear-filters-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .clear-filters-btn:hover {
+            background: rgba(93,161,161,0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 32px;
+            color: var(--text-muted);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border);
+        }
+        
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            body {
+                padding: 24px;
+            }
+            
+            .table-wrapper {
+                max-height: calc(100vh - 180px);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            /* Adjust column widths for medium screens */
+            table th:nth-child(1), table td:nth-child(1) { width: 25%; }
+            table th:nth-child(2), table td:nth-child(2) { width: 15%; }
+            table th:nth-child(3), table td:nth-child(3) { width: 12%; }
+            table th:nth-child(4), table td:nth-child(4) { width: 12%; }
+            table th:nth-child(5), table td:nth-child(5) { width: 12%; }
+            table th:nth-child(6), table td:nth-child(6) { width: 12%; }
+            table th:nth-child(7), table td:nth-child(7) { width: 12%; }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            
+            .table-container {
+                border-radius: 8px;
+            }
+            
+            .table-wrapper {
+                max-height: calc(100vh - 200px);
+            }
+            
+            th, td {
+                padding: 12px 16px;
+            }
+            
+            .page-title {
+                font-size: 20px;
+            }
+            
+            .table-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: 100%;
+                min-width: 100%;
+            }
+            
+            .filter-options {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .filter-select {
+                flex: 1;
+                min-width: 0;
+            }
+            
+            /* Adjust column widths for mobile */
+            table th:nth-child(3), table td:nth-child(3) { display: none; } /* Hide Nature */
+            table th:nth-child(4), table td:nth-child(4) { width: 15%; } /* Location */
+            table th:nth-child(5), table td:nth-child(5) { display: none; } /* Hide Owner */
+            table th:nth-child(6), table td:nth-child(6) { width: 15%; } /* Created */
+            table th:nth-child(7), table td:nth-child(7) { width: 15%; } /* Actions */
+        }
+        
+        @media (max-width: 480px) {
+            th, td {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .category-badge {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+            
+            .table-wrapper {
+                max-height: calc(100vh - 200px);
+            }
+            
+            .action-btn {
+                width: 28px;
+                height: 28px;
+                padding: 4px;
+            }
+            
+            /* Further adjust for very small screens */
+            table th:nth-child(2), table td:nth-child(2) { width: 20%; } /* Category */
+            table th:nth-child(4), table td:nth-child(4) { width: 20%; } /* Location */
+            table th:nth-child(6), table td:nth-child(6) { width: 20%; } /* Created */
+            table th:nth-child(7), table td:nth-child(7) { width: 15%; } /* Actions */
+        }
+    </style>
+</head>
+<body>
+    <h1 class="page-title">Asset List</h1>
+    
+    <div class="table-controls">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search assets...">
+        </div>
+        <div class="filter-options">
+            <select class="filter-select" id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="Department">Department</option>
+                <option value="Business Unit">Business Unit</option>
+                <option value="Production Asset">Production Asset</option>
+                <option value="Location">Location</option>
+                <option value="Other">Other</option>
+            </select>
+            <select class="filter-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <button class="clear-filters-btn" onclick="clearFilters()">
+                Clear
+            </button>
+        </div>
+    </div>
+    
+    <div id="loading" class="loading-spinner">
+        <div style="display:inline-block; width:20px; height:20px; border:3px solid rgba(93,161,161,0.3); border-radius:50%; border-top-color:var(--primary); animation:spin 1s ease-in-out infinite; margin-right:10px;"></div>
+        Loading assets...
+    </div>
+    
+    <div id="tableContainer" class="table-container" style="display:none;">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Asset Name</th>
+                        <th>Category</th>
+                        <th>Nature</th>
+                        <th>Location</th>
+                        <th>Owner</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="assetsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+   <script>
+    let allAssets = [];
+    
+    async function loadAssets() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            document.getElementById('loading').innerHTML = 
+                '<div class="empty-state">' +
+                '<i class="fas fa-lock"></i>' +
+                '<h3>Authentication Required</h3>' +
+                '<p>Please log in to view assets</p>' +
+                '<button onclick="window.parent.location.href=\'auth/login.html\'" style="padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;">Go to Login</button>' +
+                '</div>';
+            return;
+        }
+
+        try {
+            // Get user role from token
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const userRole = payload.role || 'user';
+            
+            let response;
+            
+            // Admin users should use assigned assets endpoint
+            if (userRole === 'admin') {
+                response = await fetch('/api/user/assets/assigned', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                // If endpoint doesn't exist, fallback to regular assets
+                if (!response.ok && response.status === 404) {
+                    console.log('Assigned assets endpoint not found, using all assets');
+                    response = await fetch('/api/assets', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                }
+            } else {
+                // Super admin and other roles use all assets
+                response = await fetch('/api/assets', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error(`Failed to load assets (${response.status})`);
+            }
+
+            const assets = await response.json();
+            allAssets = assets;
+            
+            const loading = document.getElementById('loading');
+            const tableContainer = document.getElementById('tableContainer');
+
+            loading.style.display = 'none';
+            tableContainer.style.display = 'block';
+
+            renderAssets(assets);
+            
+        } catch (err) {
+            console.error('Error loading assets:', err);
+            document.getElementById('loading').innerHTML = 
+                '<div class="empty-state">' +
+                '<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>' +
+                '<h3>Error Loading Assets</h3>' +
+                '<p>' + err.message + '</p>' +
+                '<button onclick="loadAssets()" style="padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;">Retry</button>' +
+                '</div>';
+        }
+    }
+
+    function renderAssets(assets) {
+        const tableBody = document.getElementById('assetsTableBody');
+        
+        if (!assets || assets.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7">' +
+                '<div class="empty-state">' +
+                '<i class="fas fa-box-open"></i>' +
+                '<h3>No Assets Found</h3>' +
+                '<p>No assets match your current filters</p>' +
+                '<button onclick="clearFilters()" style="padding:8px 16px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;">Clear Filters</button>' +
+                '</div>' +
+                '</td></tr>';
+            return;
+        }
+
+        let html = '';
+        assets.forEach(asset => {
+            const createdDate = new Date(asset.createdAt);
+            
+            html += `
+                <tr>
+                    <td>
+                        <span class="asset-name truncate" title="${escapeHtml(asset.name || 'Unnamed Asset')}" onclick="viewAssetDetail('${asset.id}')">
+                            ${escapeHtml(asset.name || 'Unnamed Asset')}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="category-badge" title="${escapeHtml(asset.category || 'Uncategorized')}">
+                            ${escapeHtml(asset.category || 'Uncategorized')}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="truncate" title="${escapeHtml(asset.nature || '-')}">
+                            ${escapeHtml(asset.nature || '-')}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="truncate" title="${escapeHtml(asset.location || '-')}">
+                            ${escapeHtml(asset.location || '-')}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="truncate" title="${escapeHtml(asset.owner || '-')}">
+                            ${escapeHtml(asset.owner || '-')}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="truncate" title="${createdDate.toLocaleDateString()}">
+                            ${createdDate.toLocaleDateString()}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="viewAssetDetail('${asset.id}')" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" onclick="editAsset('${asset.id}')" title="Edit Asset">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tableBody.innerHTML = html;
+    }
+
+    function filterAssets() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        
+        const filteredAssets = allAssets.filter(asset => {
+            // Search filter
+            const matchesSearch = !searchTerm || 
+                (asset.name && asset.name.toLowerCase().includes(searchTerm)) ||
+                (asset.category && asset.category.toLowerCase().includes(searchTerm)) ||
+                (asset.owner && asset.owner.toLowerCase().includes(searchTerm)) ||
+                (asset.location && asset.location.toLowerCase().includes(searchTerm)) ||
+                (asset.nature && asset.nature.toLowerCase().includes(searchTerm));
+            
+            // Category filter
+            const matchesCategory = !categoryFilter || asset.category === categoryFilter;
+            
+            // Status filter
+            const matchesStatus = !statusFilter || asset.status === statusFilter;
+            
+            return matchesSearch && matchesCategory && matchesStatus;
+        });
+        
+        renderAssets(filteredAssets);
+    }
+
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+        filterAssets();
+    }
+
+    function viewAssetDetail(assetId) {
+        if (window.parent && window.parent.loadIframePage) {
+            window.parent.loadIframePage('assets/detail.html?id=' + assetId);
+        } else {
+            window.location.href = 'detail.html?id=' + assetId;
+        }
+    }
+
+    function editAsset(assetId) {
+        // You can implement edit functionality here
+        // For now, just view the detail page
+        viewAssetDetail(assetId);
+    }
+
+    // Utility function to escape HTML
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Initialize event listeners
+    document.getElementById('searchInput').addEventListener('input', filterAssets);
+    document.getElementById('categoryFilter').addEventListener('change', filterAssets);
+    document.getElementById('statusFilter').addEventListener('change', filterAssets);
+
+    // Animation for spinner
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    window.addEventListener('load', loadAssets);
+    
+    // Add keyboard shortcut for search
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+        if (e.key === 'Escape') {
+            clearFilters();
+            document.getElementById('searchInput').blur();
+        }
+    });
+</script>
+</body>
+</html>

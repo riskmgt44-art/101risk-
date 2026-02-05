@@ -1,0 +1,693 @@
+<!-- frontend/invite-team.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invite Team • RiskMGT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5DA1A1;
+      --primary-hover: #4e9393;
+      --text-primary: #111111;
+      --text-secondary: #666666;
+      --border: #d1d5db;
+      --bg: #ffffff;
+      --surface: #f9fafb;
+      --shadow: 0 4px 20px rgba(0,0,0,0.06);
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --hover-bg: #f1f5f9;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: var(--bg); 
+      color: var(--text-primary); 
+      min-height: 100vh; 
+      padding: 16px; 
+    }
+
+    .container { max-width: 1280px; margin: 0 auto; }
+
+    header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 32px; 
+      flex-wrap: wrap; 
+      gap: 16px; 
+    }
+
+    .logo { width: 44px; height: 44px; }
+    .skip-btn { 
+      padding: 8px 18px; 
+      background: var(--surface); 
+      border: 1px solid var(--border); 
+      border-radius: 999px; 
+      cursor: pointer; 
+      font-weight: 500; 
+      font-size: 14px; 
+      transition: all 0.2s;
+    }
+    .skip-btn:hover { 
+      background: var(--hover-bg); 
+      border-color: var(--primary);
+    }
+
+    .title { font-size: clamp(20px, 5vw, 26px); font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 15px; color: var(--text-secondary); margin-bottom: 28px; }
+
+    .section { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 24px; 
+      margin-bottom: 32px; 
+      box-shadow: var(--shadow); 
+    }
+
+    .form-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.4fr 1fr 1fr 48px;
+      gap: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-align: left;
+      padding: 0 4px 12px;
+      font-size: 13px;
+    }
+
+    .form-rows { display: flex; flex-direction: column; gap: 10px; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.4fr 1fr 1fr 48px;
+      gap: 12px;
+      align-items: center;
+      background: white;
+      padding: 6px 4px;
+      border-radius: 10px;
+      transition: all 0.18s;
+    }
+    .form-row:hover { background: var(--hover-bg); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(93,161,161,0.12);
+    }
+    input:invalid:not(:placeholder-shown), select:invalid:not(:placeholder-shown) {
+      border-color: var(--error);
+    }
+
+    .add-btn {
+      padding: 12px 24px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .add-btn:hover { background: var(--primary-hover); }
+
+    .remove-btn {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      transition: all 0.15s;
+    }
+    .remove-btn:hover { background: #fecaca; transform: scale(1.08); }
+
+    .csv-area {
+      margin: 32px 0;
+      padding: 24px;
+      background: #f8fafc;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .csv-area:hover { border-color: var(--primary); background: rgba(93,161,161,0.04); }
+    .csv-area p { margin: 8px 0; color: var(--text-secondary); font-size: 14px; }
+
+    .submit-wrapper { margin-top: 32px; }
+    .submit-btn {
+      padding: 15px;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .submit-btn:hover:not(:disabled) { background: var(--primary-hover); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; background: #9ca3af; }
+
+    .loader { 
+      display: inline-block; 
+      width: 18px; 
+      height: 18px; 
+      border: 3px solid white; 
+      border-top-color: transparent; 
+      border-radius: 50%; 
+      animation: spin 0.9s linear infinite; 
+      margin-left: 10px; 
+      vertical-align: middle; 
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .user-list { margin-top: 48px; }
+    .table-container { overflow-x: auto; border-radius: 12px; box-shadow: var(--shadow); }
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      min-width: 680px;
+    }
+    .user-table th, .user-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .user-table tr:hover { background: var(--hover-bg); }
+
+    .toast-container { position: fixed; top: 24px; right: 24px; z-index: 1000; }
+    .toast {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      border-left: 5px solid var(--success);
+      opacity: 0;
+      transform: translateX(120%);
+      transition: all 0.4s;
+    }
+    .toast.show { opacity: 1; transform: translateX(0); }
+    .toast.error { border-left-color: var(--error); }
+    .toast.warning { border-left-color: var(--warning); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      padding: 28px;
+    }
+    .modal-header { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-size: 28px;
+      cursor: pointer;
+      color: #888;
+    }
+    .password-item {
+      background: #f1f5f9;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .password-box {
+      background: #e2e8f0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 15px;
+      word-break: break-all;
+      margin: 12px 0 8px;
+      user-select: all;
+    }
+
+    @media (max-width: 1024px) {
+      .form-header, .form-row { 
+        grid-template-columns: 1fr 1fr 1fr 48px; 
+      }
+      .form-header > *:nth-child(n+5), .form-row > *:nth-child(n+5) { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .form-header, .form-row { 
+        grid-template-columns: 1fr; 
+        gap: 14px;
+        padding: 16px 12px;
+      }
+      .form-header { display: none; }
+      .form-row { 
+        border: 1px solid #e5e7eb; 
+        background: white; 
+      }
+      .remove-btn { 
+        width: 40px; 
+        height: 40px; 
+        margin: 0 auto; 
+      }
+      .section { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="assets/images/logo.png" alt="RiskMGT" class="logo">
+      <button class="skip-btn" onclick="goToDashboard()">Skip & Go to Dashboard</button>
+    </header>
+
+    <h1 class="title">Invite Team Members</h1>
+    <p class="subtitle">Add users manually or upload CSV. New users must change password on first login.</p>
+
+    <div class="section">
+      <h3>Manual Entry</h3>
+
+      <div class="form-header">
+        <div>First Name</div>
+        <div>Last Name</div>
+        <div>Email</div>
+        <div>Job Title</div>
+        <div>Role</div>
+        <div></div>
+      </div>
+
+      <div class="form-rows" id="userRows"></div>
+
+      <div style="margin: 24px 0;">
+        <button class="add-btn" onclick="addRow()">+ Add User</button>
+      </div>
+
+      <div class="csv-area" id="csvDropArea">
+        <h4>Upload CSV File</h4>
+        <p>Click or drag & drop your .csv file here</p>
+        <input type="file" id="csvFile" accept=".csv" style="display:none;">
+        <p id="fileName" style="margin-top:12px; font-size:13px; color:#555;"></p>
+      </div>
+
+      <div class="submit-wrapper">
+        <button class="submit-btn" id="submitBtn" onclick="submitUsers()">
+          Invite Users
+        </button>
+      </div>
+
+      <div id="successActions" style="margin-top:32px; text-align:center; display:none; gap:16px; flex-wrap:wrap; justify-content:center;">
+        <button class="add-btn" onclick="goToDashboard()">Go to Dashboard</button>
+        <button style="padding:15px 32px; background:#e5e7eb; border:none; border-radius:12px; font-weight:600; cursor:pointer;" onclick="continueInviting()">
+          Invite More
+        </button>
+      </div>
+    </div>
+
+    <div class="user-list">
+      <h3>Current Team Members</h3>
+      <div class="table-container">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Job Title</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody">
+            <tr><td colspan="4" style="text-align:center;padding:40px;color:#888;">Loading team members...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Passwords Modal -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal">
+      <span class="modal-close" onclick="closeModal()">×</span>
+      <div class="modal-header">New Users & Temporary Passwords</div>
+      <div id="passwordList"></div>
+      <div style="margin-top:28px; text-align:center;">
+        <p style="color:#666; font-size:14px; margin-bottom:16px;">
+          Share these securely — users must change password on first login
+        </p>
+        <button onclick="closeModal()" style="padding:14px 40px; background:var(--primary); color:white; border:none; border-radius:12px; font-weight:600; cursor:pointer;">
+          Close & Continue
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ROLES = ["superadmin", "admin", "analyst", "viewer"];
+    const ROLE_DISPLAY_NAMES = {
+      "superadmin": "Super Admin",
+      "admin": "Administrator", 
+      "analyst": "Analyst",
+      "viewer": "Viewer"
+    };
+
+    // Toast
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+      }, 6500);
+    }
+
+    // Add Row
+    function addRow(data = { firstName: '', lastName: '', email: '', jobTitle: '', role: 'analyst' }) {
+      const row = document.createElement('div');
+      row.className = 'form-row';
+      row.innerHTML = `
+        <input type="text" placeholder="First Name" value="${data.firstName}" required>
+        <input type="text" placeholder="Last Name" value="${data.lastName}" required>
+        <input type="email" placeholder="Email" value="${data.email}" required>
+        <input type="text" placeholder="Job Title" value="${data.jobTitle}" required>
+        <select required>
+          ${ROLES.map(r => `<option value="${r}" ${data.role === r ? 'selected' : ''}>${ROLE_DISPLAY_NAMES[r]}</option>`).join('')}
+        </select>
+        <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+      `;
+      document.getElementById('userRows').appendChild(row);
+    }
+
+    // Get valid users from form
+    function getUsersFromForm() {
+      const rows = document.querySelectorAll('.form-row');
+      return Array.from(rows)
+        .map(row => {
+          const [fn, ln, em, jt, roleSelect] = row.querySelectorAll('input, select');
+          return {
+            firstName: fn.value.trim(),
+            lastName: ln.value.trim(),
+            email: em.value.trim(),
+            jobTitle: jt.value.trim(),
+            role: roleSelect.value
+          };
+        })
+        .filter(u => u.firstName && u.lastName && u.email && u.jobTitle && u.role && u.email.includes('@'));
+    }
+
+    // CSV Parsing
+    async function parseCSV(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const lines = e.target.result.split('\n').slice(1);
+          const users = [];
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            const [first, last, email, job, role] = line.split(',').map(s => s.trim());
+            if (first && email && email.includes('@')) {
+              const normalizedRole = role ? role.toLowerCase() : 'analyst';
+              const validRole = ROLES.includes(normalizedRole) ? normalizedRole : 'analyst';
+              
+              users.push({
+                firstName: first,
+                lastName: last || '',
+                email,
+                jobTitle: job || '',
+                role: validRole
+              });
+            }
+          }
+          resolve(users);
+        };
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    }
+
+    // Submit
+    async function submitUsers() {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = 'Inviting... <span class="loader"></span>';
+
+      let users = getUsersFromForm();
+      const fileInput = document.getElementById('csvFile');
+      const file = fileInput.files[0];
+
+      if (file) {
+        try {
+          const csvUsers = await parseCSV(file);
+          users = [...users, ...csvUsers];
+        } catch (e) {
+          showToast('Failed to read CSV file', 'error');
+          resetSubmitButton();
+          return;
+        }
+      }
+
+      if (!users.length) {
+        showToast('No valid users to invite', 'error');
+        resetSubmitButton();
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showToast('Session expired - please login again', 'error');
+        resetSubmitButton();
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/users/invite', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(users)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || 'Failed to invite users');
+
+        showToast('Invitation process completed!', 'success');
+
+        // Show passwords in modal
+        const successUsers = data.results?.filter(r => r.status === 'created') || [];
+        if (successUsers.length > 0) {
+          showPasswordsModal(successUsers);
+        }
+
+        // Handle errors/skipped
+        data.results?.forEach(r => {
+          if (r.status !== 'created') {
+            showToast(`${r.email}: ${r.message}`, r.status === 'skipped' ? 'warning' : 'error');
+          }
+        });
+
+        document.getElementById('successActions').style.display = 'flex';
+        loadUsers();
+
+        // Reset form
+        document.getElementById('userRows').innerHTML = '';
+        fileInput.value = '';
+        document.getElementById('fileName').textContent = '';
+        addRow();
+
+      } catch (err) {
+        showToast(err.message || 'Something went wrong', 'error');
+      } finally {
+        resetSubmitButton();
+      }
+    }
+
+    function resetSubmitButton() {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = false;
+      btn.textContent = 'Invite Users';
+    }
+
+    function showPasswordsModal(users) {
+      const list = document.getElementById('passwordList');
+      list.innerHTML = users.map(u => `
+        <div class="password-item">
+          <strong>${u.fullName || u.firstName + ' ' + u.lastName}</strong><br>
+          <span style="color:#555;font-size:13px;">${u.email} • ${ROLE_DISPLAY_NAMES[u.role] || u.role}</span>
+          <div class="password-box">${u.temporaryPassword}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('passwordModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('passwordModal').classList.remove('show');
+    }
+
+    // CSV drag & drop / click
+    const csvArea = document.getElementById('csvDropArea');
+    const fileInput = document.getElementById('csvFile');
+    const fileNameEl = document.getElementById('fileName');
+
+    csvArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => {
+      if (e.target.files[0]) {
+        fileNameEl.textContent = e.target.files[0].name;
+      }
+    });
+
+    ['dragover', 'dragenter'].forEach(evt => csvArea.addEventListener(evt, e => {
+      e.preventDefault();
+      csvArea.style.borderColor = 'var(--primary)';
+      csvArea.style.background = 'rgba(93,161,161,0.08)';
+    }));
+
+    ['dragleave', 'drop'].forEach(evt => csvArea.addEventListener(evt, e => {
+      e.preventDefault();
+      csvArea.style.borderColor = 'var(--border)';
+      csvArea.style.background = '#f8fafc';
+    }));
+
+    csvArea.addEventListener('drop', e => {
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'text/csv') {
+        fileInput.files = e.dataTransfer.files;
+        fileNameEl.textContent = file.name;
+      } else {
+        showToast('Please drop a valid .csv file', 'error');
+      }
+    });
+
+    function goToDashboard() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const role = user.role?.toLowerCase();
+      
+      const dashboardPaths = {
+        'superadmin': '/dashboards/executive/index.html',
+        'admin': '/dashboards/admin/index.html',
+        'analyst': '/dashboards/analyst/index.html',
+        'viewer': '/dashboards/viewer/index.html'
+      };
+      
+      const dashboardPath = dashboardPaths[role] || '/dashboards/analyst/index.html';
+      window.location.href = dashboardPath;
+    }
+
+    function continueInviting() {
+      document.getElementById('successActions').style.display = 'none';
+      addRow();
+      showToast('Add more users or upload CSV', 'success');
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById('userTableBody');
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:60px 20px;color:#888;">Loading...</td></tr>';
+
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const res = await fetch('/api/users', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const users = await res.json();
+
+        tbody.innerHTML = users.length === 0 
+          ? '<tr><td colspan="4" style="text-align:center;padding:60px 20px;color:#888;">No team members yet</td></tr>'
+          : users.map(u => `
+              <tr>
+                <td>${u.firstName} ${u.lastName}</td>
+                <td>${u.email}</td>
+                <td>${u.jobTitle || '—'}</td>
+                <td>${ROLE_DISPLAY_NAMES[u.role] || u.role}</td>
+              </tr>
+            `).join('');
+      } catch {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:60px 20px;color:#888;">Failed to load team</td></tr>';
+        showToast('Could not load team members', 'error');
+      }
+    }
+
+    // Init - Auto-redirect users who shouldn't see this page
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // If no token, redirect to login
+      if (!token) {
+        window.location.href = '/index.html';
+        return;
+      }
+      
+      // Check if user has permission to invite users
+      const allowedRoles = ['superadmin', 'admin'];
+      if (!allowedRoles.includes(user.role)) {
+        // Auto-redirect non-admin users to their dashboard
+        showToast('Redirecting to your dashboard...', 'warning');
+        setTimeout(() => {
+          goToDashboard();
+        }, 1500);
+        return;
+      }
+      
+      // Only show the page for superadmin and admin users
+      addRow();
+      loadUsers();
+
+      // Close modal on outside click
+      document.getElementById('passwordModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('passwordModal')) {
+          closeModal();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
