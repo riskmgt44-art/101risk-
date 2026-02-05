@@ -2237,38 +2237,41 @@ function printRisk() {
 
 function viewBowtie() {
     try {
-        // Get the current risk data
         const risk = riskData || loadSampleData();
         
         if (!risk || (!risk._id && !risk.id)) {
             showNotification('No risk data available to view bowtie diagram', 'error');
-            console.error('No risk ID found:', risk);
             return;
         }
         
-        console.log('Opening bowtie diagram for risk:', {
-            id: risk._id || risk.id,
-            riskId: risk.riskId,
-            title: risk.title
-        });
+        // Check if we're on Render (API-only) or local (full stack)
+        const isRender = window.location.hostname.includes('render.com') || 
+                        window.location.hostname.includes('onrender.com');
         
-        // Store risk data in localStorage for the bowtie page to access
-        localStorage.setItem('viewingRisk', JSON.stringify(risk));
-        
-        // Create URL parameters
-        const params = new URLSearchParams({
-            riskId: risk._id || risk.id,
-            riskIdHuman: risk.riskId || '',
-            riskTitle: risk.title || ''
-        });
-        
-        // Open bowtie.html in a new tab with the risk data
-        const bowtieUrl = `bowtie.html?${params.toString()}`;
-        console.log('Opening bowtie URL:', bowtieUrl);
-        window.open(bowtieUrl, '_blank');
-        
-        // Show notification
-        showNotification('Opening Bowtie Diagram in new tab...', 'info');
+        if (isRender) {
+            // On Render - open in same window with API call
+            localStorage.setItem('viewingRisk', JSON.stringify(risk));
+            
+            // Create a modal or show message
+            showNotification('Bowtie diagrams are available in the full application. Please access via local deployment.', 'info');
+            
+            // Optionally, redirect to a hosted frontend if you have one
+            // window.open('https://your-frontend-domain.com/bowtie.html?riskId=' + risk._id, '_blank');
+            
+        } else {
+            // Local development - open HTML file
+            localStorage.setItem('viewingRisk', JSON.stringify(risk));
+            
+            const params = new URLSearchParams({
+                riskId: risk._id || risk.id,
+                riskIdHuman: risk.riskId || '',
+                riskTitle: risk.title || ''
+            });
+            
+            const bowtieUrl = `/dashboards/executive/global-risk-register/bowtie.html?${params.toString()}`;
+            console.log('Opening bowtie URL:', bowtieUrl);
+            window.open(bowtieUrl, '_blank');
+        }
         
     } catch (error) {
         console.error('Error opening bowtie diagram:', error);
@@ -2325,4 +2328,5 @@ function debugRiskData() {
 }
 </script>
 </body>
+
 </html>
