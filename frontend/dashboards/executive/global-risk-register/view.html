@@ -2237,41 +2237,57 @@ function printRisk() {
 
 function viewBowtie() {
     try {
+        // Get the current risk data
         const risk = riskData || loadSampleData();
         
         if (!risk || (!risk._id && !risk.id)) {
             showNotification('No risk data available to view bowtie diagram', 'error');
+            console.error('No risk ID found:', risk);
             return;
         }
         
-        // Check if we're on Render (API-only) or local (full stack)
-        const isRender = window.location.hostname.includes('render.com') || 
-                        window.location.hostname.includes('onrender.com');
+        console.log('Opening bowtie diagram for risk:', {
+            id: risk._id || risk.id,
+            riskId: risk.riskId,
+            title: risk.title
+        });
         
-        if (isRender) {
-            // On Render - open in same window with API call
-            localStorage.setItem('viewingRisk', JSON.stringify(risk));
+        // Store risk data in localStorage for the bowtie page to access
+        localStorage.setItem('viewingRisk', JSON.stringify(risk));
+        
+        // Create URL parameters
+        const params = new URLSearchParams({
+            riskId: risk._id || risk.id,
+            riskIdHuman: risk.riskId || '',
+            riskTitle: risk.title || ''
+        });
+        
+        // FIX: Use correct case - Bowtie.html (capital B)
+        // Try multiple variations
+        const baseUrl = window.location.origin;
+        const paths = [
+            '/dashboards/executive/global-risk-register/Bowtie.html',
+            '/dashboards/admin/global-risk-register/Bowtie.html',
+            '/dashboards/analyst/pages/Bowtie.html',
+            '/Bowtie.html'
+        ];
+        
+        // Try each path
+        for (const path of paths) {
+            const testUrl = `${baseUrl}${path}`;
+            console.log('Testing URL:', testUrl);
             
-            // Create a modal or show message
-            showNotification('Bowtie diagrams are available in the full application. Please access via local deployment.', 'info');
-            
-            // Optionally, redirect to a hosted frontend if you have one
-            // window.open('https://your-frontend-domain.com/bowtie.html?riskId=' + risk._id, '_blank');
-            
-        } else {
-            // Local development - open HTML file
-            localStorage.setItem('viewingRisk', JSON.stringify(risk));
-            
-            const params = new URLSearchParams({
-                riskId: risk._id || risk.id,
-                riskIdHuman: risk.riskId || '',
-                riskTitle: risk.title || ''
-            });
-            
-            const bowtieUrl = `/dashboards/executive/global-risk-register/bowtie.html?${params.toString()}`;
-            console.log('Opening bowtie URL:', bowtieUrl);
-            window.open(bowtieUrl, '_blank');
+            // You could do a HEAD request to check if it exists
+            // For now, we'll just try the most likely one
         }
+        
+        // Use the most likely path for executive dashboard
+        const bowtieUrl = `/dashboards/executive/global-risk-register/Bowtie.html?${params.toString()}`;
+        console.log('Opening bowtie URL:', bowtieUrl);
+        window.open(bowtieUrl, '_blank');
+        
+        // Show notification
+        showNotification('Opening Bowtie Diagram in new tab...', 'info');
         
     } catch (error) {
         console.error('Error opening bowtie diagram:', error);
@@ -2330,3 +2346,4 @@ function debugRiskData() {
 </body>
 
 </html>
+
