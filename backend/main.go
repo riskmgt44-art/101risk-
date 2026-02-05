@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -60,7 +62,7 @@ func main() {
 			"status":  "ok",
 			"version": "1.0.0",
 			"service": "riskmgt-backend",
-			"port":    os.Getenv("PORT"), // Add this for debugging
+			"port":    os.Getenv("PORT"),
 		})
 	}).Methods("GET", "OPTIONS")
 
@@ -78,15 +80,7 @@ func main() {
 	// ============================================
 	// SERVE STATIC FILES (SPA fallback)
 	// ============================================
-	
-	// Only serve static files if they exist
-	if _, err := os.Stat("../frontend"); !os.IsNotExist(err) {
-		fs := http.FileServer(http.Dir("../frontend"))
-		router.PathPrefix("/").Handler(fs)
-		log.Println("Static file serving enabled for ../frontend")
-	} else {
-		log.Println("Static files directory not found, API-only mode")
-	}
+	setupStaticFileServing(router)
 
 	// ============================================
 	// HTTP SERVER CONFIGURATION
@@ -117,6 +111,7 @@ func main() {
 		log.Printf("╠══════════════════════════════════════════════════════════╣")
 		log.Printf("║ Server running on port: %s                              ║", port)
 		log.Printf("║ Health Check:     http://localhost:%s/health           ║", port)
+		log.Printf("║ Frontend:         http://localhost:%s                  ║", port)
 		log.Printf("║ WebSocket:        ws://localhost:%s/ws                 ║", port)
 		log.Printf("║ API Endpoint:     http://localhost:%s/api              ║", port)
 		log.Printf("╚══════════════════════════════════════════════════════════╝")
@@ -144,4 +139,188 @@ func main() {
 
 	database.Disconnect()
 	log.Println("Server stopped gracefully ✓")
+}
+
+// setupStaticFileServing handles serving frontend files
+func setupStaticFileServing(router *mux.Router) {
+	// Try multiple possible frontend locations
+	possiblePaths := []string{
+		"frontend",           // Current directory/frontend
+		"./frontend",         // Same directory
+		"../frontend",        // Parent directory
+		"../../frontend",     // Two levels up
+		"../../../frontend",  // Three levels up
+	}
+	
+	var frontendPath string
+	for _, path := range possiblePaths {
+		if stat, err := os.Stat(path); err == nil && stat.IsDir() {
+			// Check if index.html exists in this directory
+			if _, err := os.Stat(filepath.Join(path, "index.html")); err == nil {
+				frontendPath = path
+				log.Printf("✓ Found frontend at: %s (absolute: %s)", 
+					path, getAbsolutePath(path))
+				break
+			}
+		}
+	}
+	
+	if frontendPath == "" {
+		log.Println("⚠ Frontend directory not found - running in API-only mode")
+		
+		// Provide API-only response
+		router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Allow API routes
+			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/health" || r.URL.Path == "/ws" {
+				http.NotFound(w, r) // Let the API routes handle 404
+				return
+			}
+			
+			// For non-API routes, show API info
+			w.Header().Set("Content-Type", "text/html")
+			html := `<!DOCTYPE html>
+<html>
+<head>
+	<title>Risk Management API</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+		.code { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }
+		a { color: #0066cc; text-decoration: none; }
+		a:hover { text-decoration: underline; }
+	</style>
+</head>
+<body>
+	<h1>Risk Management API Server</h1>
+	<p>This is an API-only server. The frontend should be deployed separately or check if frontend files are included in the deployment.</p>
+	
+	<div class="code">
+		<h3>Available Endpoints:</h3>
+		<p>• <a href="/health">GET /health</a> - Health check</p>
+		<p>• GET /api/risks - List risks (requires authentication)</p>
+		<p>• GET /api/actions - List actions (requires authentication)</p>
+		<p>• GET /api/audit-logs - Audit logs (requires authentication)</p>
+		<p>• WS /ws - WebSocket connection for real-time updates</p>
+	</div>
+	
+	<h3>Troubleshooting:</h3>
+	<ol>
+		<li>Make sure frontend files are in the deployment</li>
+		<li>Check that index.html exists in the frontend directory</li>
+		<li>Verify file paths are correct (Linux is case-sensitive)</li>
+	</ol>
+</body>
+</html>`
+			w.Write([]byte(html))
+		})
+		return
+	}
+	
+	// Create a case-insensitive file server wrapper
+	fs := &caseInsensitiveFileSystem{base: http.Dir(frontendPath)}
+	
+	// File server for static files
+	staticHandler := http.FileServer(fs)
+	
+	// Serve static files
+	router.PathPrefix("/").Handler(http.StripPrefix("/", staticHandler))
+	
+	log.Printf("Static file serving enabled from: %s", frontendPath)
+	
+	// Log available HTML files for debugging
+	logAvailableHTMLFiles(frontendPath)
+}
+
+// getAbsolutePath returns the absolute path for debugging
+func getAbsolutePath(relativePath string) string {
+	absPath, err := filepath.Abs(relativePath)
+	if err != nil {
+		return relativePath
+	}
+	return absPath
+}
+
+// logAvailableHTMLFiles lists HTML files for debugging
+func logAvailableHTMLFiles(basePath string) {
+	htmlFiles := []string{}
+	
+	err := filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), ".html") {
+			relPath, _ := filepath.Rel(basePath, path)
+			htmlFiles = append(htmlFiles, relPath)
+		}
+		return nil
+	})
+	
+	if err == nil && len(htmlFiles) > 0 {
+		log.Printf("Found %d HTML files:", len(htmlFiles))
+		for i, file := range htmlFiles {
+			if i < 20 { // Show first 20 files
+				log.Printf("  • /%s", file)
+			}
+		}
+		if len(htmlFiles) > 20 {
+			log.Printf("  ... and %d more", len(htmlFiles)-20)
+		}
+	}
+}
+
+// caseInsensitiveFileSystem wraps http.FileSystem to handle case-insensitive file access
+type caseInsensitiveFileSystem struct {
+	base http.Dir
+}
+
+func (fs *caseInsensitiveFileSystem) Open(name string) (http.File, error) {
+	// First try the exact path
+	f, err := fs.base.Open(name)
+	if err == nil {
+		return f, nil
+	}
+	
+	// If not found, try case-insensitive search
+	dir, file := filepath.Split(name)
+	
+	// Get the directory listing
+	d, err := fs.base.Open(dir)
+	if err != nil {
+		return nil, err
+	}
+	defer d.Close()
+	
+	// Read directory contents
+	files, err := d.Readdir(-1)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Search for case-insensitive match
+	lowerFile := strings.ToLower(file)
+	for _, fi := range files {
+		if strings.ToLower(fi.Name()) == lowerFile {
+			// Found case-insensitive match
+			return fs.base.Open(filepath.Join(dir, fi.Name()))
+		}
+	}
+	
+	// Try common case variations for bowtie.html
+	if strings.Contains(strings.ToLower(name), "bowtie") {
+		// Try with capital B
+		bowtieVariations := []string{
+			strings.Replace(name, "bowtie", "Bowtie", -1),
+			strings.Replace(name, "bowtie", "BOWTIE", -1),
+			strings.Replace(name, "bowtie.html", "Bowtie.html", -1),
+			strings.Replace(name, "bowtie.html", "BOWTIE.HTML", -1),
+		}
+		
+		for _, variation := range bowtieVariations {
+			if f, err := fs.base.Open(variation); err == nil {
+				log.Printf("Found case variation: %s -> %s", name, variation)
+				return f, nil
+			}
+		}
+	}
+	
+	return nil, os.ErrNotExist
 }
