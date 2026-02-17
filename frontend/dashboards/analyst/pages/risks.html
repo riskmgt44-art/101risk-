@@ -977,9 +977,9 @@
                 <div class="favicon">R</div>
                 <span>My Risks</span>
             </div>
-            <div class="nav-tab disabled" title="Open a risk to view details">
+            <div class="nav-tab" id="riskVisualTab" onclick="openRiskVisual()">
                 <div class="favicon">V</div>
-                <span>View</span>
+                <span>Risk Visual</span>
             </div>
         </div>
         <div class="actions-group">
@@ -2337,6 +2337,38 @@ async function createNewRisk() {
     }
 }
 
+// Risk Visual functionality
+function openRiskVisual() {
+    // Hide the main content
+    document.querySelector('.top-nav').style.display = 'none';
+    document.querySelector('.main').style.display = 'none';
+    
+   
+    
+    // Create iframe for risk visual
+    const visualIframe = document.createElement('iframe');
+    visualIframe.style.cssText = 'width:100%;height:100%;border:none;position:fixed;top:0;left:0;z-index:5;';
+    visualIframe.src = 'risk-visual.html';  // The risk visual page
+    visualIframe.id = 'riskVisualIframe';
+    document.body.appendChild(visualIframe);
+}
+
+function exitRiskVisual() {
+    // Remove iframe and back button
+    const iframe = document.getElementById('riskVisualIframe');
+    const backButton = document.querySelector('.view-back-btn');
+    
+    if (iframe) iframe.remove();
+    if (backButton) backButton.remove();
+    
+    // Show original UI
+    document.querySelector('.top-nav').style.display = 'flex';
+    document.querySelector('.main').style.display = 'block';
+    
+    // Optionally refresh risks data
+    loadRisks();
+}
+
 // View risk detail
 async function viewRiskDetail(riskId) {
     try {
@@ -2361,13 +2393,7 @@ async function viewRiskDetail(riskId) {
         document.querySelector('.top-nav').style.display = 'none';
         document.querySelector('.main').style.display = 'none';
         
-        // Create back button
-        const backButton = document.createElement('button');
-        backButton.className = 'view-back-btn';
-        backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to My Risks';
-        backButton.onclick = exitViewMode;
-        document.body.appendChild(backButton);
-        
+  
         // Load view in iframe
         const viewIframe = document.createElement('iframe');
         viewIframe.style.cssText = 'width:100%;height:100%;border:none;position:fixed;top:0;left:0;z-index:5;';
@@ -2476,6 +2502,8 @@ window.addControlToConsequence = addControlToConsequence;
 window.removeConsequence = removeConsequence;
 window.removeControl = removeControl;
 window.updateActionStatus = updateActionStatus;
+window.openRiskVisual = openRiskVisual;
+window.exitRiskVisual = exitRiskVisual;
 </script>
 </body>
 </html>
