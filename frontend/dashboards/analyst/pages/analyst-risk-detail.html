@@ -61,25 +61,6 @@
             gap: 16px;
         }
         
-        .back-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-        
-        .back-btn:hover {
-            background: rgba(93,161,161,0.06);
-            color: var(--primary);
-        }
-        
         .nav-title {
             font-size: 18px;
             font-weight: 600;
@@ -535,7 +516,7 @@
         .arrow-medium { border-bottom: 12px solid var(--amber); }
         .arrow-low { border-bottom: 12px solid var(--green); }
 
-        /* Modal Styles */
+        /* Full Screen Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -550,6 +531,7 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
         }
         
         .modal-overlay.active {
@@ -559,36 +541,39 @@
         
         .modal {
             background: var(--card-bg);
-            border-radius: var(--radius);
             box-shadow: var(--shadow-lg);
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: translateY(20px);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.95);
             transition: transform 0.3s ease;
         }
         
         .modal-overlay.active .modal {
-            transform: translateY(0);
+            transform: scale(1);
         }
         
         .modal-header {
-            padding: 24px;
+            padding: 24px 32px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: white;
+            flex-shrink: 0;
         }
         
         .modal-title {
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 600;
+            color: var(--text-primary);
         }
         
         .modal-close {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 8px;
             background: transparent;
             border: 1px solid var(--border);
@@ -598,72 +583,91 @@
             cursor: pointer;
             color: var(--text-secondary);
             transition: var(--transition);
+            font-size: 18px;
         }
         
         .modal-close:hover {
             background: rgba(93,161,161,0.06);
             color: var(--primary);
+            border-color: var(--primary);
         }
         
         .modal-body {
-            padding: 24px;
+            padding: 32px;
+            overflow-y: auto;
+            flex-grow: 1;
+            background: #fafafa;
         }
         
         .modal-footer {
-            padding: 16px 24px;
+            padding: 24px 32px;
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: flex-end;
-            gap: 12px;
+            gap: 16px;
+            background: white;
+            flex-shrink: 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
         }
         
-        .form-group {
-            margin-bottom: 20px;
+        .modal .form-group {
+            margin-bottom: 24px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        .form-label {
+        .modal .form-label {
             display: block;
             font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
+            font-weight: 600;
+            color: var(--text-primary);
             margin-bottom: 8px;
         }
         
-        .form-input, .form-textarea, .form-select {
+        .modal .form-input, 
+        .modal .form-textarea, 
+        .modal .form-select {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 18px;
             border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 15px;
             font-family: 'Inter', sans-serif;
             transition: var(--transition);
             background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
+        .modal .form-input:focus, 
+        .modal .form-textarea:focus, 
+        .modal .form-select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+            box-shadow: 0 0 0 4px rgba(93,161,161,0.1);
         }
         
-        .form-textarea {
-            min-height: 100px;
+        .modal .form-textarea {
+            min-height: 120px;
             resize: vertical;
         }
         
-        .form-row {
+        .modal .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 24px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        .btn-secondary {
-            padding: 8px 16px;
+        .modal .btn-secondary {
+            padding: 12px 28px;
             background: white;
             color: var(--text-primary);
             border: 1px solid var(--border);
-            border-radius: 9.6px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             display: flex;
@@ -672,15 +676,115 @@
             transition: var(--transition);
         }
         
-        .btn-secondary:hover {
+        .modal .btn-secondary:hover {
             background: rgba(93,161,161,0.06);
             border-color: var(--primary);
             color: var(--primary);
         }
         
-        .btn-primary:disabled, .btn-secondary:disabled {
+        .modal .btn-primary {
+            padding: 12px 28px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .modal .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(93,161,161,0.2);
+        }
+        
+        .modal .btn-primary:disabled, 
+        .modal .btn-secondary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        /* Form container for better centering */
+        .modal .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        /* Progress slider styling */
+        .modal input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        
+        .modal input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(93,161,161,0.3);
+            margin-top: -7px;
+        }
+        
+        .modal input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(93,161,161,0.3);
+        }
+
+        /* Responsive adjustments for modal */
+        @media (max-width: 768px) {
+            .modal-header {
+                padding: 20px 24px;
+            }
+            
+            .modal-body {
+                padding: 24px;
+            }
+            
+            .modal-footer {
+                padding: 20px 24px;
+                flex-direction: column-reverse;
+            }
+            
+            .modal .form-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .modal .btn-secondary,
+            .modal .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .modal .form-container {
+                padding: 20px;
+            }
+            
+            .modal-title {
+                font-size: 20px;
+            }
         }
 
         /* Responsive */
@@ -694,8 +798,6 @@
             .meta-label { min-width: auto; }
             .tab { padding: 10px 16px; font-size: 13px; }
             .card { padding: 20px; }
-            .modal { width: 95%; }
-            .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -703,18 +805,12 @@
     <!-- Top Navigation -->
     <nav class="top-nav">
         <div class="nav-left">
-            <button class="back-btn" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-                Back to Dashboard
-            </button>
+            <!-- Back to Dashboard button completely removed -->
             <div class="nav-title">Risk Details</div>
         </div>
         <div class="nav-actions">
             <!-- NEW MATRIX BUTTON ADDED HERE -->
-            <button class="btn-matrix" onclick="openRiskMatrix()" title="View Risk Matrix">
-                <i class="fas fa-th"></i>
-                Matrix
-            </button>
+           
             <button class="btn-icon" onclick="editRisk()" title="Edit Risk">
                 <i class="fas fa-edit"></i>
             </button>
@@ -979,7 +1075,7 @@
         </div>
     </main>
 
-    <!-- Add Action Modal -->
+    <!-- Add Action Modal - Full Screen -->
     <div class="modal-overlay" id="actionModal">
         <div class="modal">
             <div class="modal-header">
@@ -989,91 +1085,93 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="actionForm" onsubmit="handleSubmitAction(event)">
-                    <input type="hidden" id="actionRiskId" name="actionRiskId" value="">
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="actionTitle">Action Title *</label>
-                        <input type="text" id="actionTitle" name="actionTitle" class="form-input" required 
-                               placeholder="Enter a clear, descriptive title for this action" 
-                               aria-label="Action title">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="actionDescription">Description</label>
-                        <textarea id="actionDescription" name="actionDescription" class="form-textarea" 
-                                  placeholder="Describe the action in detail, including objectives and methodology"
-                                  aria-label="Action description"></textarea>
-                    </div>
-                    
-                    <div class="form-row">
+                <div class="form-container">
+                    <form id="actionForm" onsubmit="handleSubmitAction(event)">
+                        <input type="hidden" id="actionRiskId" name="actionRiskId" value="">
+                        
                         <div class="form-group">
-                            <label class="form-label" for="actionStatus">Status *</label>
-                            <select id="actionStatus" name="actionStatus" class="form-select" required aria-label="Action status">
-                                <option value="">Select status</option>
-                                <option value="Proposed">Proposed</option>
-                                <option value="Open">Open</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Cancelled">Cancelled</option>
-                            </select>
+                            <label class="form-label" for="actionTitle">Action Title *</label>
+                            <input type="text" id="actionTitle" name="actionTitle" class="form-input" required 
+                                   placeholder="Enter a clear, descriptive title for this action" 
+                                   aria-label="Action title">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="actionPriority">Priority</label>
-                            <select id="actionPriority" name="actionPriority" class="form-select" aria-label="Action priority">
-                                <option value="Low">Low</option>
-                                <option value="Medium" selected>Medium</option>
-                                <option value="High">High</option>
-                                <option value="Critical">Critical</option>
-                            </select>
+                            <label class="form-label" for="actionDescription">Description</label>
+                            <textarea id="actionDescription" name="actionDescription" class="form-textarea" 
+                                      placeholder="Describe the action in detail, including objectives and methodology"
+                                      aria-label="Action description"></textarea>
                         </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="actionOwner">Owner</label>
-                            <input type="text" id="actionOwner" name="actionOwner" class="form-input" 
-                                   placeholder="Person responsible" aria-label="Action owner">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="actionStatus">Status *</label>
+                                <select id="actionStatus" name="actionStatus" class="form-select" required aria-label="Action status">
+                                    <option value="">Select status</option>
+                                    <option value="Proposed">Proposed</option>
+                                    <option value="Open">Open</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="actionPriority">Priority</label>
+                                <select id="actionPriority" name="actionPriority" class="form-select" aria-label="Action priority">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="actionOwner">Owner</label>
+                                <input type="text" id="actionOwner" name="actionOwner" class="form-input" 
+                                       placeholder="Person responsible" aria-label="Action owner">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="actionCost">Estimated Cost ($)</label>
+                                <input type="number" id="actionCost" name="actionCost" class="form-input" min="0" step="0.01"
+                                       placeholder="0.00" aria-label="Estimated cost in dollars">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="actionStartDate">Start Date</label>
+                                <input type="date" id="actionStartDate" name="actionStartDate" class="form-input" aria-label="Action start date">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="actionEndDate">End Date</label>
+                                <input type="date" id="actionEndDate" name="actionEndDate" class="form-input" aria-label="Action end date">
+                            </div>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="actionCost">Estimated Cost ($)</label>
-                            <input type="number" id="actionCost" name="actionCost" class="form-input" min="0" step="0.01"
-                                   placeholder="0.00" aria-label="Estimated cost in dollars">
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="actionStartDate">Start Date</label>
-                            <input type="date" id="actionStartDate" name="actionStartDate" class="form-input" aria-label="Action start date">
+                            <label class="form-label" for="actionProgress">Progress (%)</label>
+                            <input type="range" id="actionProgress" name="actionProgress" class="form-input" min="0" max="100" value="0" 
+                                   oninput="updateProgressValue(this.value)" aria-label="Action progress percentage">
+                            <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                                <span style="font-size: 12px; color: var(--text-secondary);">0%</span>
+                                <span id="progressValue" style="font-size: 14px; font-weight: 500; color: var(--primary);">0%</span>
+                                <span style="font-size: 12px; color: var(--text-secondary);">100%</span>
+                            </div>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="actionEndDate">End Date</label>
-                            <input type="date" id="actionEndDate" name="actionEndDate" class="form-input" aria-label="Action end date">
+                            <label class="form-label" for="actionNotes">Additional Notes</label>
+                            <textarea id="actionNotes" name="actionNotes" class="form-textarea" 
+                                      placeholder="Any additional information or context"
+                                      aria-label="Additional notes"></textarea>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="actionProgress">Progress (%)</label>
-                        <input type="range" id="actionProgress" name="actionProgress" class="form-input" min="0" max="100" value="0" 
-                               oninput="updateProgressValue(this.value)" aria-label="Action progress percentage">
-                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-                            <span style="font-size: 12px; color: var(--text-secondary);">0%</span>
-                            <span id="progressValue" style="font-size: 14px; font-weight: 500; color: var(--primary);">0%</span>
-                            <span style="font-size: 12px; color: var(--text-secondary);">100%</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="actionNotes">Additional Notes</label>
-                        <textarea id="actionNotes" name="actionNotes" class="form-textarea" 
-                                  placeholder="Any additional information or context"
-                                  aria-label="Additional notes"></textarea>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" onclick="closeActionModal()">
@@ -2291,10 +2389,6 @@ function stopAuditLogsPolling() {
 }
 
 // ==================== NAVIGATION FUNCTIONS ====================
-
-function goBack() {
-    window.history.back();
-}
 
 function editRisk() {
     showNotification('Edit functionality would open the risk edit form', 'info');
