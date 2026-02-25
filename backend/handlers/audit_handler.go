@@ -28,9 +28,6 @@ func InitAuditHandlers() {
 	go hub.Run()
 }
 
-// Everything below remains EXACTLY AS YOU HAD IT
-// Only removing the duplicate helper functions at the end
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -325,7 +322,7 @@ func ListAuditLogs(w http.ResponseWriter, r *http.Request) {
 	if userID := r.URL.Query().Get("userId"); userID != "" && userID != "all" {
 		userObjID, err := primitive.ObjectIDFromHex(userID)
 		if err == nil {
-			filter["userID"] = userObjID
+			filter["userId"] = userObjID  // FIXED: changed from "userID" to "userId"
 		}
 	}
 	
@@ -366,6 +363,7 @@ func ListAuditLogs(w http.ResponseWriter, r *http.Request) {
 }
 
 // ListAnalystAuditLogs returns audit logs filtered for analyst's assigned assets
+// PLUS all auth events (login/logout)
 func ListAnalystAuditLogs(w http.ResponseWriter, r *http.Request) {
 	orgIDStr, ok := r.Context().Value("orgID").(string)
 	if !ok || orgIDStr == "" {
@@ -398,40 +396,49 @@ func ListAnalystAuditLogs(w http.ResponseWriter, r *http.Request) {
 
 	assignedAssetIDs := getAnalystAssignedAssetIDs(ctx, userID, orgID, userRole)
 	
+	// Start with base conditions that ALWAYS apply:
+	// 1. Your own actions
+	// 2. ALL auth events (login/logout) regardless of asset assignment
 	filter := bson.M{
 		"organizationId": orgID,
 		"$or": []bson.M{
-			{"userID": userID},
+			{"userId": userID},           // FIXED: changed from "userID" to "userId"
+			{"entityType": "auth"},       // ALL authentication events
 		},
 	}
 
+	// Add filters for assigned assets/risks/actions if the analyst has any
 	if len(assignedAssetIDs) > 0 {
 		riskIDs := getAnalystRiskIDsForAssets(ctx, orgID, assignedAssetIDs)
 		actionIDs := getAnalystActionIDsForRisks(ctx, orgID, riskIDs)
 		
+		// Get current OR conditions
 		orConditions := filter["$or"].([]bson.M)
 		
+		// Add asset filter
 		orConditions = append(orConditions, bson.M{
 			"$and": []bson.M{
 				{"entityType": "asset"},
-				{"entityID": bson.M{"$in": assignedAssetIDs}},
+				{"entityId": bson.M{"$in": assignedAssetIDs}},  // FIXED: changed from "entityID" to "entityId"
 			},
 		})
 		
+		// Add risk filter if there are any risks
 		if len(riskIDs) > 0 {
 			orConditions = append(orConditions, bson.M{
 				"$and": []bson.M{
 					{"entityType": "risk"},
-					{"entityID": bson.M{"$in": riskIDs}},
+					{"entityId": bson.M{"$in": riskIDs}},  // FIXED: changed from "entityID" to "entityId"
 				},
 			})
 		}
 		
+		// Add action filter if there are any actions
 		if len(actionIDs) > 0 {
 			orConditions = append(orConditions, bson.M{
 				"$and": []bson.M{
 					{"entityType": "action"},
-					{"entityID": bson.M{"$in": actionIDs}},
+					{"entityId": bson.M{"$in": actionIDs}},  // FIXED: changed from "entityID" to "entityId"
 				},
 			})
 		}
@@ -439,27 +446,51 @@ func ListAnalystAuditLogs(w http.ResponseWriter, r *http.Request) {
 		filter["$or"] = orConditions
 	}
 	
+	// Apply additional query filters
 	if entityType := r.URL.Query().Get("entityType"); entityType != "" && entityType != "all" {
-		orConditions := filter["$or"].([]bson.M)
-		newOrConditions := []bson.M{}
-		for _, condition := range orConditions {
-			if condition["$and"] != nil {
-				andConditions := condition["$and"].([]bson.M)
-				andConditions = append(andConditions, bson.M{"entityType": entityType})
-				newOrConditions = append(newOrConditions, bson.M{
-					"$and": andConditions,
-				})
-			} else if len(condition) == 1 && condition["userID"] != nil {
-				newCondition := bson.M{
-					"userID":     condition["userID"],
-					"entityType": entityType,
+		// If filtering by entity type, we need to ensure auth events are still included
+		if entityType == "auth" {
+			// Simple case: just filter by auth
+			filter["entityType"] = "auth"
+		} else {
+			// Complex case: keep auth events but also filter by the requested type
+			orConditions := filter["$or"].([]bson.M)
+			newOrConditions := []bson.M{}
+			
+			for _, condition := range orConditions {
+				if entityTypeInCondition(condition, "auth") {
+					// Keep auth events as-is
+					newOrConditions = append(newOrConditions, condition)
+				} else if condition["$and"] != nil {
+					// For asset/risk/action conditions, add entityType filter
+					andConditions := condition["$and"].([]bson.M)
+					// Check if entityType is already in the condition
+					hasEntityType := false
+					for _, ac := range andConditions {
+						if _, ok := ac["entityType"]; ok {
+							hasEntityType = true
+							break
+						}
+					}
+					if !hasEntityType {
+						andConditions = append(andConditions, bson.M{"entityType": entityType})
+					}
+					newOrConditions = append(newOrConditions, bson.M{
+						"$and": andConditions,
+					})
+				} else if len(condition) == 1 && condition["userId"] != nil {  // FIXED: changed from "userID" to "userId"
+					// For user's own actions, add entityType filter
+					newCondition := bson.M{
+						"userId":     condition["userId"],  // FIXED: changed from "userID" to "userId"
+						"entityType": entityType,
+					}
+					newOrConditions = append(newOrConditions, newCondition)
+				} else {
+					newOrConditions = append(newOrConditions, condition)
 				}
-				newOrConditions = append(newOrConditions, newCondition)
-			} else {
-				newOrConditions = append(newOrConditions, condition)
 			}
+			filter["$or"] = newOrConditions
 		}
-		filter["$or"] = newOrConditions
 	}
 	
 	if action := r.URL.Query().Get("action"); action != "" && action != "all" {
@@ -518,6 +549,27 @@ func ListAnalystAuditLogs(w http.ResponseWriter, r *http.Request) {
 	utils.RespondWithJSON(w, http.StatusOK, jsonLogs)
 }
 
+// Helper function to check if a condition includes auth entity type
+func entityTypeInCondition(condition bson.M, entityType string) bool {
+	// Check direct entityType field
+	if et, ok := condition["entityType"]; ok && et == entityType {
+		return true
+	}
+	
+	// Check inside $and conditions
+	if and, ok := condition["$and"]; ok {
+		if andConditions, ok := and.([]bson.M); ok {
+			for _, ac := range andConditions {
+				if et, ok := ac["entityType"]; ok && et == entityType {
+					return true
+				}
+			}
+		}
+	}
+	
+	return false
+}
+
 // GetAnalystAuditStats returns statistics for analyst's audit view
 func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 	orgIDStr, ok := r.Context().Value("orgID").(string)
@@ -567,7 +619,8 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 	baseFilter := bson.M{
 		"organizationId": orgID,
 		"$or": []bson.M{
-			{"userID": userID},
+			{"userId": userID},  // FIXED: changed from "userID" to "userId"
+			{"entityType": "auth"}, // Include auth events in stats
 		},
 	}
 
@@ -580,7 +633,7 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 		orConditions = append(orConditions, bson.M{
 			"$and": []bson.M{
 				{"entityType": "asset"},
-				{"entityID": bson.M{"$in": assignedAssetIDs}},
+				{"entityId": bson.M{"$in": assignedAssetIDs}},  // FIXED: changed from "entityID" to "entityId"
 			},
 		})
 		
@@ -588,7 +641,7 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 			orConditions = append(orConditions, bson.M{
 				"$and": []bson.M{
 					{"entityType": "risk"},
-					{"entityID": bson.M{"$in": riskIDs}},
+					{"entityId": bson.M{"$in": riskIDs}},  // FIXED: changed from "entityID" to "entityId"
 				},
 			})
 		}
@@ -597,7 +650,7 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 			orConditions = append(orConditions, bson.M{
 				"$and": []bson.M{
 					{"entityType": "action"},
-					{"entityID": bson.M{"$in": actionIDs}},
+					{"entityId": bson.M{"$in": actionIDs}},  // FIXED: changed from "entityID" to "entityId"
 				},
 			})
 		}
@@ -626,7 +679,7 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 		defer wg.Done()
 		count, _ := auditLogCollection.CountDocuments(ctx, bson.M{
 			"organizationId": orgID,
-			"userID": userID,
+			"userId": userID,  // FIXED: changed from "userID" to "userId"
 		})
 		updateStat("myEvents", count)
 	}()
@@ -638,7 +691,7 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 		count, _ := auditLogCollection.CountDocuments(ctx, bson.M{
 			"organizationId": orgID,
 			"createdAt": bson.M{"$gte": twentyFourHoursAgo},
-			"userID": userID,
+			"userId": userID,  // FIXED: changed from "userID" to "userId"
 		})
 		updateStat("last24Hours", count)
 	}()
@@ -701,7 +754,7 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 			assetFilter := bson.M{
 				"organizationId": orgID,
 				"entityType": "asset",
-				"entityID": bson.M{"$in": assignedAssetIDs},
+				"entityId": bson.M{"$in": assignedAssetIDs},  // FIXED: changed from "entityID" to "entityId"
 			}
 			count, _ := auditLogCollection.CountDocuments(ctx, assetFilter)
 			updateStat("assetEvents", count)
@@ -716,7 +769,7 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 			riskFilter := bson.M{
 				"organizationId": orgID,
 				"entityType": "risk",
-				"entityID": bson.M{"$in": riskIDs},
+				"entityId": bson.M{"$in": riskIDs},  // FIXED: changed from "entityID" to "entityId"
 			}
 			count, _ := auditLogCollection.CountDocuments(ctx, riskFilter)
 			updateStat("riskEvents", count)
@@ -732,7 +785,7 @@ func GetAnalystAuditStats(w http.ResponseWriter, r *http.Request) {
 			actionFilter := bson.M{
 				"organizationId": orgID,
 				"entityType": "action",
-				"entityID": bson.M{"$in": actionIDs},
+				"entityId": bson.M{"$in": actionIDs},  // FIXED: changed from "entityID" to "entityId"
 			}
 			count, _ := auditLogCollection.CountDocuments(ctx, actionFilter)
 			updateStat("actionEvents", count)
@@ -823,7 +876,7 @@ func GetAuditStats(w http.ResponseWriter, r *http.Request) {
 		pipeline := mongo.Pipeline{
 			bson.D{{Key: "$match", Value: filter}},
 			bson.D{{Key: "$group", Value: bson.D{
-				{Key: "_id", Value: "$userID"},
+				{Key: "_id", Value: "$userId"},  // FIXED: changed from "userID" to "userId"
 			}}},
 			bson.D{{Key: "$count", Value: "userCount"}},
 		}
@@ -883,11 +936,11 @@ func convertAuditLogsToJSON(logs []models.AuditLog) []map[string]interface{} {
 		jsonLog := map[string]interface{}{
 			"_id":            log.ID,
 			"organizationId": log.OrganizationID,
-			"userID":         log.UserID,
+			"userId":         log.UserID,      // FIXED: changed from "userID" to "userId" to match frontend expectation
 			"userEmail":      log.UserEmail,
 			"userRole":       log.UserRole,
 			"entityType":     log.EntityType,
-			"entityId":       log.EntityID,
+			"entityId":       log.EntityID,    // FIXED: changed from "entityID" to "entityId" to match frontend expectation
 			"action":         log.Action,
 			"createdAt":      log.CreatedAt,
 			"ipAddress":      log.IPAddress,
