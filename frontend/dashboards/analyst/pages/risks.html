@@ -19,6 +19,7 @@
             --neutral: #6b7280;
             --text-primary: #111111;
             --text-secondary: #555555;
+            --text-muted: #888888;
             --bg: #FFFFFF;
             --card-bg: #FFFFFF;
             --border: #e8e8e8;
@@ -27,6 +28,7 @@
             --radius: 12.8px;
             --transition: all 0.3s ease;
             --shimmer-bg: #f6f7f8;
+            --focus-ring: 0 0 0 3px rgba(93,161,161,0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -236,14 +238,16 @@
 
         /* RAM Pill Styles */
         .ram-pill { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+        .ram-very-low { background: rgba(16,185,129,0.1); color: var(--green); }
         .ram-low { background: rgba(16,185,129,0.1); color: var(--green); }
         .ram-medium { background: rgba(245,158,11,0.1); color: var(--amber); }
         .ram-high { background: rgba(239,68,68,0.1); color: var(--red); }
+        .ram-very-high { background: rgba(239,68,68,0.1); color: var(--red); }
 
         .manageability-pill { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
         .can-control { background: rgba(16,185,129,0.1); color: var(--green); }
         .can-influence { background: rgba(245,158,11,0.1); color: var(--amber); }
-        .cannot-influence { background: rgba(239,68,68,0.1); color: var(--red); }
+        .cannot-control { background: rgba(239,68,68,0.1); color: var(--red); }
 
         .threshold-badge {
             width: 8px; height: 8px; border-radius: 50%; display: inline-block;
@@ -417,6 +421,12 @@
             box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
         }
         
+        .form-group input:disabled,
+        .form-group select:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
         .form-group textarea {
             min-height: 120px;
             resize: vertical;
@@ -436,6 +446,104 @@
         .required::after {
             content: ' *';
             color: var(--red);
+        }
+        
+        /* Custom Select Dropdown with Search */
+        .custom-select {
+            position: relative;
+            width: 100%;
+        }
+        
+        .select-search {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            transition: border-color 0.2s;
+            background-color: white;
+        }
+        
+        .select-search:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        
+        .select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            display: none;
+            margin-top: 4px;
+        }
+        
+        .select-dropdown.open {
+            display: block;
+        }
+        
+        .select-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .select-option:hover,
+        .select-option.highlighted {
+            background: rgba(93,161,161,0.1);
+        }
+        
+        .select-option.selected {
+            background: rgba(93,161,161,0.15);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .user-avatar-small {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .user-info-dropdown-small {
+            flex: 1;
+            font-size: 12px;
+        }
+        
+        .user-name-dropdown-small {
+            font-weight: 500;
+        }
+        
+        .user-email-dropdown-small {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        
+        .no-results {
+            padding: 12px;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 12px;
         }
         
         /* Form Container */
@@ -847,6 +955,20 @@
             background: white;
         }
 
+        /* Bowtie shortcut button */
+        .btn-bowtie {
+            background: rgba(93,161,161,0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .btn-bowtie:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-bowtie i {
+            margin-right: 2px;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) { 
             table { min-width: 2000px; } 
@@ -1010,13 +1132,13 @@
                                     <th>Title</th>
                                     <th>Asset</th>
                                     <th>Status</th>
-                                    <th>Occurrence Level</th>
                                     <th>Risk Owner</th>
                                     <th>Sub Project</th>
                                     <th>Exposure Start</th>
                                     <th>Exposure End</th>
                                     <th>Next Review</th>
-                                    <th>Project RAM</th>
+                                    <th>HSSA RAM</th>
+                                    <th>Risk Visual RAM</th>
                                     <th>Manageability</th>
                                     <th>Created</th>
                                     <th>Updated</th>
@@ -1056,7 +1178,7 @@
                                 Context & Ownership
                             </h3>
                             <div class="form-row">
-                                <div class="form-group">
+                                <div class="form-group" id="assetGroup">
                                     <label for="assetId_create" class="required">Asset</label>
                                     <select id="assetId_create" class="asset-selector-input" required>
                                         <option value="">Select asset</option>
@@ -1065,7 +1187,19 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="subProject_create" class="required">Sub-Project / Department</label>
-                                    <input type="text" id="subProject_create" placeholder="e.g., Phase 2 Construction" required>
+                                    <select id="subProject_create" required>
+                                        <option value="">Select sub-project</option>
+                                        <option value="Phase 1 Construction">Phase 1 Construction</option>
+                                        <option value="Phase 2 Construction">Phase 2 Construction</option>
+                                        <option value="Operations">Operations</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="HR">HR</option>
+                                        <option value="IT">IT</option>
+                                        <option value="Legal">Legal</option>
+                                        <option value="Procurement">Procurement</option>
+                                    </select>
                                 </div>
                             </div>
                             
@@ -1079,22 +1213,36 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="riskOwner_create" class="required">Risk Owner</label>
-                                    <input type="text" id="riskOwner_create" placeholder="Name of responsible person" required>
+                                    <label for="riskCategory_create" class="required">Risk Category</label>
+                                    <select id="riskCategory_create" required>
+                                        <option value="">Select category</option>
+                                        <option value="Technical">Technical</option>
+                                        <option value="Environmental">Environmental</option>
+                                        <option value="Operational">Operational</option>
+                                        <option value="Financial">Financial</option>
+                                        <option value="Commercial">Commercial</option>
+                                        <option value="Political">Political</option>
+                                        <option value="Regulatory">Regulatory</option>
+                                        <option value="Safety">Safety</option>
+                                    </select>
                                 </div>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="functionalAreaTECOP_create" class="required">Functional Area (TECOP)</label>
-                                    <select id="functionalAreaTECOP_create" required>
-                                        <option value="">Select area</option>
-                                        <option value="Technical">Technical</option>
-                                        <option value="Environmental">Environmental</option>
-                                        <option value="Commercial">Commercial</option>
-                                        <option value="Operational">Operational</option>
-                                        <option value="Political">Political</option>
-                                    </select>
+                                    <label for="riskOwner_create" class="required">Risk Owner</label>
+                                    <div class="custom-select">
+                                        <input type="text" 
+                                               class="select-search" 
+                                               id="riskOwnerSearch" 
+                                               placeholder="Search users by name or email..."
+                                               autocomplete="off"
+                                               required>
+                                        <input type="hidden" id="riskOwnerId" name="riskOwnerId">
+                                        <div class="select-dropdown" id="riskOwnerDropdown">
+                                            <div class="no-results">Loading users...</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1128,21 +1276,9 @@
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="occurenceLevel_create" class="required">Occurrence Level</label>
-                                    <select id="occurenceLevel_create" required>
-                                        <option value="">Select likelihood</option>
-                                        <option value="Low">Low (Unlikely)</option>
-                                        <option value="Medium">Medium (Possible)</option>
-                                        <option value="High">High (Likely)</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
                                     <label for="exposureStart_create">Exposure Start Date</label>
                                     <input type="date" id="exposureStart_create">
                                 </div>
-                            </div>
-                            
-                            <div class="form-row">
                                 <div class="form-group">
                                     <label for="exposureEnd_create">Exposure End Date</label>
                                     <input type="date" id="exposureEnd_create">
@@ -1184,59 +1320,7 @@
                                     </div>
                                     
                                     <div class="actions-container">
-                                        <!-- Actions will be added here with new styling -->
-                                        <div class="action-item preventive" data-action-index="0">
-                                            <div class="action-item-header">
-                                                <div class="action-item-title">
-                                                    Preventive Action #1
-                                                    <span class="action-status-badge pending">Pending</span>
-                                                </div>
-                                                <div class="action-item-actions">
-                                                    <button type="button" class="icon-btn small" title="Edit action">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button type="button" class="icon-btn small danger" title="Remove action" onclick="removeAction(0, 0)">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="action-item-details">
-                                                <div class="action-item-field">
-                                                    <label class="action-item-label">
-                                                        <i class="fas fa-heading"></i>
-                                                        Action Title
-                                                    </label>
-                                                    <input type="text" class="action-item-input action-title" 
-                                                           placeholder="e.g., Implement monthly maintenance checks" required>
-                                                </div>
-                                                <div class="action-item-field">
-                                                    <label class="action-item-label">
-                                                        <i class="fas fa-user"></i>
-                                                        Owner
-                                                    </label>
-                                                    <input type="text" class="action-item-input action-owner" 
-                                                           placeholder="Responsible person">
-                                                </div>
-                                                <div class="action-item-field">
-                                                    <label class="action-item-label">
-                                                        <i class="fas fa-calendar"></i>
-                                                        Due Date
-                                                    </label>
-                                                    <input type="date" class="action-item-input action-due-date">
-                                                </div>
-                                                <div class="action-item-field">
-                                                    <label class="action-item-label">
-                                                        <i class="fas fa-tasks"></i>
-                                                        Status
-                                                    </label>
-                                                    <select class="action-item-select action-status">
-                                                        <option value="pending" selected>Pending</option>
-                                                        <option value="in-progress">In Progress</option>
-                                                        <option value="completed">Completed</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <!-- Actions will be added here -->
                                     </div>
                                 </div>
                             </div>
@@ -1276,59 +1360,7 @@
                                     </div>
                                     
                                     <div class="controls-container">
-                                        <!-- Controls will be added here with new styling -->
-                                        <div class="action-item recovery" data-control-index="0">
-                                            <div class="action-item-header">
-                                                <div class="action-item-title">
-                                                    Recovery Control #1
-                                                    <span class="action-status-badge pending">Pending</span>
-                                                </div>
-                                                <div class="action-item-actions">
-                                                    <button type="button" class="icon-btn small" title="Edit control">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button type="button" class="icon-btn small danger" title="Remove control" onclick="removeControl(0, 0)">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="action-item-details">
-                                                <div class="action-item-field">
-                                                    <label class="action-item-label">
-                                                        <i class="fas fa-heading"></i>
-                                                        Control Title
-                                                    </label>
-                                                    <input type="text" class="action-item-input control-title" 
-                                                           placeholder="e.g., Activate backup power system" required>
-                                                </div>
-                                                <div class="action-item-field">
-                                                    <label class="action-item-label">
-                                                        <i class="fas fa-user"></i>
-                                                        Owner
-                                                    </label>
-                                                    <input type="text" class="action-item-input control-owner" 
-                                                           placeholder="Responsible person">
-                                                </div>
-                                                <div class="action-item-field">
-                                                    <label class="action-item-label">
-                                                        <i class="fas fa-calendar"></i>
-                                                        Due Date
-                                                    </label>
-                                                    <input type="date" class="action-item-input control-due-date">
-                                                </div>
-                                                <div class="action-item-field">
-                                                    <label class="action-item-label">
-                                                        <i class="fas fa-tasks"></i>
-                                                        Status
-                                                    </label>
-                                                    <select class="action-item-select control-status">
-                                                        <option value="pending" selected>Pending</option>
-                                                        <option value="in-progress">In Progress</option>
-                                                        <option value="completed">Completed</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <!-- Controls will be added here -->
                                     </div>
                                 </div>
                             </div>
@@ -1348,94 +1380,92 @@
                             <div class="ram-grid">
                                 <div class="ram-card">
                                     <div class="ram-card-header">
-                                        <span class="ram-card-title">Project RAM</span>
+                                        <span class="ram-card-title">HSSA RAM (5x5)</span>
                                     </div>
                                     <div class="ram-values">
                                         <div class="form-group">
-                                            <label>Current</label>
-                                            <select id="projectRamCurrent_create">
-                                                <option value="">Select level</option>
+                                            <label>Likelihood</label>
+                                            <select id="hsseLikelihood_create" onchange="calculateRiskVisualRAM()">
+                                                <option value="">Select likelihood</option>
+                                                <option value="Very Low">Very Low</option>
                                                 <option value="Low">Low</option>
                                                 <option value="Medium">Medium</option>
                                                 <option value="High">High</option>
+                                                <option value="Very High">Very High</option>
                                             </select>
                                         </div>
-                                        <span class="ram-arrow">→</span>
+                                        <span class="ram-arrow">×</span>
                                         <div class="form-group">
-                                            <label>Target</label>
-                                            <select id="projectRamTarget_create">
-                                                <option value="">Select level</option>
+                                            <label>Consequence</label>
+                                            <select id="hsseConsequence_create" onchange="calculateRiskVisualRAM()">
+                                                <option value="">Select consequence</option>
+                                                <option value="Very Low">Very Low</option>
                                                 <option value="Low">Low</option>
                                                 <option value="Medium">Medium</option>
                                                 <option value="High">High</option>
+                                                <option value="Very High">Very High</option>
                                             </select>
                                         </div>
+                                    </div>
+                                    <div class="form-group" style="margin-top: 16px;">
+                                        <label>Calculated HSSA RAM Level</label>
+                                        <input type="text" id="hsseRamCurrent_create" readonly placeholder="Auto-calculated">
                                     </div>
                                 </div>
                                 
                                 <div class="ram-card">
                                     <div class="ram-card-header">
-                                        <span class="ram-card-title">Risk Visual RAM</span>
+                                        <span class="ram-card-title">Risk Visual RAM (3x3)</span>
                                     </div>
                                     <div class="ram-values">
                                         <div class="form-group">
-                                            <label>Current</label>
-                                            <select id="riskVisualRamCurrent_create">
-                                                <option value="">Select level</option>
+                                            <label>Likelihood</label>
+                                            <select id="riskVisualLikelihood_create">
+                                                <option value="">Select likelihood</option>
                                                 <option value="Low">Low</option>
                                                 <option value="Medium">Medium</option>
                                                 <option value="High">High</option>
                                             </select>
                                         </div>
-                                        <span class="ram-arrow">→</span>
+                                        <span class="ram-arrow">×</span>
                                         <div class="form-group">
-                                            <label>Target</label>
-                                            <select id="riskVisualRamTarget_create">
-                                                <option value="">Select level</option>
+                                            <label>Consequence</label>
+                                            <select id="riskVisualConsequence_create">
+                                                <option value="">Select consequence</option>
                                                 <option value="Low">Low</option>
                                                 <option value="Medium">Medium</option>
                                                 <option value="High">High</option>
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <div class="ram-card">
-                                    <div class="ram-card-header">
-                                        <span class="ram-card-title">HSSE RAM</span>
+                                    <div class="form-group" style="margin-top: 16px;">
+                                        <label>Calculated Risk Visual RAM Level</label>
+                                        <input type="text" id="riskVisualRamCurrent_create" readonly placeholder="Auto-calculated or overridden">
                                     </div>
-                                    <div class="ram-values">
-                                        <div class="form-group">
-                                            <label>Current</label>
-                                            <select id="hsseRamCurrent_create">
-                                                <option value="">Select level</option>
-                                                <option value="Low">Low</option>
-                                                <option value="Medium">Medium</option>
-                                                <option value="High">High</option>
-                                            </select>
-                                        </div>
-                                        <span class="ram-arrow">→</span>
-                                        <div class="form-group">
-                                            <label>Target</label>
-                                            <select id="hsseRamTarget_create">
-                                                <option value="">Select level</option>
-                                                <option value="Low">Low</option>
-                                                <option value="Medium">Medium</option>
-                                                <option value="High">High</option>
-                                            </select>
-                                        </div>
+                                    <div class="form-group" style="margin-top: 8px;">
+                                        <label>
+                                            <input type="checkbox" id="overrideRamCheckbox" onchange="toggleRamOverride()"> 
+                                            Override Risk Visual RAM
+                                        </label>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="form-row" style="margin-top: 24px;">
                                 <div class="form-group">
+                                    <label for="impact_create">Impact Description</label>
+                                    <textarea id="impact_create" placeholder="Describe the potential impact..." rows="2"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
                                     <label for="manageability_create">Manageability</label>
                                     <select id="manageability_create">
                                         <option value="">Select level</option>
                                         <option value="Can Control">Can Control</option>
                                         <option value="Can Influence">Can Influence</option>
-                                        <option value="Cannot Influence">Cannot Influence</option>
+                                        <option value="Cannot Control">Cannot Control</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
@@ -1468,6 +1498,14 @@ let allAssets = [];
 let risks = [];
 let causeCount = 1;
 let consequenceCount = 1;
+let assignedAssets = [];
+
+// User data for dropdowns
+let allUsers = [];
+let selectedRiskOwner = null;
+
+// Map to store selected action owners (key: action element ID, value: selected user)
+let selectedActionOwners = new Map();
 
 // Utility functions
 function escapeHtml(unsafe) {
@@ -1488,9 +1526,11 @@ function capitalize(str) {
 function getRamClass(ramLevel) {
     if (!ramLevel) return '';
     ramLevel = ramLevel.toLowerCase();
+    if (ramLevel === 'very low') return 'ram-pill ram-very-low';
     if (ramLevel === 'low') return 'ram-pill ram-low';
     if (ramLevel === 'medium') return 'ram-pill ram-medium';
     if (ramLevel === 'high') return 'ram-pill ram-high';
+    if (ramLevel === 'very high') return 'ram-pill ram-very-high';
     return 'ram-pill';
 }
 
@@ -1498,7 +1538,7 @@ function getManageabilityClass(manageability) {
     if (!manageability) return '';
     if (manageability === 'Can Control') return 'manageability-pill can-control';
     if (manageability === 'Can Influence') return 'manageability-pill can-influence';
-    if (manageability === 'Cannot Influence') return 'manageability-pill cannot-influence';
+    if (manageability === 'Cannot Control') return 'manageability-pill cannot-control';
     return 'manageability-pill';
 }
 
@@ -1512,6 +1552,300 @@ function getStatusClass(status) {
     return '';
 }
 
+// Load users for all dropdowns
+async function loadAllUsers() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast('Please login to assign owners', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/users', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to load users: ${response.status}`);
+        }
+
+        allUsers = await response.json();
+        return allUsers;
+    } catch (err) {
+        console.error('Failed to load users:', err);
+        showToast('Failed to load users', 'error');
+        return [];
+    }
+}
+
+// Create a user dropdown for action owner
+function createActionOwnerDropdown(actionElement, actionId, currentValue = '') {
+    const container = document.createElement('div');
+    container.className = 'custom-select';
+    container.style.width = '100%';
+    
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'select-search';
+    searchInput.placeholder = 'Search users...';
+    searchInput.autocomplete = 'off';
+    searchInput.value = currentValue;
+    
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.className = 'action-owner-id';
+    hiddenInput.name = 'actionOwnerId';
+    
+    const dropdown = document.createElement('div');
+    dropdown.className = 'select-dropdown';
+    dropdown.innerHTML = '<div class="no-results">Loading users...</div>';
+    
+    container.appendChild(searchInput);
+    container.appendChild(hiddenInput);
+    container.appendChild(dropdown);
+    
+    // Setup event listeners
+    let selectedUser = null;
+    
+    function populateActionOwnerDropdown(searchTerm = '') {
+        if (!allUsers.length) {
+            dropdown.innerHTML = '<div class="no-results">No users found</div>';
+            return;
+        }
+
+        let filteredUsers = allUsers;
+        
+        if (searchTerm.trim()) {
+            const term = searchTerm.toLowerCase();
+            filteredUsers = allUsers.filter(user => 
+                (user.firstName && user.firstName.toLowerCase().includes(term)) ||
+                (user.lastName && user.lastName.toLowerCase().includes(term)) ||
+                (user.email && user.email.toLowerCase().includes(term)) ||
+                (user.name && user.name.toLowerCase().includes(term))
+            );
+        }
+
+        if (filteredUsers.length === 0) {
+            dropdown.innerHTML = '<div class="no-results">No users match your search</div>';
+            return;
+        }
+
+        let dropdownHTML = '';
+        
+        filteredUsers.forEach(user => {
+            const firstName = user.firstName || (user.name ? user.name.split(' ')[0] : '');
+            const lastName = user.lastName || (user.name ? user.name.split(' ').slice(1).join(' ') : '');
+            const fullName = `${firstName} ${lastName}`.trim() || user.name || user.email || 'Unknown User';
+            const email = user.email || '';
+            const initials = (firstName[0] || '') + (lastName[0] || '') || fullName[0] || '?';
+            const userId = user.id || user._id;
+            const isSelected = selectedUser && selectedUser.id === userId;
+            
+            dropdownHTML += `
+                <div class="select-option ${isSelected ? 'selected' : ''}" 
+                     data-user-id="${userId}" 
+                     data-user-name="${fullName}"
+                     data-user-email="${email}">
+                    <div class="user-avatar-small">${initials.toUpperCase()}</div>
+                    <div class="user-info-dropdown-small">
+                        <div class="user-name-dropdown-small">${fullName}</div>
+                        <div class="user-email-dropdown-small">${email}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        dropdown.innerHTML = dropdownHTML;
+
+        dropdown.querySelectorAll('.select-option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const userId = this.getAttribute('data-user-id');
+                const userName = this.getAttribute('data-user-name');
+                
+                selectedUser = {
+                    id: userId,
+                    name: userName
+                };
+                
+                searchInput.value = userName;
+                hiddenInput.value = userId;
+                
+                // Store in map
+                selectedActionOwners.set(actionId, selectedUser);
+                
+                dropdown.querySelectorAll('.select-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                toggleDropdown(false);
+            });
+        });
+    }
+
+    function toggleDropdown(show) {
+        if (show) {
+            dropdown.classList.add('open');
+            populateActionOwnerDropdown(searchInput.value);
+        } else {
+            setTimeout(() => {
+                dropdown.classList.remove('open');
+            }, 200);
+        }
+    }
+
+    searchInput.addEventListener('focus', () => toggleDropdown(true));
+    searchInput.addEventListener('input', () => populateActionOwnerDropdown(searchInput.value));
+
+    document.addEventListener('click', (e) => {
+        if (!container.contains(e.target)) {
+            toggleDropdown(false);
+        }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        const options = dropdown.querySelectorAll('.select-option');
+        if (!dropdown.classList.contains('open')) return;
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const current = dropdown.querySelector('.select-option.highlighted') || options[0];
+            const next = current.nextElementSibling || options[0];
+            
+            options.forEach(opt => opt.classList.remove('highlighted'));
+            next.classList.add('highlighted');
+            next.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const current = dropdown.querySelector('.select-option.highlighted') || options[options.length - 1];
+            const prev = current.previousElementSibling || options[options.length - 1];
+            
+            options.forEach(opt => opt.classList.remove('highlighted'));
+            prev.classList.add('highlighted');
+            prev.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const highlighted = dropdown.querySelector('.select-option.highlighted');
+            if (highlighted) {
+                highlighted.click();
+            }
+        } else if (e.key === 'Escape') {
+            toggleDropdown(false);
+        }
+    });
+
+    return container;
+}
+
+// Load users for Risk Owner dropdown
+async function loadUsersForRiskOwner() {
+    const dropdown = document.getElementById('riskOwnerDropdown');
+    dropdown.innerHTML = '<div class="no-results">Loading users...</div>';
+
+    await loadAllUsers();
+
+    if (!allUsers.length) {
+        dropdown.innerHTML = '<div class="no-results">No users found in organization</div>';
+        return;
+    }
+
+    populateRiskOwnerDropdown('');
+}
+
+// Populate Risk Owner dropdown with search results
+function populateRiskOwnerDropdown(searchTerm = '') {
+    const dropdown = document.getElementById('riskOwnerDropdown');
+    
+    if (!allUsers.length) {
+        dropdown.innerHTML = '<div class="no-results">No users found in organization</div>';
+        return;
+    }
+
+    let filteredUsers = allUsers;
+    
+    if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        filteredUsers = allUsers.filter(user => 
+            (user.firstName && user.firstName.toLowerCase().includes(term)) ||
+            (user.lastName && user.lastName.toLowerCase().includes(term)) ||
+            (user.email && user.email.toLowerCase().includes(term)) ||
+            (user.jobTitle && user.jobTitle.toLowerCase().includes(term)) ||
+            (user.name && user.name.toLowerCase().includes(term))
+        );
+    }
+
+    if (filteredUsers.length === 0) {
+        dropdown.innerHTML = '<div class="no-results">No users match your search</div>';
+        return;
+    }
+
+    let dropdownHTML = '';
+    
+    filteredUsers.forEach(user => {
+        const firstName = user.firstName || (user.name ? user.name.split(' ')[0] : '');
+        const lastName = user.lastName || (user.name ? user.name.split(' ').slice(1).join(' ') : '');
+        const fullName = `${firstName} ${lastName}`.trim() || user.name || user.email || 'Unknown User';
+        const email = user.email || '';
+        const initials = (firstName[0] || '') + (lastName[0] || '') || fullName[0] || '?';
+        const userId = user.id || user._id;
+        const isSelected = selectedRiskOwner && selectedRiskOwner.id === userId;
+        
+        dropdownHTML += `
+            <div class="select-option ${isSelected ? 'selected' : ''}" 
+                 data-user-id="${userId}" 
+                 data-user-name="${fullName}"
+                 data-user-email="${email}">
+                <div class="user-avatar-small">${initials.toUpperCase()}</div>
+                <div class="user-info-dropdown-small">
+                    <div class="user-name-dropdown-small">${fullName}</div>
+                    <div class="user-email-dropdown-small">${email}</div>
+                </div>
+                <div class="user-role-badge">${user.role || 'User'}</div>
+            </div>
+        `;
+    });
+
+    dropdown.innerHTML = dropdownHTML;
+
+    dropdown.querySelectorAll('.select-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            
+            selectedRiskOwner = {
+                id: userId,
+                name: userName
+            };
+            
+            document.getElementById('riskOwnerSearch').value = userName;
+            document.getElementById('riskOwnerId').value = userId;
+            
+            dropdown.querySelectorAll('.select-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            
+            toggleRiskOwnerDropdown(false);
+        });
+    });
+}
+
+// Toggle Risk Owner dropdown visibility
+function toggleRiskOwnerDropdown(show) {
+    const dropdown = document.getElementById('riskOwnerDropdown');
+    if (show) {
+        dropdown.classList.add('open');
+        if (dropdown.innerHTML.includes('Loading')) {
+            loadUsersForRiskOwner();
+        }
+    } else {
+        setTimeout(() => {
+            dropdown.classList.remove('open');
+        }, 200);
+    }
+}
+
 // Update status badge when status changes
 function updateActionStatus(actionElement) {
     const statusSelect = actionElement.querySelector('.action-status, .control-status');
@@ -1520,6 +1854,89 @@ function updateActionStatus(actionElement) {
         const status = statusSelect.value;
         statusBadge.className = `action-status-badge ${status}`;
         statusBadge.textContent = status.replace('-', ' ');
+    }
+}
+
+// RAM Calculation Functions
+function calculateRiskVisualRAM() {
+    const likelihood = document.getElementById('hsseLikelihood_create').value;
+    const consequence = document.getElementById('hsseConsequence_create').value;
+    
+    if (!likelihood || !consequence) {
+        document.getElementById('hsseRamCurrent_create').value = '';
+        document.getElementById('riskVisualLikelihood_create').value = '';
+        document.getElementById('riskVisualConsequence_create').value = '';
+        document.getElementById('riskVisualRamCurrent_create').value = '';
+        return;
+    }
+    
+    // Calculate HSSA RAM (5x5) - simple matrix for demo
+    const likelihoodMap = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
+    const consequenceMap = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
+    
+    const lvl = likelihoodMap[likelihood];
+    const cvl = consequenceMap[consequence];
+    const product = lvl * cvl;
+    
+    let hsseLevel = '';
+    if (product <= 4) hsseLevel = 'Very Low';
+    else if (product <= 9) hsseLevel = 'Low';
+    else if (product <= 16) hsseLevel = 'Medium';
+    else if (product <= 25) hsseLevel = 'High';
+    else hsseLevel = 'Very High';
+    
+    document.getElementById('hsseRamCurrent_create').value = hsseLevel;
+    
+    // Auto-calculate Risk Visual RAM (3x3) based on mapping
+    const overrideCheck = document.getElementById('overrideRamCheckbox');
+    if (!overrideCheck || !overrideCheck.checked) {
+        // Mapping logic: Very High → High, High → High, Medium → Medium, Low → Low, Very Low → Low
+        let visualLikelihood = '';
+        let visualConsequence = '';
+        
+        // Map likelihood
+        if (likelihood === 'Very Low' || likelihood === 'Low') visualLikelihood = 'Low';
+        else if (likelihood === 'Medium') visualLikelihood = 'Medium';
+        else if (likelihood === 'High' || likelihood === 'Very High') visualLikelihood = 'High';
+        
+        // Map consequence
+        if (consequence === 'Very Low' || consequence === 'Low') visualConsequence = 'Low';
+        else if (consequence === 'Medium') visualConsequence = 'Medium';
+        else if (consequence === 'High' || consequence === 'Very High') visualConsequence = 'High';
+        
+        document.getElementById('riskVisualLikelihood_create').value = visualLikelihood;
+        document.getElementById('riskVisualConsequence_create').value = visualConsequence;
+        
+        // Calculate visual RAM
+        const visualLikelihoodMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
+        const visualConsequenceMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
+        
+        const vll = visualLikelihoodMap[visualLikelihood] || 0;
+        const vcl = visualConsequenceMap[visualConsequence] || 0;
+        const visualProduct = vll * vcl;
+        
+        let visualLevel = '';
+        if (visualProduct <= 3) visualLevel = 'Low';
+        else if (visualProduct <= 6) visualLevel = 'Medium';
+        else visualLevel = 'High';
+        
+        document.getElementById('riskVisualRamCurrent_create').value = visualLevel;
+    }
+}
+
+function toggleRamOverride() {
+    const overrideCheck = document.getElementById('overrideRamCheckbox');
+    const likelihoodSelect = document.getElementById('riskVisualLikelihood_create');
+    const consequenceSelect = document.getElementById('riskVisualConsequence_create');
+    
+    if (overrideCheck.checked) {
+        likelihoodSelect.removeAttribute('disabled');
+        consequenceSelect.removeAttribute('disabled');
+    } else {
+        likelihoodSelect.setAttribute('disabled', 'disabled');
+        consequenceSelect.setAttribute('disabled', 'disabled');
+        // Recalculate based on HSSA
+        calculateRiskVisualRAM();
     }
 }
 
@@ -1536,53 +1953,73 @@ async function loadAssignedAssets() {
         
         if (response.ok) {
             const assets = await response.json();
-            allAssets = Array.isArray(assets) ? assets : [];
+            assignedAssets = Array.isArray(assets) ? assets : [];
+            allAssets = assignedAssets;
             updateAssetDropdown();
         } else {
-            // Fallback to all assets
-            await loadAllAssets();
+            // Fallback to demo data
+            assignedAssets = [
+                { _id: '1', name: 'Asset A' },
+                { _id: '2', name: 'Asset B' }
+            ];
+            allAssets = assignedAssets;
+            updateAssetDropdown();
         }
     } catch (error) {
         console.error('Error loading assigned assets:', error);
-        await loadAllAssets();
-    }
-}
-
-async function loadAllAssets() {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/assets', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            allAssets = Array.isArray(data) ? data : [];
-            updateAssetDropdown();
-        }
-    } catch (error) {
-        console.error('Error loading all assets:', error);
-        allAssets = [];
+        // Demo data for testing
+        assignedAssets = [
+            { _id: '1', name: 'Asset A' },
+            { _id: '2', name: 'Asset B' }
+        ];
+        allAssets = assignedAssets;
+        updateAssetDropdown();
     }
 }
 
 function updateAssetDropdown() {
+    const assetGroup = document.getElementById('assetGroup');
     const assetSelect = document.getElementById('assetId_create');
     if (!assetSelect) return;
     
-    // Clear existing options except first one
-    assetSelect.innerHTML = '<option value="">Select asset</option>';
-    
-    // Add asset options
-    allAssets.forEach(asset => {
-        const option = document.createElement('option');
-        option.value = asset._id || asset.id;
-        option.textContent = asset.name || `Asset ${asset._id}`;
-        assetSelect.appendChild(option);
-    });
+    // Handle single asset case
+    if (assignedAssets.length === 1) {
+        // Hide dropdown and show static text
+        assetSelect.style.display = 'none';
+        
+        // Create or update static display
+        let staticDisplay = document.getElementById('staticAssetDisplay');
+        if (!staticDisplay) {
+            staticDisplay = document.createElement('div');
+            staticDisplay.id = 'staticAssetDisplay';
+            staticDisplay.className = 'form-control-static';
+            staticDisplay.style.padding = '12px 16px';
+            staticDisplay.style.background = '#f5f5f5';
+            staticDisplay.style.borderRadius = '8px';
+            staticDisplay.style.border = '1px solid var(--border)';
+            assetGroup.appendChild(staticDisplay);
+        }
+        staticDisplay.textContent = assignedAssets[0].name;
+        
+        // Set the select value for form submission
+        assetSelect.value = assignedAssets[0]._id || assignedAssets[0].id;
+    } else {
+        // Show dropdown for multiple assets
+        assetSelect.style.display = 'block';
+        const staticDisplay = document.getElementById('staticAssetDisplay');
+        if (staticDisplay) staticDisplay.remove();
+        
+        // Clear existing options except first one
+        assetSelect.innerHTML = '<option value="">Select asset</option>';
+        
+        // Add asset options
+        assignedAssets.forEach(asset => {
+            const option = document.createElement('option');
+            option.value = asset._id || asset.id;
+            option.textContent = asset.name || `Asset ${asset._id}`;
+            assetSelect.appendChild(option);
+        });
+    }
 }
 
 // Load risks
@@ -1637,12 +2074,12 @@ function showSkeleton() {
             <td><div class="skeleton skeleton-cell long"></div></td>
             <td><div class="skeleton skeleton-cell medium"></div></td>
             <td><div class="skeleton skeleton-pill"></div></td>
-            <td><div style="width:40px;height:24px;border-radius:8px;" class="skeleton"></div></td>
             <td><div class="skeleton skeleton-cell medium"></div></td>
             <td><div class="skeleton skeleton-cell medium"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
+            <td><div class="skeleton skeleton-pill"></div></td>
             <td><div class="skeleton skeleton-pill"></div></td>
             <td><div class="skeleton skeleton-pill"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
@@ -1723,23 +2160,22 @@ function renderRisks(risks) {
             <td>${escapeHtml(risk.title || '—')}</td>
             <td>${escapeHtml(risk.assetName || '—')}</td>
             <td><span class="pill ${getStatusClass(risk.status)}">${escapeHtml(risk.status || 'Open')}</span></td>
-            <td><div class="arrow-wrapper">
-                <div class="arrow arrow-${risk.occurenceLevel?.toLowerCase() || 'medium'}"></div>
-                <div class="tooltip">${capitalize(risk.occurenceLevel || 'Medium')}</div>
-            </div></td>
             <td>${escapeHtml(risk.riskOwnerName || '—')}</td>
             <td>${escapeHtml(risk.subProject || '—')}</td>
             <td>${risk.exposureStartDate ? new Date(risk.exposureStartDate).toISOString().split('T')[0] : '—'}</td>
             <td>${risk.exposureEndDate ? new Date(risk.exposureEndDate).toISOString().split('T')[0] : '—'}</td>
             <td>${risk.nextReviewDate ? new Date(risk.nextReviewDate).toISOString().split('T')[0] : '—'}</td>
-            <td><span class="${getRamClass(risk.projectRamCurrent)}">${escapeHtml(risk.projectRamCurrent || '—')}</span> → 
-                <span class="${getRamClass(risk.projectRamTarget)}">${escapeHtml(risk.projectRamTarget || '—')}</span></td>
+            <td><span class="${getRamClass(risk.hsseRamCurrent || risk.hssaRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || risk.hssaRamCurrent || '—')}</span></td>
+            <td><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></td>
             <td><span class="${getManageabilityClass(risk.manageability)}">${escapeHtml(risk.manageability || '—')}</span></td>
             <td>${risk.createdAt ? new Date(risk.createdAt).toLocaleDateString() : '—'}</td>
             <td>${risk.updatedAt ? new Date(risk.updatedAt).toLocaleDateString() : '—'}</td>
-            <td>
+            <td style="display: flex; gap: 4px;">
                 <button class="icon-btn" onclick="viewRiskDetail('${risk._id}')" title="View">
                     <i class="fas fa-eye"></i>
+                </button>
+                <button class="icon-btn btn-bowtie" onclick="openBowtieView('${risk._id}')" title="Bowtie View">
+                    <i class="fas fa-project-diagram"></i>
                 </button>
                 ${risk.status === 'pending' ? '' : `
                 <button class="icon-btn" onclick="editRisk('${risk._id}')" title="Edit">
@@ -1758,9 +2194,14 @@ function renderRisks(risks) {
                 <div class="risk-card-title" onclick="viewRiskDetail('${risk._id}')">
                     ${escapeHtml(risk.riskId || '—')}: ${escapeHtml(risk.title || '—')}
                 </div>
-                <button class="icon-btn" onclick="viewRiskDetail('${risk._id}')">
-                    <i class="fas fa-eye"></i>
-                </button>
+                <div style="display: flex; gap: 4px;">
+                    <button class="icon-btn btn-bowtie small" onclick="openBowtieView('${risk._id}')" title="Bowtie View">
+                        <i class="fas fa-project-diagram"></i>
+                    </button>
+                    <button class="icon-btn" onclick="viewRiskDetail('${risk._id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
             </div>
             <div class="risk-card-grid">
                 <div class="risk-card-label">Type</div>
@@ -1777,15 +2218,11 @@ function renderRisks(risks) {
                 <div class="risk-card-label">Owner</div>
                 <div>${escapeHtml(risk.riskOwnerName || '—')}</div>
                 
-                <div class="risk-card-label">Occurrence</div>
-                <div><div class="arrow-wrapper">
-                    <div class="arrow arrow-${risk.occurenceLevel?.toLowerCase() || 'medium'}"></div>
-                    <div class="tooltip">${capitalize(risk.occurenceLevel || 'Medium')}</div>
-                </div></div>
+                <div class="risk-card-label">HSSA RAM</div>
+                <div><span class="${getRamClass(risk.hsseRamCurrent || risk.hssaRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || risk.hssaRamCurrent || '—')}</span></div>
                 
-                <div class="risk-card-label">Project RAM</div>
-                <div><span class="${getRamClass(risk.projectRamCurrent)}">${escapeHtml(risk.projectRamCurrent || '—')}</span> → 
-                    <span class="${getRamClass(risk.projectRamTarget)}">${escapeHtml(risk.projectRamTarget || '—')}</span></div>
+                <div class="risk-card-label">Visual RAM</div>
+                <div><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></div>
                 
                 <div class="risk-card-label">Created</div>
                 <div>${risk.createdAt ? new Date(risk.createdAt).toLocaleDateString() : '—'}</div>
@@ -1829,6 +2266,11 @@ function searchRisks() {
         
         renderRisks(filteredRisks);
     }, 300);
+}
+
+// Bowtie view function - opens Bowtie.html in new tab
+function openBowtieView(riskId) {
+    window.open(`Bowtie.html?riskId=${riskId}`, '_blank');
 }
 
 // Dynamic Form Functions
@@ -1889,9 +2331,19 @@ function addActionToCause(causeIndex) {
     const actionItem = document.createElement('div');
     actionItem.className = 'action-item preventive';
     actionItem.dataset.actionIndex = actionIndex;
+    actionItem.dataset.causeIndex = causeIndex;
+    
+    // Generate unique ID for this action
+    const actionId = `action-${causeIndex}-${actionIndex}-${Date.now()}`;
+    actionItem.id = actionId;
+    
+    // Generate action ID
+    const actionNumber = `ACT-${Date.now().toString().slice(-6)}-${actionIndex + 1}`;
+    
     actionItem.innerHTML = `
         <div class="action-item-header">
             <div class="action-item-title">
+                <span style="color: var(--neutral); font-size: 11px; margin-right: 8px;">${actionNumber}</span>
                 Preventive Action #${actionIndex + 1}
                 <span class="action-status-badge pending">Pending</span>
             </div>
@@ -1908,26 +2360,38 @@ function addActionToCause(causeIndex) {
             <div class="action-item-field">
                 <label class="action-item-label">
                     <i class="fas fa-heading"></i>
-                    Action Title
+                    Action Description
                 </label>
                 <input type="text" class="action-item-input action-title" 
-                       placeholder="e.g., Implement monthly maintenance checks" required
-                       onchange="updateActionStatus(this.closest('.action-item'))">
+                       placeholder="e.g., Implement monthly maintenance checks" required>
             </div>
-            <div class="action-item-field">
+            <div class="action-item-field action-owner-field">
                 <label class="action-item-label">
                     <i class="fas fa-user"></i>
                     Owner
                 </label>
-                <input type="text" class="action-item-input action-owner" 
-                       placeholder="Responsible person">
+                <div class="action-owner-container" id="owner-container-${actionId}"></div>
             </div>
             <div class="action-item-field">
                 <label class="action-item-label">
                     <i class="fas fa-calendar"></i>
-                    Due Date
+                    Start Date
                 </label>
-                <input type="date" class="action-item-input action-due-date">
+                <input type="date" class="action-item-input action-start-date">
+            </div>
+            <div class="action-item-field">
+                <label class="action-item-label">
+                    <i class="fas fa-calendar-check"></i>
+                    Finish Date
+                </label>
+                <input type="date" class="action-item-input action-finish-date">
+            </div>
+            <div class="action-item-field">
+                <label class="action-item-label">
+                    <i class="fas fa-dollar-sign"></i>
+                    Cost
+                </label>
+                <input type="number" class="action-item-input action-cost" placeholder="0.00" step="0.01">
             </div>
             <div class="action-item-field">
                 <label class="action-item-label">
@@ -1944,6 +2408,15 @@ function addActionToCause(causeIndex) {
     `;
     
     actionsContainer.appendChild(actionItem);
+    
+    // Add the owner dropdown after the element is in the DOM
+    setTimeout(() => {
+        const ownerContainer = actionItem.querySelector('.action-owner-container');
+        if (ownerContainer) {
+            const ownerDropdown = createActionOwnerDropdown(actionItem, actionId);
+            ownerContainer.appendChild(ownerDropdown);
+        }
+    }, 0);
 }
 
 function removeAction(causeIndex, actionIndex) {
@@ -1953,7 +2426,12 @@ function removeAction(causeIndex, actionIndex) {
     const actionsContainer = causeCard.querySelector('.actions-container');
     const actionItem = actionsContainer.querySelector(`[data-action-index="${actionIndex}"]`);
     if (actionItem) {
+        // Remove from map
+        if (actionItem.id) {
+            selectedActionOwners.delete(actionItem.id);
+        }
         actionItem.remove();
+        
         // Re-index remaining actions
         const actions = actionsContainer.querySelectorAll('.action-item');
         actions.forEach((action, i) => {
@@ -2024,9 +2502,19 @@ function addControlToConsequence(consequenceIndex) {
     const controlItem = document.createElement('div');
     controlItem.className = 'action-item recovery';
     controlItem.dataset.controlIndex = controlIndex;
+    controlItem.dataset.consequenceIndex = consequenceIndex;
+    
+    // Generate unique ID for this control
+    const controlId = `control-${consequenceIndex}-${controlIndex}-${Date.now()}`;
+    controlItem.id = controlId;
+    
+    // Generate control ID
+    const controlNumber = `CTRL-${Date.now().toString().slice(-6)}-${controlIndex + 1}`;
+    
     controlItem.innerHTML = `
         <div class="action-item-header">
             <div class="action-item-title">
+                <span style="color: var(--neutral); font-size: 11px; margin-right: 8px;">${controlNumber}</span>
                 Recovery Control #${controlIndex + 1}
                 <span class="action-status-badge pending">Pending</span>
             </div>
@@ -2043,26 +2531,38 @@ function addControlToConsequence(consequenceIndex) {
             <div class="action-item-field">
                 <label class="action-item-label">
                     <i class="fas fa-heading"></i>
-                    Control Title
+                    Control Description
                 </label>
                 <input type="text" class="action-item-input control-title" 
-                       placeholder="e.g., Activate backup power system" required
-                       onchange="updateActionStatus(this.closest('.action-item'))">
+                       placeholder="e.g., Activate backup power system" required>
             </div>
-            <div class="action-item-field">
+            <div class="action-item-field control-owner-field">
                 <label class="action-item-label">
                     <i class="fas fa-user"></i>
                     Owner
                 </label>
-                <input type="text" class="action-item-input control-owner" 
-                       placeholder="Responsible person">
+                <div class="control-owner-container" id="owner-container-${controlId}"></div>
             </div>
             <div class="action-item-field">
                 <label class="action-item-label">
                     <i class="fas fa-calendar"></i>
-                    Due Date
+                    Start Date
                 </label>
-                <input type="date" class="action-item-input control-due-date">
+                <input type="date" class="action-item-input control-start-date">
+            </div>
+            <div class="action-item-field">
+                <label class="action-item-label">
+                    <i class="fas fa-calendar-check"></i>
+                    Finish Date
+                </label>
+                <input type="date" class="action-item-input control-finish-date">
+            </div>
+            <div class="action-item-field">
+                <label class="action-item-label">
+                    <i class="fas fa-dollar-sign"></i>
+                    Cost
+                </label>
+                <input type="number" class="action-item-input control-cost" placeholder="0.00" step="0.01">
             </div>
             <div class="action-item-field">
                 <label class="action-item-label">
@@ -2079,6 +2579,15 @@ function addControlToConsequence(consequenceIndex) {
     `;
     
     controlsContainer.appendChild(controlItem);
+    
+    // Add the owner dropdown after the element is in the DOM
+    setTimeout(() => {
+        const ownerContainer = controlItem.querySelector('.control-owner-container');
+        if (ownerContainer) {
+            const ownerDropdown = createActionOwnerDropdown(controlItem, controlId);
+            ownerContainer.appendChild(ownerDropdown);
+        }
+    }, 0);
 }
 
 function removeControl(consequenceIndex, controlIndex) {
@@ -2088,7 +2597,12 @@ function removeControl(consequenceIndex, controlIndex) {
     const controlsContainer = consequenceCard.querySelector('.controls-container');
     const controlItem = controlsContainer.querySelector(`[data-control-index="${controlIndex}"]`);
     if (controlItem) {
+        // Remove from map
+        if (controlItem.id) {
+            selectedActionOwners.delete(controlItem.id);
+        }
         controlItem.remove();
+        
         // Re-index remaining controls
         const controls = controlsContainer.querySelectorAll('.action-item');
         controls.forEach((control, i) => {
@@ -2115,14 +2629,23 @@ function collectCauses() {
         const actionItems = card.querySelectorAll('.actions-container .action-item');
         
         actionItems.forEach((actionItem, actionIndex) => {
-            const title = actionItem.querySelector('.action-title').value.trim();
+            const title = actionItem.querySelector('.action-title')?.value.trim();
             if (!title) return;
             
+            // Get owner from the hidden input in the custom dropdown
+            const ownerHidden = actionItem.querySelector('.action-owner-id');
+            const ownerName = actionItem.querySelector('.select-search')?.value || '';
+            const ownerId = ownerHidden?.value || '';
+            
             actions.push({
+                id: `ACT-${Date.now()}-${actionIndex}`,
                 title: title,
-                owner: actionItem.querySelector('.action-owner').value.trim(),
-                dueDate: actionItem.querySelector('.action-due-date').value || null,
-                status: actionItem.querySelector('.action-status').value,
+                ownerId: ownerId,
+                ownerName: ownerName,
+                startDate: actionItem.querySelector('.action-start-date')?.value || null,
+                finishDate: actionItem.querySelector('.action-finish-date')?.value || null,
+                cost: actionItem.querySelector('.action-cost')?.value || null,
+                status: actionItem.querySelector('.action-status')?.value || 'pending',
                 type: 'preventive',
                 order: actionIndex + 1
             });
@@ -2151,14 +2674,23 @@ function collectConsequences() {
         const controlItems = card.querySelectorAll('.controls-container .action-item');
         
         controlItems.forEach((controlItem, controlIndex) => {
-            const title = controlItem.querySelector('.control-title').value.trim();
+            const title = controlItem.querySelector('.control-title')?.value.trim();
             if (!title) return;
             
+            // Get owner from the hidden input in the custom dropdown
+            const ownerHidden = controlItem.querySelector('.action-owner-id');
+            const ownerName = controlItem.querySelector('.select-search')?.value || '';
+            const ownerId = ownerHidden?.value || '';
+            
             controls.push({
+                id: `CTRL-${Date.now()}-${controlIndex}`,
                 title: title,
-                owner: controlItem.querySelector('.control-owner').value.trim(),
-                dueDate: controlItem.querySelector('.control-due-date').value || null,
-                status: controlItem.querySelector('.control-status').value,
+                ownerId: ownerId,
+                ownerName: ownerName,
+                startDate: controlItem.querySelector('.control-start-date')?.value || null,
+                finishDate: controlItem.querySelector('.control-finish-date')?.value || null,
+                cost: controlItem.querySelector('.control-cost')?.value || null,
+                status: controlItem.querySelector('.control-status')?.value || 'pending',
                 type: 'recovery',
                 order: controlIndex + 1
             });
@@ -2181,6 +2713,14 @@ function openCreateRiskModal() {
     
     // Reset form
     document.getElementById('createRiskForm').reset();
+    
+    // Reset risk owner
+    document.getElementById('riskOwnerSearch').value = '';
+    document.getElementById('riskOwnerId').value = '';
+    selectedRiskOwner = null;
+    
+    // Clear action owners map
+    selectedActionOwners.clear();
     
     // Reset dynamic sections
     document.getElementById('causes-container').innerHTML = `
@@ -2241,10 +2781,27 @@ function openCreateRiskModal() {
     document.getElementById('exposureEnd_create').value = nextMonthStr;
     document.getElementById('nextReviewDate_create').value = nextMonthStr;
     
+    // Reset RAM fields
+    document.getElementById('hsseLikelihood_create').value = '';
+    document.getElementById('hsseConsequence_create').value = '';
+    document.getElementById('hsseRamCurrent_create').value = '';
+    document.getElementById('riskVisualLikelihood_create').value = '';
+    document.getElementById('riskVisualConsequence_create').value = '';
+    document.getElementById('riskVisualRamCurrent_create').value = '';
+    document.getElementById('overrideRamCheckbox').checked = false;
+    document.getElementById('riskVisualLikelihood_create').setAttribute('disabled', 'disabled');
+    document.getElementById('riskVisualConsequence_create').setAttribute('disabled', 'disabled');
+    
     // Load assets if not already loaded
-    if (allAssets.length === 0) {
+    if (assignedAssets.length === 0) {
         loadAssignedAssets();
     }
+    
+    // Load users for all dropdowns
+    loadAllUsers().then(() => {
+        // Load users for risk owner dropdown
+        loadUsersForRiskOwner();
+    });
     
     // Focus on first field
     setTimeout(() => {
@@ -2265,17 +2822,23 @@ async function createNewRisk() {
         return;
     }
 
+    // Check if risk owner is selected
+    if (!document.getElementById('riskOwnerId').value) {
+        showToast('Please select a risk owner', 'error');
+        return;
+    }
+
     // Collect form data with bow-tie structure
     const riskData = {
         // Basic information
         title: document.getElementById('riskTitle_create').value.trim(),
         description: document.getElementById('description_create').value.trim(),
         type: document.getElementById('riskType_create').value,
+        category: document.getElementById('riskCategory_create').value,
         assetId: document.getElementById('assetId_create').value || '',
-        occurenceLevel: document.getElementById('occurenceLevel_create').value,
-        riskOwnerName: document.getElementById('riskOwner_create').value.trim(),
-        subProject: document.getElementById('subProject_create').value.trim(),
-        functionalAreaTECOP: document.getElementById('functionalAreaTECOP_create').value.trim(),
+        riskOwnerId: document.getElementById('riskOwnerId').value,
+        riskOwnerName: selectedRiskOwner ? selectedRiskOwner.name : '',
+        subProject: document.getElementById('subProject_create').value,
         event: document.getElementById('event_create').value.trim(),
         exposureStartDate: document.getElementById('exposureStart_create').value || null,
         exposureEndDate: document.getElementById('exposureEnd_create').value || null,
@@ -2288,12 +2851,13 @@ async function createNewRisk() {
         consequences: collectConsequences(),
         
         // RAM assessment
-        projectRamCurrent: document.getElementById('projectRamCurrent_create').value || '',
-        projectRamTarget: document.getElementById('projectRamTarget_create').value || '',
-        riskVisualRamCurrent: document.getElementById('riskVisualRamCurrent_create').value || '',
-        riskVisualRamTarget: document.getElementById('riskVisualRamTarget_create').value || '',
-        hsseRamCurrent: document.getElementById('hsseRamCurrent_create').value || '',
-        hsseRamTarget: document.getElementById('hsseRamTarget_create').value || '',
+        hsseLikelihood: document.getElementById('hsseLikelihood_create').value,
+        hsseConsequence: document.getElementById('hsseConsequence_create').value,
+        hsseRamCurrent: document.getElementById('hsseRamCurrent_create').value,
+        riskVisualLikelihood: document.getElementById('riskVisualLikelihood_create').value,
+        riskVisualConsequence: document.getElementById('riskVisualConsequence_create').value,
+        riskVisualRamCurrent: document.getElementById('riskVisualRamCurrent_create').value,
+        impact: document.getElementById('impact_create').value.trim(),
         manageability: document.getElementById('manageability_create').value || '',
         thresholdChanging: document.getElementById('thresholdChanging_create').value === 'true'
     };
@@ -2339,34 +2903,7 @@ async function createNewRisk() {
 
 // Risk Visual functionality
 function openRiskVisual() {
-    // Hide the main content
-    document.querySelector('.top-nav').style.display = 'none';
-    document.querySelector('.main').style.display = 'none';
-    
-   
-    
-    // Create iframe for risk visual
-    const visualIframe = document.createElement('iframe');
-    visualIframe.style.cssText = 'width:100%;height:100%;border:none;position:fixed;top:0;left:0;z-index:5;';
-    visualIframe.src = 'risk-visual.html';  // The risk visual page
-    visualIframe.id = 'riskVisualIframe';
-    document.body.appendChild(visualIframe);
-}
-
-function exitRiskVisual() {
-    // Remove iframe and back button
-    const iframe = document.getElementById('riskVisualIframe');
-    const backButton = document.querySelector('.view-back-btn');
-    
-    if (iframe) iframe.remove();
-    if (backButton) backButton.remove();
-    
-    // Show original UI
-    document.querySelector('.top-nav').style.display = 'flex';
-    document.querySelector('.main').style.display = 'block';
-    
-    // Optionally refresh risks data
-    loadRisks();
+    window.open('risk-visual.html', '_blank');
 }
 
 // View risk detail
@@ -2389,17 +2926,8 @@ async function viewRiskDetail(riskId) {
         // Store risk data for view page
         localStorage.setItem('viewingRisk', JSON.stringify(risk));
         
-        // Hide current UI
-        document.querySelector('.top-nav').style.display = 'none';
-        document.querySelector('.main').style.display = 'none';
-        
-  
-        // Load view in iframe
-        const viewIframe = document.createElement('iframe');
-        viewIframe.style.cssText = 'width:100%;height:100%;border:none;position:fixed;top:0;left:0;z-index:5;';
-        viewIframe.src = 'analyst-risk-detail.html';
-        viewIframe.id = 'riskViewIframe';
-        document.body.appendChild(viewIframe);
+        // Open detail view in new tab
+        window.open('analyst-risk-detail.html', '_blank');
         
     } catch (error) {
         console.error('Error fetching risk details:', error);
@@ -2410,20 +2938,6 @@ async function viewRiskDetail(riskId) {
 // Edit risk (placeholder)
 async function editRisk(riskId) {
     showToast('Edit functionality coming soon!', 'warning');
-}
-
-// Exit view mode
-function exitViewMode() {
-    // Remove iframe and back button
-    const iframe = document.getElementById('riskViewIframe');
-    const backButton = document.querySelector('.view-back-btn');
-    
-    if (iframe) iframe.remove();
-    if (backButton) backButton.remove();
-    
-    // Show original UI
-    document.querySelector('.top-nav').style.display = 'flex';
-    document.querySelector('.main').style.display = 'block';
 }
 
 // Refresh all data
@@ -2483,6 +2997,72 @@ document.addEventListener('DOMContentLoaded', () => {
             closeCreateRiskModal();
         }
     });
+    
+    // Initialize RAM fields
+    const likelihoodSelect = document.getElementById('riskVisualLikelihood_create');
+    const consequenceSelect = document.getElementById('riskVisualConsequence_create');
+    if (likelihoodSelect && consequenceSelect) {
+        likelihoodSelect.setAttribute('disabled', 'disabled');
+        consequenceSelect.setAttribute('disabled', 'disabled');
+    }
+    
+    // Setup Risk Owner dropdown event listeners
+    const riskOwnerSearch = document.getElementById('riskOwnerSearch');
+    const riskOwnerDropdown = document.getElementById('riskOwnerDropdown');
+    
+    if (riskOwnerSearch) {
+        riskOwnerSearch.addEventListener('focus', () => {
+            toggleRiskOwnerDropdown(true);
+        });
+
+        riskOwnerSearch.addEventListener('input', (e) => {
+            populateRiskOwnerDropdown(e.target.value);
+            toggleRiskOwnerDropdown(true);
+        });
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select')) {
+            toggleRiskOwnerDropdown(false);
+        }
+    });
+
+    // Handle keyboard navigation in Risk Owner dropdown
+    if (riskOwnerSearch) {
+        riskOwnerSearch.addEventListener('keydown', (e) => {
+            const dropdown = document.getElementById('riskOwnerDropdown');
+            const options = dropdown.querySelectorAll('.select-option');
+            
+            if (!dropdown.classList.contains('open')) return;
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const current = dropdown.querySelector('.select-option.highlighted') || options[0];
+                const next = current.nextElementSibling || options[0];
+                
+                options.forEach(opt => opt.classList.remove('highlighted'));
+                next.classList.add('highlighted');
+                next.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const current = dropdown.querySelector('.select-option.highlighted') || options[options.length - 1];
+                const prev = current.previousElementSibling || options[options.length - 1];
+                
+                options.forEach(opt => opt.classList.remove('highlighted'));
+                prev.classList.add('highlighted');
+                prev.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const highlighted = dropdown.querySelector('.select-option.highlighted');
+                if (highlighted) {
+                    highlighted.click();
+                }
+            } else if (e.key === 'Escape') {
+                toggleRiskOwnerDropdown(false);
+            }
+        });
+    }
 });
 
 // Make functions globally available
@@ -2492,7 +3072,6 @@ window.createNewRisk = createNewRisk;
 window.viewRiskDetail = viewRiskDetail;
 window.editRisk = editRisk;
 window.refreshRisks = refreshRisks;
-window.exitViewMode = exitViewMode;
 window.addCause = addCause;
 window.addActionToCause = addActionToCause;
 window.removeCause = removeCause;
@@ -2503,7 +3082,9 @@ window.removeConsequence = removeConsequence;
 window.removeControl = removeControl;
 window.updateActionStatus = updateActionStatus;
 window.openRiskVisual = openRiskVisual;
-window.exitRiskVisual = exitRiskVisual;
+window.openBowtieView = openBowtieView;
+window.calculateRiskVisualRAM = calculateRiskVisualRAM;
+window.toggleRamOverride = toggleRamOverride;
 </script>
 </body>
 </html>
