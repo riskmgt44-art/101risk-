@@ -969,6 +969,21 @@
             margin-right: 2px;
         }
 
+        /* Title and Description row styling */
+        .title-description-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .title-description-row .form-group:first-child {
+            flex: 0 0 40%;
+        }
+        
+        .title-description-row .form-group:last-child {
+            flex: 1;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) { 
             table { min-width: 2000px; } 
@@ -984,6 +999,13 @@
             }
             .action-item-details {
                 grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+            .title-description-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .title-description-row .form-group:first-child {
+                flex: 1;
             }
         }
         
@@ -1253,17 +1275,17 @@
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Risk Definition
                             </h3>
-                            <div class="form-row">
+                            
+                            <!-- Title and Description on same row -->
+                            <div class="title-description-row">
                                 <div class="form-group">
                                     <label for="riskTitle_create" class="required">Risk Title</label>
                                     <input type="text" id="riskTitle_create" placeholder="Clear, concise risk statement" required>
                                 </div>
-                            </div>
-                            
-                            <div class="form-row">
+                                
                                 <div class="form-group">
                                     <label for="description_create" class="required">Risk Description</label>
-                                    <textarea id="description_create" placeholder="Describe the risk scenario, background, and context..." required rows="3"></textarea>
+                                    <textarea id="description_create" placeholder="Describe the risk scenario, background, and context..." required rows="2"></textarea>
                                 </div>
                             </div>
                             
@@ -2045,7 +2067,8 @@ async function loadRisks() {
         }
         
         const data = await response.json();
-        risks = data.risks || [];
+        // Handle both array response and object with risks property
+        risks = Array.isArray(data) ? data : (data.risks || []);
         renderRisks(risks);
         
     } catch (error) {
@@ -2149,11 +2172,34 @@ function renderRisks(risks) {
     tbody.innerHTML = '';
     mobileContainer.innerHTML = '';
     
+    // Helper function to format date in short format (DD/MM/YY)
+    function formatShortDate(dateString) {
+        if (!dateString) return '—';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString().slice(-2);
+        
+        return `${day}/${month}/${year}`;
+    }
+    
+    // Helper function to get last 4 digits of Risk ID
+    function getLastFourDigits(riskId) {
+        if (!riskId || riskId === '—') return '—';
+        // If riskId is a string, get the last 4 characters
+        const idStr = String(riskId);
+        return idStr.slice(-4);
+    }
+    
     // Desktop table
     risks.forEach(risk => {
+        const lastFourId = getLastFourDigits(risk.riskId);
+        
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${escapeHtml(risk.riskId || '—')}</td>
+            <td>${escapeHtml(lastFourId)}</td>
             <td><span class="pill ${risk.type?.toLowerCase() === 'upside' ? 'pill-upside' : 'pill-downside'}">
                 ${escapeHtml(risk.type || 'Downside')}
             </span></td>
@@ -2162,14 +2208,14 @@ function renderRisks(risks) {
             <td><span class="pill ${getStatusClass(risk.status)}">${escapeHtml(risk.status || 'Open')}</span></td>
             <td>${escapeHtml(risk.riskOwnerName || '—')}</td>
             <td>${escapeHtml(risk.subProject || '—')}</td>
-            <td>${risk.exposureStartDate ? new Date(risk.exposureStartDate).toISOString().split('T')[0] : '—'}</td>
-            <td>${risk.exposureEndDate ? new Date(risk.exposureEndDate).toISOString().split('T')[0] : '—'}</td>
-            <td>${risk.nextReviewDate ? new Date(risk.nextReviewDate).toISOString().split('T')[0] : '—'}</td>
+            <td>${formatShortDate(risk.exposureStartDate)}</td>
+            <td>${formatShortDate(risk.exposureEndDate)}</td>
+            <td>${formatShortDate(risk.nextReviewDate)}</td>
             <td><span class="${getRamClass(risk.hsseRamCurrent || risk.hssaRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || risk.hssaRamCurrent || '—')}</span></td>
             <td><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></td>
             <td><span class="${getManageabilityClass(risk.manageability)}">${escapeHtml(risk.manageability || '—')}</span></td>
-            <td>${risk.createdAt ? new Date(risk.createdAt).toLocaleDateString() : '—'}</td>
-            <td>${risk.updatedAt ? new Date(risk.updatedAt).toLocaleDateString() : '—'}</td>
+            <td>${formatShortDate(risk.createdAt)}</td>
+            <td>${formatShortDate(risk.updatedAt)}</td>
             <td style="display: flex; gap: 4px;">
                 <button class="icon-btn" onclick="viewRiskDetail('${risk._id}')" title="View">
                     <i class="fas fa-eye"></i>
@@ -2192,7 +2238,7 @@ function renderRisks(risks) {
         card.innerHTML = `
             <div class="risk-card-header">
                 <div class="risk-card-title" onclick="viewRiskDetail('${risk._id}')">
-                    ${escapeHtml(risk.riskId || '—')}: ${escapeHtml(risk.title || '—')}
+                    ${escapeHtml(lastFourId)}: ${escapeHtml(risk.title || '—')}
                 </div>
                 <div style="display: flex; gap: 4px;">
                     <button class="icon-btn btn-bowtie small" onclick="openBowtieView('${risk._id}')" title="Bowtie View">
@@ -2225,7 +2271,10 @@ function renderRisks(risks) {
                 <div><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></div>
                 
                 <div class="risk-card-label">Created</div>
-                <div>${risk.createdAt ? new Date(risk.createdAt).toLocaleDateString() : '—'}</div>
+                <div>${formatShortDate(risk.createdAt)}</div>
+                
+                <div class="risk-card-label">Next Review</div>
+                <div>${formatShortDate(risk.nextReviewDate)}</div>
             </div>
             <div style="margin-top: 16px; display: flex; gap: 8px;">
                 <button class="btn-secondary" onclick="viewRiskDetail('${risk._id}')" style="flex: 1; padding: 8px;">
@@ -2616,94 +2665,246 @@ function removeControl(consequenceIndex, controlIndex) {
     }
 }
 
-// Collect causes data
+// Collect causes as simple string array (ignoring actions for backend)
 function collectCauses() {
     const causes = [];
     const causeCards = document.querySelectorAll('#causes-container .item-card');
     
-    causeCards.forEach((card, index) => {
+    causeCards.forEach((card) => {
         const description = card.querySelector('.cause-description').value.trim();
-        if (!description) return;
-        
-        const actions = [];
-        const actionItems = card.querySelectorAll('.actions-container .action-item');
-        
-        actionItems.forEach((actionItem, actionIndex) => {
-            const title = actionItem.querySelector('.action-title')?.value.trim();
-            if (!title) return;
-            
-            // Get owner from the hidden input in the custom dropdown
-            const ownerHidden = actionItem.querySelector('.action-owner-id');
-            const ownerName = actionItem.querySelector('.select-search')?.value || '';
-            const ownerId = ownerHidden?.value || '';
-            
-            actions.push({
-                id: `ACT-${Date.now()}-${actionIndex}`,
-                title: title,
-                ownerId: ownerId,
-                ownerName: ownerName,
-                startDate: actionItem.querySelector('.action-start-date')?.value || null,
-                finishDate: actionItem.querySelector('.action-finish-date')?.value || null,
-                cost: actionItem.querySelector('.action-cost')?.value || null,
-                status: actionItem.querySelector('.action-status')?.value || 'pending',
-                type: 'preventive',
-                order: actionIndex + 1
-            });
-        });
-        
-        causes.push({
-            description: description,
-            actions: actions,
-            order: index + 1
-        });
+        if (description) {
+            causes.push(description);
+        }
     });
     
     return causes;
 }
 
-// Collect consequences data
+// Collect consequences as simple string array (ignoring controls for backend)
 function collectConsequences() {
     const consequences = [];
     const consequenceCards = document.querySelectorAll('#consequences-container .item-card');
     
-    consequenceCards.forEach((card, index) => {
+    consequenceCards.forEach((card) => {
         const description = card.querySelector('.consequence-description').value.trim();
-        if (!description) return;
-        
-        const controls = [];
-        const controlItems = card.querySelectorAll('.controls-container .action-item');
-        
-        controlItems.forEach((controlItem, controlIndex) => {
-            const title = controlItem.querySelector('.control-title')?.value.trim();
-            if (!title) return;
-            
-            // Get owner from the hidden input in the custom dropdown
-            const ownerHidden = controlItem.querySelector('.action-owner-id');
-            const ownerName = controlItem.querySelector('.select-search')?.value || '';
-            const ownerId = ownerHidden?.value || '';
-            
-            controls.push({
-                id: `CTRL-${Date.now()}-${controlIndex}`,
-                title: title,
-                ownerId: ownerId,
-                ownerName: ownerName,
-                startDate: controlItem.querySelector('.control-start-date')?.value || null,
-                finishDate: controlItem.querySelector('.control-finish-date')?.value || null,
-                cost: controlItem.querySelector('.control-cost')?.value || null,
-                status: controlItem.querySelector('.control-status')?.value || 'pending',
-                type: 'recovery',
-                order: controlIndex + 1
-            });
-        });
-        
-        consequences.push({
-            description: description,
-            actions: controls,
-            order: index + 1
-        });
+        if (description) {
+            consequences.push(description);
+        }
     });
     
     return consequences;
+}
+
+// Helper function to format date for backend
+function formatDateForBackend(dateString) {
+    if (!dateString) return null;
+    return dateString; // Already in YYYY-MM-DD format from input
+}
+
+async function createNewRisk() {
+    const form = document.getElementById('createRiskForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    // Check if risk owner is selected
+    if (!document.getElementById('riskOwnerId').value) {
+        showToast('Please select a risk owner', 'error');
+        return;
+    }
+
+    // Get asset ID
+    const assetSelect = document.getElementById('assetId_create');
+    const staticAssetDisplay = document.getElementById('staticAssetDisplay');
+    let assetId = assetSelect.value;
+    
+    if (staticAssetDisplay && assetSelect.style.display === 'none') {
+        assetId = assetSelect.value;
+    }
+
+    // Get risk owner name
+    const riskOwnerName = document.getElementById('riskOwnerSearch').value;
+
+    // Get event value
+    const event = document.getElementById('event_create').value.trim();
+    if (!event) {
+        showToast('Risk event is required', 'error');
+        return;
+    }
+
+    // Collect causes and consequences as simple string arrays
+    const causes = collectCauses();
+    const consequences = collectConsequences();
+
+    if (causes.length === 0) {
+        showToast('At least one cause is required', 'error');
+        return;
+    }
+
+    if (consequences.length === 0) {
+        showToast('At least one consequence is required', 'error');
+        return;
+    }
+
+    // Get RAM values
+    const hsseLikelihood = document.getElementById('hsseLikelihood_create').value;
+    const hsseConsequence = document.getElementById('hsseConsequence_create').value;
+    const hsseRamCurrent = document.getElementById('hsseRamCurrent_create').value;
+    const riskVisualRamCurrent = document.getElementById('riskVisualRamCurrent_create').value;
+    const manageability = document.getElementById('manageability_create').value;
+    const thresholdChanging = document.getElementById('thresholdChanging_create').value === 'true';
+
+    // Collect form data matching backend CreateRiskRequest structure
+    const riskData = {
+        // Basic information
+        title: document.getElementById('riskTitle_create').value.trim(),
+        description: document.getElementById('description_create').value.trim(),
+        type: document.getElementById('riskType_create').value,
+        status: 'pending',
+        assetId: assetId || '',
+        riskOwnerName: riskOwnerName,
+        subProject: document.getElementById('subProject_create').value || '',
+        
+        // Causes, event, consequences
+        causes: causes,
+        event: event,
+        consequences: consequences,
+        
+        // Dates
+        nextReviewDate: formatDateForBackend(document.getElementById('nextReviewDate_create').value),
+        exposureStartDate: formatDateForBackend(document.getElementById('exposureStart_create').value),
+        exposureEndDate: formatDateForBackend(document.getElementById('exposureEnd_create').value),
+        
+        // RAM assessment - using field names that match backend
+        occurenceLevel: hsseLikelihood || '',
+        hsseRamCurrent: hsseRamCurrent || '',
+        riskVisualRamCurrent: riskVisualRamCurrent || '',
+        
+        // Additional fields
+        manageability: manageability || '',
+        thresholdChanging: thresholdChanging
+    };
+
+    console.log('Creating risk with data:', riskData);
+
+    // Show loading state
+    const submitBtn = document.querySelector('.btn-success');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Please login to create a risk', 'error');
+            return;
+        }
+
+        const response = await fetch('/api/analyst/risks', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(riskData)
+        });
+
+        let responseData;
+        try {
+            responseData = await response.json();
+        } catch (e) {
+            console.error('Could not parse response:', e);
+        }
+
+        if (!response.ok) {
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            if (responseData && responseData.error) {
+                errorMessage = responseData.error;
+            } else if (responseData && responseData.message) {
+                errorMessage = responseData.message;
+            }
+            throw new Error(errorMessage);
+        }
+
+        console.log('Risk created successfully:', responseData);
+        
+        closeCreateRiskModal();
+        showToast('Risk created successfully and submitted for approval!', 'success');
+        
+        // Refresh data
+        loadRisks();
+        
+    } catch (error) {
+        console.error('Error creating risk:', error);
+        showToast(`Failed to create risk: ${error.message}`, 'error');
+    } finally {
+        // Remove loading state
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
+}
+
+// Risk Visual functionality
+function openRiskVisual() {
+    window.open('risk-visual.html', '_blank');
+}
+
+// View risk detail
+async function viewRiskDetail(riskId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/analyst/risks/${riskId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const risk = await response.json();
+        
+        // Store risk data for view page
+        localStorage.setItem('viewingRisk', JSON.stringify(risk));
+        
+        // Open detail view in new tab
+        window.open('analyst-risk-detail.html', '_blank');
+        
+    } catch (error) {
+        console.error('Error fetching risk details:', error);
+        showToast('Failed to load risk details', 'error');
+    }
+}
+
+// Edit risk (placeholder)
+async function editRisk(riskId) {
+    showToast('Edit functionality coming soon!', 'warning');
+}
+
+// Refresh all data
+function refreshRisks() {
+    loadRisks();
+    showToast('Refreshing data...', 'success');
+}
+
+// Toast notification system
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} toast-icon"></i>
+        <div class="toast-message">${message}</div>
+    `;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
 }
 
 // Modal functions
@@ -2813,154 +3014,6 @@ function openCreateRiskModal() {
 function closeCreateRiskModal() {
     document.getElementById('createRiskModal').classList.remove('open');
     document.body.style.overflow = 'auto';
-}
-
-async function createNewRisk() {
-    const form = document.getElementById('createRiskForm');
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-
-    // Check if risk owner is selected
-    if (!document.getElementById('riskOwnerId').value) {
-        showToast('Please select a risk owner', 'error');
-        return;
-    }
-
-    // Collect form data with bow-tie structure
-    const riskData = {
-        // Basic information
-        title: document.getElementById('riskTitle_create').value.trim(),
-        description: document.getElementById('description_create').value.trim(),
-        type: document.getElementById('riskType_create').value,
-        category: document.getElementById('riskCategory_create').value,
-        assetId: document.getElementById('assetId_create').value || '',
-        riskOwnerId: document.getElementById('riskOwnerId').value,
-        riskOwnerName: selectedRiskOwner ? selectedRiskOwner.name : '',
-        subProject: document.getElementById('subProject_create').value,
-        event: document.getElementById('event_create').value.trim(),
-        exposureStartDate: document.getElementById('exposureStart_create').value || null,
-        exposureEndDate: document.getElementById('exposureEnd_create').value || null,
-        nextReviewDate: document.getElementById('nextReviewDate_create').value || null,
-        
-        // Bow-tie left side: Causes with preventive actions
-        causes: collectCauses(),
-        
-        // Bow-tie right side: Consequences with recovery controls
-        consequences: collectConsequences(),
-        
-        // RAM assessment
-        hsseLikelihood: document.getElementById('hsseLikelihood_create').value,
-        hsseConsequence: document.getElementById('hsseConsequence_create').value,
-        hsseRamCurrent: document.getElementById('hsseRamCurrent_create').value,
-        riskVisualLikelihood: document.getElementById('riskVisualLikelihood_create').value,
-        riskVisualConsequence: document.getElementById('riskVisualConsequence_create').value,
-        riskVisualRamCurrent: document.getElementById('riskVisualRamCurrent_create').value,
-        impact: document.getElementById('impact_create').value.trim(),
-        manageability: document.getElementById('manageability_create').value || '',
-        thresholdChanging: document.getElementById('thresholdChanging_create').value === 'true'
-    };
-
-    console.log('Creating risk:', riskData);
-
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/analyst/risks', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(riskData)
-        });
-
-        if (!response.ok) {
-            let errorMessage = `HTTP error! status: ${response.status}`;
-            try {
-                const errorData = await response.json();
-                errorMessage = errorData.message || errorMessage;
-            } catch (e) {
-                console.error('Could not parse error response:', e);
-            }
-            throw new Error(errorMessage);
-        }
-
-        const result = await response.json();
-        console.log('Risk created successfully:', result);
-        
-        closeCreateRiskModal();
-        showToast('Risk created successfully and submitted for approval! Actions will activate once approved.', 'success');
-        
-        // Refresh data
-        loadRisks();
-        
-    } catch (error) {
-        console.error('Error creating risk:', error);
-        showToast(`Failed to create risk: ${error.message}`, 'error');
-    }
-}
-
-// Risk Visual functionality
-function openRiskVisual() {
-    window.open('risk-visual.html', '_blank');
-}
-
-// View risk detail
-async function viewRiskDetail(riskId) {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`/api/analyst/risks/${riskId}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const risk = await response.json();
-        
-        // Store risk data for view page
-        localStorage.setItem('viewingRisk', JSON.stringify(risk));
-        
-        // Open detail view in new tab
-        window.open('analyst-risk-detail.html', '_blank');
-        
-    } catch (error) {
-        console.error('Error fetching risk details:', error);
-        showToast('Failed to load risk details', 'error');
-    }
-}
-
-// Edit risk (placeholder)
-async function editRisk(riskId) {
-    showToast('Edit functionality coming soon!', 'warning');
-}
-
-// Refresh all data
-function refreshRisks() {
-    loadRisks();
-    showToast('Refreshing data...', 'success');
-}
-
-// Toast notification system
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} toast-icon"></i>
-        <div class="toast-message">${message}</div>
-    `;
-    container.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add('show'));
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400);
-    }, 3000);
 }
 
 // Initialize on load
@@ -3085,6 +3138,7 @@ window.openRiskVisual = openRiskVisual;
 window.openBowtieView = openBowtieView;
 window.calculateRiskVisualRAM = calculateRiskVisualRAM;
 window.toggleRamOverride = toggleRamOverride;
+window.searchRisks = searchRisks;
 </script>
 </body>
 </html>
