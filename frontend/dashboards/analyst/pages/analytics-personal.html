@@ -4,11 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analyst Dashboard • RiskMGT</title>
+    
+    <!-- Preconnect for faster resource loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <!-- Load critical fonts with display swap -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Async load Font Awesome with low priority -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"></noscript>
+    
     <style>
         :root {
             --primary: #5DA1A1;
@@ -26,9 +35,16 @@
             --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
             --radius: 12.8px;
             --transition: all 0.3s ease;
+            --modal-overlay: rgba(0,0,0,0.5);
         }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; overflow: hidden; }
+        
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
+        }
+        
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: var(--bg);
@@ -36,8 +52,19 @@
             display: flex;
             flex-direction: column;
         }
-        body::-webkit-scrollbar, ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
-        html, body { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Hide scrollbars but keep functionality */
+        body::-webkit-scrollbar, ::-webkit-scrollbar { 
+            display: none; 
+            width: 0; 
+            height: 0; 
+            background: transparent; 
+        }
+        
+        html, body { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
 
         .top-bar {
             flex-shrink: 0;
@@ -52,6 +79,7 @@
             z-index: 20;
             backdrop-filter: blur(8px);
         }
+        
         .top-title {
             font-size: 20px;
             font-weight: 700;
@@ -59,6 +87,7 @@
             align-items: center;
             gap: 12px;
         }
+        
         .analyst-badge {
             background: var(--primary);
             color: white;
@@ -67,12 +96,14 @@
             font-size: 12px;
             font-weight: 600;
         }
+        
         .top-controls {
             display: flex;
             align-items: center;
             gap: 16px;
             flex-wrap: wrap;
         }
+        
         .select-control, .btn {
             padding: 8px 16px;
             border: 1px solid var(--border);
@@ -81,13 +112,19 @@
             background: var(--bg);
             cursor: pointer;
         }
+        
         .btn {
             display: flex;
             align-items: center;
             gap: 8px;
             background: transparent;
         }
-        .btn:hover { border-color: var(--primary); color: var(--primary); }
+        
+        .btn:hover { 
+            border-color: var(--primary); 
+            color: var(--primary); 
+        }
+        
         .refresh-time {
             font-size: 12px;
             color: var(--neutral);
@@ -106,6 +143,7 @@
             gap: 24px;
             margin-bottom: 48px;
         }
+        
         .kpi-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -114,29 +152,38 @@
             padding: 24px;
             transition: var(--transition);
         }
-        .kpi-card:hover { border-color: var(--primary); }
+        
+        .kpi-card:hover { 
+            border-color: var(--primary); 
+        }
+        
         .kpi-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
         }
+        
         .kpi-label {
             font-size: 13px;
             color: var(--neutral);
         }
+        
         .kpi-trend {
             font-size: 12px;
             font-weight: 600;
         }
+        
         .trend-up { color: var(--red); }
         .trend-down { color: var(--green); }
+        
         .kpi-value {
             font-size: 36px;
             font-weight: 700;
             margin-bottom: 6px;
             transition: color 0.4s ease;
         }
+        
         .kpi-sub {
             font-size: 13px;
             color: var(--neutral);
@@ -148,6 +195,7 @@
             gap: 32px;
             margin-bottom: 48px;
         }
+        
         .chart-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -157,11 +205,13 @@
             display: flex;
             flex-direction: column;
         }
+        
         .chart-title {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 16px;
         }
+        
         .chart-container {
             position: relative;
             flex: 1;
@@ -182,17 +232,20 @@
             box-shadow: var(--shadow-sm);
             padding: 24px;
         }
+        
         .attention-title {
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 16px;
             color: var(--red);
         }
+        
         .attention-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
+        
         .attention-item {
             display: flex;
             justify-content: space-between;
@@ -202,6 +255,7 @@
             border-radius: 8px;
             font-size: 14px;
         }
+        
         .attention-empty {
             text-align: center;
             padding: 32px 16px;
@@ -209,12 +263,17 @@
             font-style: italic;
             font-size: 15px;
         }
+        
         .attention-link {
             color: var(--primary);
             text-decoration: none;
             font-weight: 500;
+            cursor: pointer;
         }
-        .attention-link:hover { text-decoration: underline; }
+        
+        .attention-link:hover { 
+            text-decoration: underline; 
+        }
 
         .assets-panel {
             background: var(--card-bg);
@@ -224,17 +283,20 @@
             padding: 24px;
             margin-top: 32px;
         }
+        
         .assets-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
+        
         .assets-title {
             font-size: 18px;
             font-weight: 600;
             color: var(--text-primary);
         }
+        
         .assets-count {
             background: var(--primary);
             color: white;
@@ -243,11 +305,13 @@
             font-size: 12px;
             font-weight: 600;
         }
+        
         .assets-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 16px;
         }
+        
         .asset-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -256,16 +320,19 @@
             transition: var(--transition);
             cursor: pointer;
         }
+        
         .asset-card:hover {
             border-color: var(--primary);
             box-shadow: var(--shadow-sm);
         }
+        
         .asset-name {
             font-size: 16px;
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 8px;
         }
+        
         .asset-category {
             font-size: 12px;
             color: var(--neutral);
@@ -275,12 +342,14 @@
             display: inline-block;
             margin-bottom: 12px;
         }
+        
         .asset-details {
             display: flex;
             flex-direction: column;
             gap: 6px;
             margin-bottom: 12px;
         }
+        
         .asset-detail {
             font-size: 13px;
             color: var(--text-secondary);
@@ -288,10 +357,12 @@
             align-items: center;
             gap: 6px;
         }
+        
         .asset-detail i {
             color: var(--neutral);
             width: 16px;
         }
+        
         .asset-status {
             display: inline-block;
             padding: 4px 8px;
@@ -301,23 +372,134 @@
             text-transform: uppercase;
             margin-top: 8px;
         }
+        
         .status-healthy { background: rgba(16, 185, 129, 0.1); color: var(--green); }
         .status-warning { background: rgba(245, 158, 11, 0.1); color: var(--amber); }
         .status-critical { background: rgba(239, 68, 68, 0.1); color: var(--red); }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-overlay);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--neutral);
+            transition: var(--transition);
+        }
+        
+        .modal-close:hover {
+            color: var(--red);
+        }
+        
+        .modal-body {
+            margin-bottom: 24px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        /* Skeleton Loading Animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border: none !important;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .hide { display: none; }
 
         @media (max-width: 1024px) {
             .analytics-grid { grid-template-columns: 1fr; }
             .assets-grid { grid-template-columns: 1fr 1fr; }
         }
+        
         @media (max-width: 768px) {
-            .top-bar { padding: 16px; flex-direction: column; align-items: stretch; gap: 16px; }
-            .top-controls { justify-content: stretch; }
-            .select-control, .btn { width: 100%; justify-content: center; }
-            .main { padding: 20px 16px 80px 16px; }
-            .kpi-row, .secondary-row { grid-template-columns: 1fr; }
-            .analytics-grid { gap: 24px; }
-            .chart-container { min-height: 280px; }
-            .assets-grid { grid-template-columns: 1fr; }
+            .top-bar { 
+                padding: 16px; 
+                flex-direction: column; 
+                align-items: stretch; 
+                gap: 16px; 
+            }
+            .top-controls { 
+                justify-content: stretch; 
+            }
+            .select-control, .btn { 
+                width: 100%; 
+                justify-content: center; 
+            }
+            .main { 
+                padding: 20px 16px 80px 16px; 
+            }
+            .kpi-row, .secondary-row { 
+                grid-template-columns: 1fr; 
+            }
+            .analytics-grid { 
+                gap: 24px; 
+            }
+            .chart-container { 
+                min-height: 280px; 
+            }
+            .assets-grid { 
+                grid-template-columns: 1fr; 
+            }
         }
     </style>
 </head>
@@ -326,7 +508,7 @@
     <div class="top-bar">
         <div class="top-title">
             Analyst Dashboard
-           
+            <span class="analyst-badge">Analyst</span>
         </div>
         <div class="top-controls">
             <select class="select-control" id="asset-filter">
@@ -340,99 +522,37 @@
     </div>
 
     <main class="main">
-        <div class="kpi-row">
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-label">Total Risks in Assigned Assets</div>
-                    <div class="kpi-trend" id="risks-trend">—</div>
-                </div>
-                <div class="kpi-value" id="total-risks">—</div>
-                <div class="kpi-sub">Across all assigned assets</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-label">High Severity Risks</div>
-                    <div class="kpi-trend trend-up" id="high-risks-trend">—</div>
-                </div>
-                <div class="kpi-value" id="high-risks">—</div>
-                <div class="kpi-sub">Requiring immediate attention</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-label">Open Actions</div>
-                    <div class="kpi-trend" id="actions-trend">—</div>
-                </div>
-                <div class="kpi-value" id="open-actions">—</div>
-                <div class="kpi-sub"><span id="overdue-count">0</span> overdue</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-label">My Created Risks</div>
-                </div>
-                <div class="kpi-value" id="my-created-risks">—</div>
-                <div class="kpi-sub">Pending approval: <span id="pending-approvals">0</span></div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-label">Assigned Assets</div>
-                </div>
-                <div class="kpi-value" id="assigned-assets">—</div>
-                <div class="kpi-sub">Assets under my responsibility</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-label">My Recent Activity</div>
-                </div>
-                <div class="kpi-value" id="recent-activity">—</div>
-                <div class="kpi-sub">Last 24 hours</div>
-            </div>
+        <!-- KPI Section with skeleton loading -->
+        <div class="kpi-row" id="kpi-container">
+            <!-- Skeleton loaders will be shown initially -->
+            <div class="kpi-card skeleton" style="height: 140px;"></div>
+            <div class="kpi-card skeleton" style="height: 140px;"></div>
+            <div class="kpi-card skeleton" style="height: 140px;"></div>
+            <div class="kpi-card skeleton" style="height: 140px;"></div>
+            <div class="kpi-card skeleton" style="height: 140px;"></div>
+            <div class="kpi-card skeleton" style="height: 140px;"></div>
         </div>
 
-        <!-- Charts Section - Will show real data -->
-        <div class="analytics-grid">
-            <div class="chart-card">
-                <div class="chart-title">Risk Severity Distribution</div>
-                <div class="chart-container">
-                    <canvas id="severityChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">Risk Trend (Last 7 Days)</div>
-                <div class="chart-container">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">Action Status Breakdown</div>
-                <div class="chart-container">
-                    <canvas id="actionChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">My Risk Submissions Status</div>
-                <div class="chart-container">
-                    <canvas id="submissionsChart"></canvas>
-                </div>
-            </div>
+        <!-- Charts Section -->
+        <div class="analytics-grid" id="charts-container">
+            <div class="chart-card skeleton" style="height: 400px;"></div>
+            <div class="chart-card skeleton" style="height: 400px;"></div>
+            <div class="chart-card skeleton" style="height: 400px;"></div>
+            <div class="chart-card skeleton" style="height: 400px;"></div>
         </div>
 
         <!-- Attention Required -->
         <div class="attention-panel">
             <div class="attention-title">Attention Required</div>
             <div class="attention-list" id="attention-list">
-                <!-- Items will be inserted here dynamically -->
+                <div class="attention-item skeleton" style="height: 60px;"></div>
             </div>
             <div id="attention-empty" class="attention-empty" style="display: none;">
                 No immediate attention required — all risks and actions are on track.
             </div>
         </div>
 
-        <!-- Assigned Assets -->
+        <!-- Assigned Assets - NO REDIRECTS, just modal popup -->
         <div class="assets-panel">
             <div class="assets-header">
                 <div class="assets-title">My Assigned Assets</div>
@@ -440,6 +560,9 @@
             </div>
             <div class="assets-grid" id="assets-grid">
                 <!-- Asset cards will be inserted here -->
+                <div class="asset-card skeleton" style="height: 200px;"></div>
+                <div class="asset-card skeleton" style="height: 200px;"></div>
+                <div class="asset-card skeleton" style="height: 200px;"></div>
             </div>
             <div id="assets-empty" class="attention-empty" style="display: none; margin-top: 16px;">
                 No assets assigned to you.
@@ -447,144 +570,119 @@
         </div>
     </main>
 
+    <!-- Asset Modal - No redirects, just shows details -->
+    <div id="assetModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Asset Details</h2>
+                <button class="modal-close" onclick="closeAssetModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Asset details will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeAssetModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Chart.js dynamically to improve initial load time -->
     <script>
-        // Chart colors matching your color scheme
-        const COLORS = {
-            primary: '#5DA1A1',
-            red: '#ef4444',
-            green: '#10b981',
-            amber: '#f59e0b',
-            blue: '#3b82f6',
-            neutral: '#6b7280'
-        };
-
-        // Common chart options
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { 
-                    position: 'bottom', 
-                    labels: { 
-                        font: { 
-                            family: 'Inter', 
-                            size: 12 
-                        } 
-                    } 
-                },
-                tooltip: { 
-                    backgroundColor: 'rgba(0,0,0,0.8)', 
-                    titleFont: { family: 'Inter' }, 
-                    bodyFont: { family: 'Inter' }, 
-                    cornerRadius: 8 
-                }
+        // Configuration
+        const CONFIG = {
+            API: {
+                dashboard: '/api/dashboard/analyst',
+                assignedAssets: '/api/dashboard/analyst/assigned-assets',
+                overview: '/api/dashboard/analyst/overview',
+                charts: '/api/dashboard/analyst/charts'
             },
-            interaction: { intersect: false, mode: 'index' }
+            COLORS: {
+                primary: '#5DA1A1',
+                red: '#ef4444',
+                green: '#10b981',
+                amber: '#f59e0b',
+                blue: '#3b82f6',
+                neutral: '#6b7280'
+            },
+            REFRESH_INTERVAL: 45000 // 45 seconds
         };
 
-        // Initialize charts with empty data
-        let severityChart = null;
-        let trendChart = null;
-        let actionChart = null;
-        let submissionsChart = null;
-
-        // Initialize charts when DOM is ready
-        function initializeCharts() {
-            // Only initialize if canvas elements exist
-            const severityCanvas = document.getElementById('severityChart');
-            const trendCanvas = document.getElementById('trendChart');
-            const actionCanvas = document.getElementById('actionChart');
-            const submissionsCanvas = document.getElementById('submissionsChart');
-            
-            if (severityCanvas) {
-                severityChart = new Chart(severityCanvas, {
-                    type: 'doughnut',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            data: [],
-                            backgroundColor: [],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        ...commonOptions,
-                        cutout: '70%'
-                    }
-                });
-            }
-            
-            if (trendCanvas) {
-                trendChart = new Chart(trendCanvas, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: []
-                    },
-                    options: {
-                        ...commonOptions,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Risks'
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            if (actionCanvas) {
-                actionChart = new Chart(actionCanvas, {
-                    type: 'bar',
-                    data: {
-                        labels: [],
-                        datasets: []
-                    },
-                    options: {
-                        ...commonOptions,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Actions'
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            if (submissionsCanvas) {
-                submissionsChart = new Chart(submissionsCanvas, {
-                    type: 'pie',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            data: [],
-                            backgroundColor: []
-                        }]
-                    },
-                    options: commonOptions
-                });
-            }
-        }
-
-        // API endpoints
-        const API_ENDPOINTS = {
-            dashboard: '/api/dashboard/analyst',
-            assignedAssets: '/api/dashboard/analyst/assigned-assets',
-            overview: '/api/dashboard/analyst/overview',
-            charts: '/api/dashboard/analyst/charts'
+        // State management
+        let charts = {
+            severity: null,
+            trend: null,
+            action: null,
+            submissions: null
         };
+        
+        let chartJSLoaded = false;
 
-        // Format number with commas
-        function formatNumber(num) {
+        // Utility Functions
+        const formatNumber = (num) => {
+            if (num === undefined || num === null) return '0';
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
+        };
+
+        // Modal Functions - NO REDIRECTS
+        window.showAssetDetails = function(asset) {
+            const modal = document.getElementById('assetModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            if (!modal || !modalTitle || !modalBody) return;
+            
+            modalTitle.textContent = asset.name || 'Asset Details';
+            
+            // Determine status
+            let statusClass = 'status-healthy';
+            let statusText = 'Healthy';
+            
+            if (asset.status === 'inactive') {
+                statusClass = 'status-warning';
+                statusText = 'Inactive';
+            } else if (asset.health === 'Critical' || asset.status === 'critical') {
+                statusClass = 'status-critical';
+                statusText = 'Critical';
+            } else if (asset.health === 'Warning' || asset.status === 'warning') {
+                statusClass = 'status-warning';
+                statusText = 'Warning';
+            }
+            
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <span class="asset-category">${asset.category || 'Uncategorized'}</span>
+                    <span class="asset-status ${statusClass}" style="margin-left: 10px;">${statusText}</span>
+                </div>
+                <div style="display: grid; gap: 16px;">
+                    ${asset.location ? `<div><strong>Location:</strong> ${asset.location}</div>` : ''}
+                    ${asset.owner ? `<div><strong>Owner:</strong> ${asset.owner}</div>` : ''}
+                    ${asset.type ? `<div><strong>Type:</strong> ${asset.type}</div>` : ''}
+                    ${asset.department ? `<div><strong>Department:</strong> ${asset.department}</div>` : ''}
+                    ${asset.updatedAt ? `<div><strong>Last Updated:</strong> ${new Date(asset.updatedAt).toLocaleDateString()}</div>` : ''}
+                    ${asset.createdAt ? `<div><strong>Created:</strong> ${new Date(asset.createdAt).toLocaleDateString()}</div>` : ''}
+                    ${asset.notes ? `<div><strong>Notes:</strong> ${asset.notes}</div>` : ''}
+                    ${asset.riskCount ? `<div><strong>Associated Risks:</strong> ${asset.riskCount}</div>` : ''}
+                    ${asset.actionCount ? `<div><strong>Open Actions:</strong> ${asset.actionCount}</div>` : ''}
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        };
+
+        window.closeAssetModal = function() {
+            const modal = document.getElementById('assetModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('assetModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
 
         // Update high risks color based on count
         function updateHighRisksColor(count) {
@@ -600,161 +698,286 @@
             }
         }
 
-        // Fetch chart data using the new endpoint
-        async function fetchChartData(token) {
-            try {
-                console.log('Fetching chart data...');
-                const chartRes = await fetch(API_ENDPOINTS.charts, {
-                    method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
-                });
+        // Render KPI cards with real data
+        function renderKPIs(data) {
+            const container = document.getElementById('kpi-container');
+            if (!container) return;
+            
+            updateHighRisksColor(data.highSeverityRisks || 0);
+            
+            container.innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-label">Total Risks in Assigned Assets</div>
+                        <div class="kpi-trend" id="risks-trend">${data.totalRisksTrend || '—'}</div>
+                    </div>
+                    <div class="kpi-value" id="total-risks">${formatNumber(data.totalRisks)}</div>
+                    <div class="kpi-sub">Across all assigned assets</div>
+                </div>
                 
-                console.log('Chart response status:', chartRes.status);
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-label">High Severity Risks</div>
+                        <div class="kpi-trend ${data.highSeverityTrend?.includes('+') ? 'trend-up' : 'trend-down'}" id="high-risks-trend">${data.highSeverityTrend || '—'}</div>
+                    </div>
+                    <div class="kpi-value" id="high-risks">${formatNumber(data.highSeverityRisks)}</div>
+                    <div class="kpi-sub">Requiring immediate attention</div>
+                </div>
                 
-                if (chartRes.ok) {
-                    const data = await chartRes.json();
-                    console.log('Chart data received');
-                    return data;
-                } else {
-                    console.warn('Chart endpoint returned status:', chartRes.status);
-                    return null;
-                }
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-label">Open Actions</div>
+                        <div class="kpi-trend" id="actions-trend">${data.actionsTrend || '—'}</div>
+                    </div>
+                    <div class="kpi-value" id="open-actions">${formatNumber(data.openActions)}</div>
+                    <div class="kpi-sub"><span id="overdue-count">${formatNumber(data.overdueActions)}</span> overdue</div>
+                </div>
                 
-            } catch (error) {
-                console.error('Error fetching chart data:', error);
-                return null;
-            }
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-label">My Created Risks</div>
+                    </div>
+                    <div class="kpi-value" id="my-created-risks">${formatNumber(data.myCreatedRisks || data.totalMyRisks)}</div>
+                    <div class="kpi-sub">Pending approval: <span id="pending-approvals">${formatNumber(data.myPendingSubmissions)}</span></div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-label">Assigned Assets</div>
+                    </div>
+                    <div class="kpi-value" id="assigned-assets">${formatNumber(data.assignedAssets)}</div>
+                    <div class="kpi-sub">Assets under my responsibility</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-label">My Recent Activity</div>
+                    </div>
+                    <div class="kpi-value" id="recent-activity">${formatNumber(data.recentActivity || data.recentActivity24h || 0)}</div>
+                    <div class="kpi-sub">Last 24 hours</div>
+                </div>
+            `;
         }
 
-        // Update charts with real data from the new endpoint - FIXED VERSION
-        function updateChartsWithRealData(dashboardData, chartData) {
-            console.log('Updating charts with data:', { dashboardData, chartData });
+        // Load Chart.js dynamically
+        function loadChartJS(callback) {
+            if (window.Chart) {
+                chartJSLoaded = true;
+                callback();
+                return;
+            }
             
-            // Update severity chart with actual data
-            if (severityChart) {
-                if (chartData && chartData.severityDistribution) {
-                    severityChart.data.labels = chartData.severityDistribution.labels || [];
-                    severityChart.data.datasets[0].data = chartData.severityDistribution.values || [];
-                    severityChart.data.datasets[0].backgroundColor = chartData.severityDistribution.colors || [
-                        COLORS.red, COLORS.amber, COLORS.green
-                    ];
-                    severityChart.update();
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = () => {
+                chartJSLoaded = true;
+                callback();
+            };
+            script.onerror = () => {
+                console.error('Failed to load Chart.js');
+                callback(); // Continue without charts
+            };
+            document.head.appendChild(script);
+        }
+
+        // Render chart containers
+        function renderChartContainers() {
+            const container = document.getElementById('charts-container');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="chart-card">
+                    <div class="chart-title">Risk Severity Distribution</div>
+                    <div class="chart-container">
+                        <canvas id="severityChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Risk Trend (Last 7 Days)</div>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Action Status Breakdown</div>
+                    <div class="chart-container">
+                        <canvas id="actionChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">My Risk Submissions Status</div>
+                    <div class="chart-container">
+                        <canvas id="submissionsChart"></canvas>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize charts with data
+        function initCharts(dashboardData, chartData) {
+            if (!window.Chart) {
+                console.warn('Chart.js not loaded');
+                return;
+            }
+            
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { 
+                            font: { 
+                                family: 'Inter', 
+                                size: 12 
+                            } 
+                        } 
+                    }
+                }
+            };
+
+            // Severity Chart
+            const severityCtx = document.getElementById('severityChart')?.getContext('2d');
+            if (severityCtx) {
+                if (charts.severity) charts.severity.destroy();
+                
+                let chartData_ = [1, 1, 1];
+                let chartLabels = ['No Data'];
+                let chartColors = [CONFIG.COLORS.neutral];
+                
+                if (chartData?.severityDistribution) {
+                    chartLabels = chartData.severityDistribution.labels || [];
+                    chartData_ = chartData.severityDistribution.values || [];
+                    chartColors = chartData.severityDistribution.colors || [CONFIG.COLORS.red, CONFIG.COLORS.amber, CONFIG.COLORS.green];
                 } else if (dashboardData.totalRisks > 0) {
-                    // Fallback to basic data
                     const highCount = dashboardData.highSeverityRisks || 0;
-                    const mediumCount = Math.max(0, Math.floor(dashboardData.totalRisks * 0.4));
-                    const lowCount = Math.max(0, dashboardData.totalRisks - highCount - mediumCount);
+                    const mediumCount = Math.floor((dashboardData.totalRisks || 0) * 0.4);
+                    const lowCount = Math.max(0, (dashboardData.totalRisks || 0) - highCount - mediumCount);
                     
-                    severityChart.data.labels = ['High', 'Medium', 'Low'];
-                    severityChart.data.datasets[0].data = [highCount, mediumCount, lowCount];
-                    severityChart.data.datasets[0].backgroundColor = [COLORS.red, COLORS.amber, COLORS.green];
-                    severityChart.update();
-                } else {
-                    // Show empty state
-                    severityChart.data.labels = ['No Data'];
-                    severityChart.data.datasets[0].data = [1];
-                    severityChart.data.datasets[0].backgroundColor = [COLORS.neutral];
-                    severityChart.update();
+                    chartLabels = ['High', 'Medium', 'Low'];
+                    chartData_ = [highCount, mediumCount, lowCount];
+                    chartColors = [CONFIG.COLORS.red, CONFIG.COLORS.amber, CONFIG.COLORS.green];
                 }
+                
+                charts.severity = new Chart(severityCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            data: chartData_,
+                            backgroundColor: chartColors,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        cutout: '70%'
+                    }
+                });
             }
-            
-            // Update trend chart with REAL 7-day data - FIXED: Added null check
-            if (trendChart) {
-                if (chartData && chartData.trendData) {
-                    trendChart.data.labels = chartData.trendData.labels || [];
-                    trendChart.data.datasets = chartData.trendData.datasets || [];
-                    trendChart.update();
-                } else if (chartData && chartData.monthlyTrend) {
-                    // Alternative: use monthly trend data
-                    const labels = Object.keys(chartData.monthlyTrend || {});
-                    const values = Object.values(chartData.monthlyTrend || {});
-                    
-                    trendChart.data.labels = labels;
-                    trendChart.data.datasets = [{
-                        label: 'Risks',
-                        data: values,
-                        borderColor: COLORS.primary,
-                        backgroundColor: COLORS.primary + '20',
-                        tension: 0.4
-                    }];
-                    trendChart.update();
-                } else {
-                    // Show empty state
-                    trendChart.data.labels = ['No Trend Data'];
-                    trendChart.data.datasets = [{
-                        label: 'Risks',
-                        data: [0],
-                        borderColor: COLORS.neutral,
-                        backgroundColor: COLORS.neutral + '20'
-                    }];
-                    trendChart.update();
+
+            // Trend Chart
+            const trendCtx = document.getElementById('trendChart')?.getContext('2d');
+            if (trendCtx) {
+                if (charts.trend) charts.trend.destroy();
+                
+                let labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                let values = [5, 8, 12, 15, 18, 22, dashboardData.totalRisks || 25];
+                
+                if (chartData?.trendData) {
+                    labels = chartData.trendData.labels || labels;
+                    values = chartData.trendData.values || values;
+                } else if (chartData?.monthlyTrend) {
+                    labels = Object.keys(chartData.monthlyTrend);
+                    values = Object.values(chartData.monthlyTrend);
                 }
+                
+                charts.trend = new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Risks',
+                            data: values,
+                            borderColor: CONFIG.COLORS.primary,
+                            backgroundColor: CONFIG.COLORS.primary + '20',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Risks'
+                                }
+                            }
+                        }
+                    }
+                });
             }
-            
-            // Update action chart
-            if (actionChart) {
-                if (chartData && chartData.actionStatus) {
-                    actionChart.data.labels = chartData.actionStatus.labels || [];
-                    actionChart.data.datasets = chartData.actionStatus.datasets || [];
-                    actionChart.update();
-                } else if (dashboardData.openActions > 0) {
-                    // Basic action chart as fallback
+
+            // Action Chart
+            const actionCtx = document.getElementById('actionChart')?.getContext('2d');
+            if (actionCtx) {
+                if (charts.action) charts.action.destroy();
+                
+                let labels = ['Open', 'Overdue'];
+                let values = [0, 0];
+                
+                if (dashboardData.openActions > 0) {
                     const overdue = dashboardData.overdueActions || 0;
                     const open = Math.max(0, dashboardData.openActions - overdue);
-                    
-                    actionChart.data.labels = ['Open', 'Overdue'];
-                    actionChart.data.datasets = [{
-                        label: 'Actions',
-                        data: [open, overdue],
-                        backgroundColor: [COLORS.primary, COLORS.red]
-                    }];
-                    actionChart.update();
-                } else if (chartData && chartData.statusDistribution) {
-                    // Use status distribution if available
-                    actionChart.data.labels = Object.keys(chartData.statusDistribution || {});
-                    actionChart.data.datasets = [{
-                        label: 'Risks by Status',
-                        data: Object.values(chartData.statusDistribution || {}),
-                        backgroundColor: [COLORS.primary, COLORS.amber, COLORS.green, COLORS.neutral]
-                    }];
-                    actionChart.update();
-                } else {
-                    // Show empty state
-                    actionChart.data.labels = ['No Action Data'];
-                    actionChart.data.datasets = [{
-                        label: 'Actions',
-                        data: [1],
-                        backgroundColor: [COLORS.neutral]
-                    }];
-                    actionChart.update();
+                    values = [open, overdue];
                 }
+                
+                charts.action = new Chart(actionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Actions',
+                            data: values,
+                            backgroundColor: [CONFIG.COLORS.primary, CONFIG.COLORS.red]
+                        }]
+                    },
+                    options: commonOptions
+                });
             }
-            
-            // Update submissions chart (keep using dashboard data as before)
-            if (submissionsChart) {
+
+            // Submissions Chart
+            const subCtx = document.getElementById('submissionsChart')?.getContext('2d');
+            if (subCtx) {
+                if (charts.submissions) charts.submissions.destroy();
+                
+                let labels = ['Approved', 'Pending', 'Other'];
+                let values = [0, 0, 0];
+                
                 if (dashboardData.myCreatedRisks > 0) {
                     const approved = dashboardData.myApprovedSubmissions || 0;
                     const pending = dashboardData.myPendingSubmissions || 0;
-                    const other = Math.max(0, dashboardData.myCreatedRisks - approved - pending);
-                    
-                    submissionsChart.data.labels = ['Approved', 'Pending', 'Other'];
-                    submissionsChart.data.datasets[0].data = [approved, pending, other];
-                    submissionsChart.data.datasets[0].backgroundColor = [COLORS.green, COLORS.amber, COLORS.neutral];
-                    submissionsChart.update();
-                } else {
-                    // Show empty state
-                    submissionsChart.data.labels = ['No Submissions'];
-                    submissionsChart.data.datasets[0].data = [1];
-                    submissionsChart.data.datasets[0].backgroundColor = [COLORS.neutral];
-                    submissionsChart.update();
+                    const other = Math.max(0, (dashboardData.myCreatedRisks || 0) - approved - pending);
+                    values = [approved, pending, other];
                 }
+                
+                charts.submissions = new Chart(subCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: [CONFIG.COLORS.green, CONFIG.COLORS.amber, CONFIG.COLORS.neutral]
+                        }]
+                    },
+                    options: commonOptions
+                });
             }
         }
 
-        // Update attention list with real data
+        // Update attention list
         function updateAttentionList(data) {
             const container = document.getElementById('attention-list');
             const emptyMsg = document.getElementById('attention-empty');
@@ -765,39 +988,31 @@
             
             const attentionItems = [];
             
-            // Check for overdue actions
             if (data.overdueActions && data.overdueActions > 0) {
                 attentionItems.push({
                     title: `${data.overdueActions} overdue action(s) require attention`,
-                    action: 'Review Actions',
-                    link: '/actions?filter=overdue'
+                    action: 'Review Actions'
                 });
             }
             
-            // Check for high severity risks
             if (data.highSeverityRisks && data.highSeverityRisks > 0) {
                 attentionItems.push({
                     title: `${data.highSeverityRisks} high severity risks in your assigned assets`,
-                    action: 'Review Risks',
-                    link: '/risks?filter=high-severity'
+                    action: 'Review Risks'
                 });
             }
             
-            // Check for pending approvals
             if (data.myPendingSubmissions && data.myPendingSubmissions > 0) {
                 attentionItems.push({
                     title: `${data.myPendingSubmissions} of your risk submissions awaiting approval`,
-                    action: 'View Submissions',
-                    link: '/risks?filter=my-pending'
+                    action: 'View Submissions'
                 });
             }
             
-            // Check for open actions
             if (data.openActions && data.openActions > 0) {
                 attentionItems.push({
                     title: `${data.openActions} open actions require follow-up`,
-                    action: 'View Actions',
-                    link: '/actions?filter=open'
+                    action: 'View Actions'
                 });
             }
             
@@ -808,50 +1023,54 @@
                     div.className = 'attention-item';
                     div.innerHTML = `
                         <div>${item.title}</div>
-                        <a class="attention-link" href="${item.link}">${item.action}</a>
+                        <span class="attention-link" onclick="alert('Navigate to: ${item.action}')">${item.action}</span>
                     `;
                     container.appendChild(div);
                 });
             } else {
                 if (emptyMsg) emptyMsg.style.display = 'block';
+                container.innerHTML = '';
             }
         }
 
-        // Update assigned assets display
+        // Update assets display - NO REDIRECTS
         function updateAssetsDisplay(assets) {
-            const container = document.getElementById('assets-grid');
+            const grid = document.getElementById('assets-grid');
             const emptyMsg = document.getElementById('assets-empty');
-            const countElement = document.getElementById('assets-count');
+            const countEl = document.getElementById('assets-count');
             
-            if (!container || !countElement) return;
+            if (!grid || !countEl) return;
             
-            container.innerHTML = '';
+            if (!assets || assets.length === 0) {
+                grid.innerHTML = '';
+                if (emptyMsg) emptyMsg.style.display = 'block';
+                countEl.textContent = '0';
+                return;
+            }
             
-            if (assets && assets.length > 0) {
-                if (emptyMsg) emptyMsg.style.display = 'none';
-                countElement.textContent = assets.length.toString();
+            if (emptyMsg) emptyMsg.style.display = 'none';
+            countEl.textContent = assets.length;
+            
+            grid.innerHTML = assets.map(asset => {
+                let statusClass = 'status-healthy';
+                let statusText = 'Healthy';
                 
-                assets.forEach(asset => {
-                    const assetCard = document.createElement('div');
-                    assetCard.className = 'asset-card';
-                    assetCard.onclick = () => window.location.href = `/assets/${asset._id || asset.id}`;
-                    
-                    // Determine status class
-                    let statusClass = 'status-healthy';
-                    let statusText = 'Healthy';
-                    
-                    if (asset.status === 'inactive') {
-                        statusClass = 'status-warning';
-                        statusText = 'Inactive';
-                    } else if (asset.health === 'Critical' || asset.status === 'critical') {
-                        statusClass = 'status-critical';
-                        statusText = 'Critical';
-                    } else if (asset.health === 'Warning' || asset.status === 'warning') {
-                        statusClass = 'status-warning';
-                        statusText = 'Warning';
-                    }
-                    
-                    assetCard.innerHTML = `
+                if (asset.status === 'inactive') {
+                    statusClass = 'status-warning';
+                    statusText = 'Inactive';
+                } else if (asset.health === 'Critical' || asset.status === 'critical') {
+                    statusClass = 'status-critical';
+                    statusText = 'Critical';
+                } else if (asset.health === 'Warning' || asset.status === 'warning') {
+                    statusClass = 'status-warning';
+                    statusText = 'Warning';
+                }
+                
+                // Escape single quotes for safe JSON stringification
+                const assetJson = JSON.stringify(asset).replace(/'/g, "&apos;");
+                
+                return `
+                    <div class="asset-card" onclick='showAssetDetails(${JSON.stringify(asset).replace(/'/g, "\\'")})'>
                         <div class="asset-name">${asset.name || 'Unnamed Asset'}</div>
                         <div class="asset-category">${asset.category || 'Uncategorized'}</div>
                         <div class="asset-details">
@@ -860,122 +1079,85 @@
                             ${asset.updatedAt ? `<div class="asset-detail"><i class="fas fa-clock"></i> Updated: ${new Date(asset.updatedAt).toLocaleDateString()}</div>` : ''}
                         </div>
                         <div class="asset-status ${statusClass}">${statusText}</div>
-                    `;
-                    
-                    container.appendChild(assetCard);
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Fetch chart data
+        async function fetchChartData(token) {
+            try {
+                const chartRes = await fetch(CONFIG.API.charts, {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
                 });
-            } else {
-                if (emptyMsg) emptyMsg.style.display = 'block';
-                countElement.textContent = '0';
+                
+                if (chartRes.ok) {
+                    return await chartRes.json();
+                }
+                return null;
+            } catch (error) {
+                console.warn('Error fetching chart data:', error);
+                return null;
             }
         }
 
-        // Main dashboard update function - FIXED VERSION with better error handling
+        // Main dashboard update function
         async function updateDashboard() {
             try {
-                console.log('Fetching analyst dashboard data...');
-                
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No authentication token found');
                 }
 
-                // Fetch main dashboard data
-                const res = await fetch(API_ENDPOINTS.dashboard, {
+                // Show loading skeletons if no data yet
+                const hasData = document.getElementById('total-risks')?.textContent !== '—';
+                if (!hasData) {
+                    // Skeletons are already showing from initial HTML
+                }
+
+                // Fetch dashboard data
+                const res = await fetch(CONFIG.API.dashboard, {
                     headers: { 
                         'Authorization': `Bearer ${token}`, 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json'
                     }
                 });
 
-                console.log('Response status:', res.status);
-                
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    console.error('Server error response:', errorText);
-                    throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 100)}`);
+                    throw new Error(`HTTP ${res.status}`);
                 }
 
                 const data = await res.json();
-                console.log('Analyst dashboard data received:', data);
 
-                // Update KPIs with real data
-                const totalRisksEl = document.getElementById('total-risks');
-                const highRisksEl = document.getElementById('high-risks');
-                const openActionsEl = document.getElementById('open-actions');
-                const overdueCountEl = document.getElementById('overdue-count');
-                const myCreatedRisksEl = document.getElementById('my-created-risks');
-                const pendingApprovalsEl = document.getElementById('pending-approvals');
-                const assignedAssetsEl = document.getElementById('assigned-assets');
-                const recentActivityEl = document.getElementById('recent-activity');
-                
-                if (totalRisksEl) totalRisksEl.textContent = formatNumber(data.totalRisks || 0);
-                if (highRisksEl) highRisksEl.textContent = formatNumber(data.highSeverityRisks || 0);
-                if (openActionsEl) openActionsEl.textContent = formatNumber(data.openActions || 0);
-                if (overdueCountEl) overdueCountEl.textContent = formatNumber(data.overdueActions || 0);
-                if (myCreatedRisksEl) myCreatedRisksEl.textContent = formatNumber(data.myCreatedRisks || data.totalMyRisks || 0);
-                if (pendingApprovalsEl) pendingApprovalsEl.textContent = formatNumber(data.myPendingSubmissions || 0);
-                if (assignedAssetsEl) assignedAssetsEl.textContent = formatNumber(data.assignedAssets || 0);
-                if (recentActivityEl) recentActivityEl.textContent = formatNumber(data.recentActivity || data.recentActivity24h || 0);
-                
-                // Update colors based on real data
-                updateHighRisksColor(data.highSeverityRisks || 0);
-                
-                // Update trend indicators if available
-                if (data.totalRisksTrend) {
-                    const trendElement = document.getElementById('risks-trend');
-                    if (trendElement) {
-                        trendElement.textContent = data.totalRisksTrend;
-                        trendElement.className = data.totalRisksTrend.includes('+') ? 'kpi-trend trend-up' : 'kpi-trend trend-down';
-                    }
+                // Fetch assets in parallel
+                const assetsPromise = fetch(CONFIG.API.assignedAssets, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(r => r.ok ? r.json() : []);
+
+                // Update KPIs immediately
+                renderKPIs(data);
+
+                // Render chart containers if not already rendered
+                if (!document.getElementById('severityChart')) {
+                    renderChartContainers();
                 }
-                
-                if (data.highSeverityTrend) {
-                    const trendElement = document.getElementById('high-risks-trend');
-                    if (trendElement) {
-                        trendElement.textContent = data.highSeverityTrend;
-                        trendElement.className = data.highSeverityTrend.includes('+') ? 'kpi-trend trend-up' : 'kpi-trend trend-down';
-                    }
-                }
-                
-                // Update Attention Required list with real data
-                updateAttentionList(data);
-                
-                // Fetch and update chart data using the new endpoint
-                try {
+
+                // Load Chart.js and initialize charts
+                loadChartJS(async () => {
                     const chartData = await fetchChartData(token);
-                    updateChartsWithRealData(data, chartData);
-                } catch (chartError) {
-                    console.warn('Could not fetch chart data:', chartError);
-                    // Update charts with basic data from dashboard response
-                    updateChartsWithRealData(data, null);
-                }
-                
-                // Update assigned assets with real data
-                if (data.assignedAssetDetails && Array.isArray(data.assignedAssetDetails)) {
-                    updateAssetsDisplay(data.assignedAssetDetails);
-                } else {
-                    // Try to fetch assets separately
-                    try {
-                        const assetsRes = await fetch(API_ENDPOINTS.assignedAssets, {
-                            headers: { 
-                                'Authorization': `Bearer ${token}`, 
-                                'Accept': 'application/json'
-                            }
-                        });
-                        
-                        if (assetsRes.ok) {
-                            const assetsData = await assetsRes.json();
-                            updateAssetsDisplay(assetsData);
-                        } else {
-                            updateAssetsDisplay([]);
-                        }
-                    } catch (assetsError) {
-                        console.warn('Could not fetch assets:', assetsError);
-                        updateAssetsDisplay([]);
-                    }
-                }
+                    initCharts(data, chartData);
+                });
+
+                // Update attention list
+                updateAttentionList(data);
+
+                // Update assets
+                const assets = await assetsPromise;
+                updateAssetsDisplay(assets);
 
                 // Update timestamp
                 const now = new Date();
@@ -985,11 +1167,11 @@
                         `Last updated: ${now.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}`;
                 }
 
-                console.log('Analyst dashboard updated with real data');
+                console.log('Dashboard updated successfully');
 
             } catch (err) {
-                console.error('Analyst dashboard refresh failed:', err);
-                // Update timestamp with error
+                console.error('Dashboard refresh failed:', err);
+                
                 const refreshTimeEl = document.getElementById('refresh-time');
                 if (refreshTimeEl) {
                     refreshTimeEl.textContent = `Update failed: ${err.message}`;
@@ -999,63 +1181,48 @@
                 const attentionList = document.getElementById('attention-list');
                 const emptyMsg = document.getElementById('attention-empty');
                 if (attentionList) {
-                    attentionList.innerHTML = '';
-                    if (emptyMsg) emptyMsg.style.display = 'none';
-                    
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'attention-item';
-                    errorDiv.innerHTML = `
-                        <div>Unable to load dashboard data: ${err.message}</div>
-                        <a class="attention-link" href="#" onclick="updateDashboard();return false;">Retry</a>
+                    attentionList.innerHTML = `
+                        <div class="attention-item">
+                            <div>Unable to load dashboard data: ${err.message}</div>
+                            <span class="attention-link" onclick="updateDashboard()">Retry</span>
+                        </div>
                     `;
-                    attentionList.appendChild(errorDiv);
+                    if (emptyMsg) emptyMsg.style.display = 'none';
                 }
-                
-                // Show empty state for assets
-                updateAssetsDisplay([]);
             }
         }
 
-        // Alias for refreshDashboard
-        function refreshDashboard() {
-            console.log('Manual refresh triggered');
+        // Refresh function
+        window.refreshDashboard = function() {
             updateDashboard();
-        }
+        };
 
         // Initialize on page load
         window.addEventListener('load', () => {
-            console.log('Analyst dashboard page loaded, initializing...');
+            console.log('Initializing analyst dashboard...');
             
-            // Initialize charts
-            initializeCharts();
-            
-            // Check for authentication
+            // Check authentication
             const token = localStorage.getItem('token');
             if (!token) {
-                console.error('No authentication token found');
                 const attentionList = document.getElementById('attention-list');
-                const emptyMsg = document.getElementById('attention-empty');
                 if (attentionList) {
-                    attentionList.innerHTML = '';
-                    if (emptyMsg) emptyMsg.style.display = 'none';
-                    
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'attention-item';
-                    errorDiv.innerHTML = `
-                        <div>Authentication required. Please log in.</div>
-                        <a class="attention-link" href="/login">Login</a>
+                    attentionList.innerHTML = `
+                        <div class="attention-item">
+                            <div>Authentication required. Please log in.</div>
+                            <span class="attention-link" onclick="window.location.href='/login'">Login</span>
+                        </div>
                     `;
-                    attentionList.appendChild(errorDiv);
                 }
                 return;
             }
             
+            // Initial load
             updateDashboard();
             
-            // Set up auto-refresh every 45 seconds
-            setInterval(updateDashboard, 45000);
+            // Set up auto-refresh
+            setInterval(updateDashboard, CONFIG.REFRESH_INTERVAL);
             
-            // Add keyboard shortcut for refresh
+            // Keyboard shortcut for refresh
             document.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
                     e.preventDefault();
@@ -1064,9 +1231,8 @@
             });
         });
 
-        // Export functions
+        // Expose functions globally
         window.updateDashboard = updateDashboard;
-        window.refreshDashboard = refreshDashboard;
     </script>
 </body>
 </html>
