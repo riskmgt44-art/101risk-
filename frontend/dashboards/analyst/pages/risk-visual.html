@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- html2canvas for matrix/image export, jspdf for PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --primary: #5DA1A1;
@@ -160,6 +163,24 @@
             padding: 24px 20px;
         }
 
+        /* export bar */
+        .export-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-between;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
         .matrix-container {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -187,7 +208,7 @@
 
         .matrix-wrapper { display: flex; margin-top: 16px; }
 
-        /* FIXED: Y-axis labels in correct order (Very Low at top, Very High at bottom) */
+        /* Y-axis labels in correct order (Very Low at top) */
         .y-axis-labels {
             display: flex;
             flex-direction: column;
@@ -407,7 +428,6 @@
 <body>
     <nav class="top-nav">
         <div class="tabs-group">
-            <!-- FIXED: Using anchor tag for proper navigation -->
             <a href="risks.html" class="nav-tab">
                 <div class="favicon">R</div>
                 <span>My Risks</span>
@@ -426,7 +446,7 @@
 
     <main class="main">
         <div class="app-container">
-            <!-- FILTER SIDEBAR -->
+            <!-- FILTER SIDEBAR (unchanged) -->
             <aside class="filter-sidebar">
                 <div class="filter-section">
                     <h3>ACCEPTABILITY</h3>
@@ -459,6 +479,15 @@
             </aside>
 
             <div class="main-content">
+                <!-- Export bar updated - removed 3x3 button -->
+                <div class="export-bar">
+                    <span class="matrix-title"><i class="fas fa-download" style="margin-right: 6px;"></i>Export options</span>
+                    <div class="export-buttons">
+                        <button class="btn-primary" onclick="exportMatrixImage()"><i class="fas fa-image"></i> 5x5 RAM as image</button>
+                        <button class="btn-primary" onclick="exportFullPDF()"><i class="fas fa-file-pdf"></i> Full Risk Profile (incl. actions)</button>
+                    </div>
+                </div>
+
                 <div class="matrix-container">
                     <div class="matrix-header">
                         <div class="matrix-title">Risk Matrix</div>
@@ -477,7 +506,6 @@
 
                     <div id="matrixContent" style="display: none;">
                         <div class="matrix-wrapper">
-                            <!-- FIXED: Y-axis labels in correct order (Very Low at top) -->
                             <div class="y-axis-labels">
                                 <span class="y-axis-label">Very Low</span>
                                 <span class="y-axis-label">Low</span>
@@ -589,7 +617,6 @@
                         <button class="btn-icon" onclick="refreshMatrix()" style="margin-left: 8px;"><i class="fas fa-sync-alt"></i></button>
                     `;
                     
-                    // Generate mock data for demo
                     risks = generateMockRisks(25);
                     buildMatrix();
                     updateFilterCounts();
@@ -598,7 +625,6 @@
                 }
             }
 
-            // Generate mock data for demo purposes
             function generateMockRisks(count) {
                 const mockRisks = [];
                 const titles = ['Security Breach', 'Data Loss', 'Compliance Violation', 'System Downtime', 'Budget Overrun', 
@@ -606,6 +632,7 @@
                 const statuses = ['open', 'in-progress', 'monitoring', 'mitigated'];
                 const trends = ['up', 'down', 'stable'];
                 const owners = ['John Smith', 'Sarah Johnson', 'Mike Chen', 'Lisa Wong', 'David Kim'];
+                const actions = ['Review firewall rules', 'Update DR plan', 'Train staff', 'Patch servers', 'Audit logs']; // for summary
                 
                 for (let i = 1; i <= count; i++) {
                     mockRisks.push({
@@ -620,7 +647,8 @@
                         riskOwnerName: owners[Math.floor(Math.random() * owners.length)],
                         isNew: Math.random() > 0.8,
                         hasChange: Math.random() > 0.7,
-                        acceptability: ['acceptable', 'needs-improvement', 'major-improvement', 'under-review'][Math.floor(Math.random() * 4)]
+                        acceptability: ['acceptable', 'needs-improvement', 'major-improvement', 'under-review'][Math.floor(Math.random() * 4)],
+                        actionSummary: actions[Math.floor(Math.random() * actions.length)] // for profile
                     });
                 }
                 return mockRisks;
@@ -713,10 +741,7 @@
             }
 
             function handleRiskClick(risk) {
-                // This function handles the click without opening new tabs
                 console.log('Risk clicked:', risk.riskId || risk.id);
-                
-                // Show risk details in an alert (you can replace this with a modal)
                 const details = `
 Risk ID: ${risk.riskId || 'N/A'}
 Title: ${risk.title || 'Untitled'}
@@ -726,7 +751,6 @@ Status: ${risk.status || 'N/A'}
 Owner: ${risk.riskOwnerName || 'N/A'}
 Trend: ${risk.trend || 'stable'}
                 `;
-                
                 alert(details);
             }
 
@@ -772,19 +796,14 @@ Trend: ${risk.trend || 'stable'}
                     div.appendChild(ind);
                 }
 
-                // Mouse events for tooltip
                 div.addEventListener('mouseenter', (e) => showTooltip(e, risk));
                 div.addEventListener('mousemove', positionTooltip);
                 div.addEventListener('mouseleave', hideTooltip);
-
-                // Click event - stays in same tab
                 div.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleRiskClick(risk);
                 });
-
-                // Keyboard support
                 div.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -792,7 +811,6 @@ Trend: ${risk.trend || 'stable'}
                         handleRiskClick(risk);
                     }
                 });
-
                 return div;
             }
 
@@ -800,9 +818,7 @@ Trend: ${risk.trend || 'stable'}
                 const grid = document.getElementById('riskMatrix');
                 grid.innerHTML = '';
                 
-                // impact from 5 (Very High) down to 1 (Very Low)
                 for (let impact = 5; impact >= 1; impact--) {
-                    // probability from 1 (Very Low) up to 5 (Very High)
                     for (let prob = 1; prob <= 5; prob++) {
                         const cell = document.createElement('div');
                         cell.className = 'matrix-cell';
@@ -834,6 +850,65 @@ Trend: ${risk.trend || 'stable'}
             function refreshMatrix() {
                 loadRisks();
             }
+
+            // ---------- EXPORT FUNCTIONS ----------
+            // Export 5x5 matrix as image (renamed function)
+            window.exportMatrixImage = function() {
+                const matrixDiv = document.querySelector('.matrix-container');
+                if (!matrixDiv) return;
+                html2canvas(matrixDiv, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `risk-matrix-5x5.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            };
+
+            window.exportFullPDF = function() {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                let y = 10;
+
+                pdf.setFontSize(16);
+                pdf.text('Risk Profile (with actions summary)', 10, y);
+                y += 10;
+                pdf.setFontSize(10);
+                pdf.text('Generated: ' + new Date().toLocaleString(), 10, y);
+                y += 10;
+
+                // Matrix description
+                pdf.setFontSize(12);
+                pdf.text('Risk Matrix Snapshot (' + currentView + ' view)', 10, y);
+                y += 8;
+
+                // Add matrix as image
+                const matrixDiv = document.querySelector('.matrix-container');
+                if (matrixDiv) {
+                    return html2canvas(matrixDiv, { scale: 2 }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgWidth = 180;
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
+                        y += imgHeight + 10;
+
+                        // Actions summary
+                        pdf.setFontSize(12);
+                        pdf.text('Actions Summary (presentation-ready)', 10, y);
+                        y += 6;
+                        pdf.setFontSize(9);
+                        risks.slice(0, 10).forEach((r, idx) => {
+                            if (y > 280) { pdf.addPage(); y = 20; }
+                            const action = r.actionSummary || 'Review risk response';
+                            pdf.text(`• ${r.riskId || 'Risk'}: ${r.title || 'Untitled'} — ${action}`, 12, y);
+                            y += 5;
+                        });
+
+                        pdf.save('full-risk-profile.pdf');
+                    });
+                } else {
+                    pdf.save('risk-profile-basic.pdf');
+                }
+            };
 
             window.switchView = switchView;
             window.refreshMatrix = refreshMatrix;
