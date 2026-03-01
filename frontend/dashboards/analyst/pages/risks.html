@@ -769,19 +769,17 @@
             border: 1px solid #e2e8f0;
         }
         
-        .ram-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 16px;
-        }
-        
         .ram-card {
             background: white;
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 20px;
+            margin-bottom: 20px;
             transition: var(--transition);
+        }
+        
+        .ram-card:last-child {
+            margin-bottom: 0;
         }
         
         .ram-card:hover {
@@ -799,25 +797,73 @@
         }
         
         .ram-card-title {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--text-primary);
         }
         
-        .ram-values {
+        .ram-subheader {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .ram-row {
+            margin-bottom: 20px;
+        }
+        
+        .ram-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .ram-flex {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .ram-flex .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .ram-label {
+            font-size: 12px;
+            color: var(--neutral);
+            margin-bottom: 4px;
+            display: block;
+        }
+        
+        .ram-result {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .ram-result-flex {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .ram-result-flex .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .override-box {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .override-box label {
             display: flex;
             align-items: center;
-            gap: 12px;
-        }
-        
-        .ram-values .form-group {
-            margin-bottom: 0;
-            flex: 1;
-        }
-        
-        .ram-arrow {
-            font-size: 14px;
-            color: var(--neutral);
+            gap: 8px;
+            cursor: pointer;
             font-weight: 500;
         }
         
@@ -994,9 +1040,6 @@
             .form-row .form-group {
                 margin-bottom: 16px;
             }
-            .ram-grid {
-                grid-template-columns: 1fr;
-            }
             .action-item-details {
                 grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             }
@@ -1006,6 +1049,14 @@
             }
             .title-description-row .form-group:first-child {
                 flex: 1;
+            }
+            .ram-flex {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .ram-result-flex {
+                flex-direction: column;
+                gap: 12px;
             }
         }
         
@@ -1067,13 +1118,6 @@
             }
             .action-item::before {
                 display: none;
-            }
-            .ram-values {
-                flex-direction: column;
-                gap: 8px;
-            }
-            .ram-arrow {
-                transform: rotate(90deg);
             }
             .action-item-header {
                 flex-direction: column;
@@ -1552,23 +1596,38 @@
                             </button>
                         </div>
 
-                        <!-- SECTION 5: Risk Assessment -->
+                        <!-- SECTION 5: Risk Assessment Matrix (RAM) -->
                         <div class="form-section ram-section">
                             <h3 class="section-title">
                                 <i class="fas fa-chart-line"></i>
-                                Risk Assessment
+                                Risk Assessment Matrix (RAM)
                             </h3>
                             
-                            <div class="ram-grid">
-                                <div class="ram-card">
-                                    <div class="ram-card-header">
-                                        <span class="ram-card-title">HSSA RAM (5x5) - Primary</span>
-                                    </div>
-                                    <div class="ram-values">
+                            <!-- HSSE RAM (5x5) - Primary -->
+                            <div class="ram-card">
+                                <div class="ram-card-header">
+                                    <span class="ram-card-title">HSSE RAM (5x5)</span>
+                                </div>
+                                
+                                <!-- Impact Row -->
+                                <div class="ram-row">
+                                    <span class="ram-subheader">Impact</span>
+                                    <div class="ram-flex">
                                         <div class="form-group">
-                                            <label>Likelihood</label>
-                                            <select id="hsseLikelihood_create" onchange="calculateRiskVisualRAM()">
-                                                <option value="">Select likelihood</option>
+                                            <label class="ram-label">Current</label>
+                                            <select id="hsseImpactCurrent_create" class="form-control" onchange="calculateHSSERAM()">
+                                                <option value="">Select impact level</option>
+                                                <option value="Very Low">Very Low - No disruption to operation</option>
+                                                <option value="Low">Low - Brief disruption to operation</option>
+                                                <option value="Medium">Medium - Partial shutdown of operation (can be restarted)</option>
+                                                <option value="High">High - Partial or temporary loss of operation</option>
+                                                <option value="Very High">Very High - Substantial or total loss of operation</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="ram-label">Target</label>
+                                            <select id="hsseImpactTarget_create" class="form-control" onchange="calculateHSSERAM()">
+                                                <option value="">Select target level</option>
                                                 <option value="Very Low">Very Low</option>
                                                 <option value="Low">Low</option>
                                                 <option value="Medium">Medium</option>
@@ -1576,60 +1635,130 @@
                                                 <option value="Very High">Very High</option>
                                             </select>
                                         </div>
-                                        <span class="ram-arrow">×</span>
-                                        <div class="form-group">
-                                            <label>Consequence</label>
-                                            <select id="hsseConsequence_create" onchange="calculateRiskVisualRAM()">
-                                                <option value="">Select consequence</option>
-                                                <option value="Very Low">Very Low</option>
-                                                <option value="Low">Low</option>
-                                                <option value="Medium">Medium</option>
-                                                <option value="High">High</option>
-                                                <option value="Very High">Very High</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-group" style="margin-top: 16px;">
-                                        <label>Calculated HSSA RAM Level</label>
-                                        <input type="text" id="hsseRamCurrent_create" readonly placeholder="Auto-calculated">
                                     </div>
                                 </div>
                                 
-                                <div class="ram-card">
-                                    <div class="ram-card-header">
-                                        <span class="ram-card-title">Risk Visual RAM (3x3) - Derived</span>
-                                    </div>
-                                    <div class="ram-values">
+                                <!-- Likelihood Row -->
+                                <div class="ram-row">
+                                    <span class="ram-subheader">Likelihood</span>
+                                    <div class="ram-flex">
                                         <div class="form-group">
-                                            <label>Likelihood</label>
-                                            <select id="riskVisualLikelihood_create">
-                                                <option value="">Select likelihood</option>
+                                            <label class="ram-label">Current</label>
+                                            <select id="hsseLikelihoodCurrent_create" class="form-control" onchange="calculateHSSERAM()">
+                                                <option value="">Select likelihood level</option>
+                                                <option value="Very Low">Very Low - Never happened in the industry (less than once in 25+ years)</option>
+                                                <option value="Low">Low - Has happened rarely in the industry (about once in 10-25 years)</option>
+                                                <option value="Medium">Medium - Has happened occasionally in the industry (about once in 5-10 years)</option>
+                                                <option value="High">High - Has happened multiple times in the industry (about once in 1-5 years)</option>
+                                                <option value="Very High">Very High - Happens frequently in the industry (multiple times per year)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="ram-label">Target</label>
+                                            <select id="hsseLikelihoodTarget_create" class="form-control" onchange="calculateHSSERAM()">
+                                                <option value="">Select target level</option>
+                                                <option value="Very Low">Very Low</option>
+                                                <option value="Low">Low</option>
+                                                <option value="Medium">Medium</option>
+                                                <option value="High">High</option>
+                                                <option value="Very High">Very High</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Calculated HSSA RAM Levels -->
+                                <div class="ram-result">
+                                    <div class="ram-result-flex">
+                                        <div class="form-group">
+                                            <label>Calculated HSSE RAM Level (Current)</label>
+                                            <input type="text" id="hsseRamCurrent_create" readonly placeholder="Auto-calculated from Impact × Likelihood" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Calculated HSSE RAM Level (Target)</label>
+                                            <input type="text" id="hsseRamTarget_create" readonly placeholder="Auto-calculated from Impact × Likelihood" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Risk Visual RAM (3x3) - Derived -->
+                            <div class="ram-card">
+                                <div class="ram-card-header">
+                                    <span class="ram-card-title">Risk Visual RAM (3x3)</span>
+                                    <span style="font-size: 12px; color: var(--neutral);">Auto-populated from HSSE RAM</span>
+                                </div>
+                                
+                                <!-- Impact Row -->
+                                <div class="ram-row">
+                                    <span class="ram-subheader">Impact</span>
+                                    <div class="ram-flex">
+                                        <div class="form-group">
+                                            <label class="ram-label">Current</label>
+                                            <select id="riskVisualImpactCurrent_create" class="form-control" disabled>
+                                                <option value="">Select impact level</option>
+                                                <option value="Low">Low - Minor disruption to operations</option>
+                                                <option value="Medium">Medium - Partial shutdown or temporary interruption of operations</option>
+                                                <option value="High">High - Major disruption resulting in significant, prolonged, or total loss of operations</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="ram-label">Target</label>
+                                            <select id="riskVisualImpactTarget_create" class="form-control" onchange="calculateRiskVisualRAMTarget()">
+                                                <option value="">Select target level</option>
                                                 <option value="Low">Low</option>
                                                 <option value="Medium">Medium</option>
                                                 <option value="High">High</option>
                                             </select>
                                         </div>
-                                        <span class="ram-arrow">×</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Likelihood Row -->
+                                <div class="ram-row">
+                                    <span class="ram-subheader">Likelihood</span>
+                                    <div class="ram-flex">
                                         <div class="form-group">
-                                            <label>Consequence</label>
-                                            <select id="riskVisualConsequence_create">
-                                                <option value="">Select consequence</option>
+                                            <label class="ram-label">Current</label>
+                                            <select id="riskVisualLikelihoodCurrent_create" class="form-control" disabled>
+                                                <option value="">Select likelihood level</option>
+                                                <option value="Low">Low - Has rarely or never happened in the industry (less than once in 10+ years)</option>
+                                                <option value="Medium">Medium - Has happened occasionally in the industry (about once in 3-10 years)</option>
+                                                <option value="High">High - Has happened multiple times in the industry or occurs frequently (about once every 1-3 years or more)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="ram-label">Target</label>
+                                            <select id="riskVisualLikelihoodTarget_create" class="form-control" onchange="calculateRiskVisualRAMTarget()">
+                                                <option value="">Select target level</option>
                                                 <option value="Low">Low</option>
                                                 <option value="Medium">Medium</option>
                                                 <option value="High">High</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="form-group" style="margin-top: 16px;">
-                                        <label>Calculated Risk Visual RAM Level</label>
-                                        <input type="text" id="riskVisualRamCurrent_create" readonly placeholder="Auto-calculated or overridden">
+                                </div>
+                                
+                                <!-- Calculated Risk Visual RAM Levels -->
+                                <div class="ram-result">
+                                    <div class="ram-result-flex">
+                                        <div class="form-group">
+                                            <label>Calculated Risk Visual RAM Level (Current)</label>
+                                            <input type="text" id="riskVisualRamCurrent_create" readonly placeholder="Auto-populated from HSSE RAM" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Calculated Risk Visual RAM Level (Target)</label>
+                                            <input type="text" id="riskVisualRamTarget_create" readonly placeholder="Auto-calculated from Impact × Likelihood" class="form-control">
+                                        </div>
                                     </div>
-                                    <div class="form-group" style="margin-top: 8px;">
-                                        <label>
-                                            <input type="checkbox" id="overrideRamCheckbox" onchange="toggleRamOverride()"> 
-                                            Override Risk Visual RAM
-                                        </label>
-                                    </div>
+                                </div>
+                                
+                                <!-- Override Option -->
+                                <div class="override-box">
+                                    <label>
+                                        <input type="checkbox" id="overrideRamCheckbox" onchange="toggleRamOverride()"> 
+                                        Override Risk Visual RAM (manual entry)
+                                    </label>
                                 </div>
                             </div>
                             
@@ -2045,85 +2174,120 @@ function updateActionStatus(actionElement) {
 }
 
 // RAM Calculation Functions
-function calculateRiskVisualRAM() {
-    const likelihood = document.getElementById('hsseLikelihood_create').value;
-    const consequence = document.getElementById('hsseConsequence_create').value;
+function calculateHSSERAM() {
+    const impactCurrent = document.getElementById('hsseImpactCurrent_create').value;
+    const likelihoodCurrent = document.getElementById('hsseLikelihoodCurrent_create').value;
+    const impactTarget = document.getElementById('hsseImpactTarget_create').value;
+    const likelihoodTarget = document.getElementById('hsseLikelihoodTarget_create').value;
     
-    if (!likelihood || !consequence) {
-        document.getElementById('hsseRamCurrent_create').value = '';
-        document.getElementById('riskVisualLikelihood_create').value = '';
-        document.getElementById('riskVisualConsequence_create').value = '';
-        document.getElementById('riskVisualRamCurrent_create').value = '';
-        return;
+    // Calculate Current HSSE RAM
+    if (impactCurrent && likelihoodCurrent) {
+        const hsseCurrent = calculate5x5RAM(impactCurrent, likelihoodCurrent);
+        document.getElementById('hsseRamCurrent_create').value = hsseCurrent;
+        
+        // Auto-populate Risk Visual RAM Current (if not overridden)
+        const overrideCheck = document.getElementById('overrideRamCheckbox');
+        if (!overrideCheck || !overrideCheck.checked) {
+            const visualCurrent = convert5x5To3x3(impactCurrent, likelihoodCurrent);
+            document.getElementById('riskVisualImpactCurrent_create').value = visualCurrent.impact;
+            document.getElementById('riskVisualLikelihoodCurrent_create').value = visualCurrent.likelihood;
+            
+            // Calculate visual RAM current
+            const visualRamCurrent = calculate3x3RAM(visualCurrent.impact, visualCurrent.likelihood);
+            document.getElementById('riskVisualRamCurrent_create').value = visualRamCurrent;
+        }
     }
     
-    // Calculate HSSA RAM (5x5) - simple matrix for demo
+    // Calculate Target HSSE RAM
+    if (impactTarget && likelihoodTarget) {
+        const hsseTarget = calculate5x5RAM(impactTarget, likelihoodTarget);
+        document.getElementById('hsseRamTarget_create').value = hsseTarget;
+    }
+    
+    // Auto-populate Risk Visual Target if not manually set
+    if (impactTarget && likelihoodTarget) {
+        const visualTargetImpact = convertImpact5x5To3x3(impactTarget);
+        const visualTargetLikelihood = convertLikelihood5x5To3x3(likelihoodTarget);
+        
+        document.getElementById('riskVisualImpactTarget_create').value = visualTargetImpact;
+        document.getElementById('riskVisualLikelihoodTarget_create').value = visualTargetLikelihood;
+        
+        calculateRiskVisualRAMTarget();
+    }
+}
+
+function calculateRiskVisualRAMTarget() {
+    const impactTarget = document.getElementById('riskVisualImpactTarget_create').value;
+    const likelihoodTarget = document.getElementById('riskVisualLikelihoodTarget_create').value;
+    
+    if (impactTarget && likelihoodTarget) {
+        const visualRamTarget = calculate3x3RAM(impactTarget, likelihoodTarget);
+        document.getElementById('riskVisualRamTarget_create').value = visualRamTarget;
+    }
+}
+
+function calculate5x5RAM(impact, likelihood) {
+    const impactMap = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
     const likelihoodMap = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
-    const consequenceMap = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
     
-    const lvl = likelihoodMap[likelihood];
-    const cvl = consequenceMap[consequence];
-    const product = lvl * cvl;
+    const imp = impactMap[impact] || 0;
+    const like = likelihoodMap[likelihood] || 0;
+    const product = imp * like;
     
-    let hsseLevel = '';
-    if (product <= 4) hsseLevel = 'Very Low';
-    else if (product <= 9) hsseLevel = 'Low';
-    else if (product <= 16) hsseLevel = 'Medium';
-    else if (product <= 25) hsseLevel = 'High';
-    else hsseLevel = 'Very High';
+    if (product <= 4) return 'Very Low';
+    if (product <= 9) return 'Low';
+    if (product <= 16) return 'Medium';
+    if (product <= 25) return 'High';
+    return 'Very High';
+}
+
+function calculate3x3RAM(impact, likelihood) {
+    const impactMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
+    const likelihoodMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
     
-    document.getElementById('hsseRamCurrent_create').value = hsseLevel;
+    const imp = impactMap[impact] || 0;
+    const like = likelihoodMap[likelihood] || 0;
+    const product = imp * like;
     
-    // Auto-calculate Risk Visual RAM (3x3) based on mapping
-    const overrideCheck = document.getElementById('overrideRamCheckbox');
-    if (!overrideCheck || !overrideCheck.checked) {
-        // Mapping logic: Very High → High, High → High, Medium → Medium, Low → Low, Very Low → Low
-        let visualLikelihood = '';
-        let visualConsequence = '';
-        
-        // Map likelihood
-        if (likelihood === 'Very Low' || likelihood === 'Low') visualLikelihood = 'Low';
-        else if (likelihood === 'Medium') visualLikelihood = 'Medium';
-        else if (likelihood === 'High' || likelihood === 'Very High') visualLikelihood = 'High';
-        
-        // Map consequence
-        if (consequence === 'Very Low' || consequence === 'Low') visualConsequence = 'Low';
-        else if (consequence === 'Medium') visualConsequence = 'Medium';
-        else if (consequence === 'High' || consequence === 'Very High') visualConsequence = 'High';
-        
-        document.getElementById('riskVisualLikelihood_create').value = visualLikelihood;
-        document.getElementById('riskVisualConsequence_create').value = visualConsequence;
-        
-        // Calculate visual RAM
-        const visualLikelihoodMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
-        const visualConsequenceMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
-        
-        const vll = visualLikelihoodMap[visualLikelihood] || 0;
-        const vcl = visualConsequenceMap[visualConsequence] || 0;
-        const visualProduct = vll * vcl;
-        
-        let visualLevel = '';
-        if (visualProduct <= 3) visualLevel = 'Low';
-        else if (visualProduct <= 6) visualLevel = 'Medium';
-        else visualLevel = 'High';
-        
-        document.getElementById('riskVisualRamCurrent_create').value = visualLevel;
-    }
+    if (product <= 3) return 'Low';
+    if (product <= 6) return 'Medium';
+    return 'High';
+}
+
+function convert5x5To3x3(impact, likelihood) {
+    return {
+        impact: convertImpact5x5To3x3(impact),
+        likelihood: convertLikelihood5x5To3x3(likelihood)
+    };
+}
+
+function convertImpact5x5To3x3(impact) {
+    if (impact === 'Very Low' || impact === 'Low') return 'Low';
+    if (impact === 'Medium') return 'Medium';
+    if (impact === 'High' || impact === 'Very High') return 'High';
+    return '';
+}
+
+function convertLikelihood5x5To3x3(likelihood) {
+    if (likelihood === 'Very Low' || likelihood === 'Low') return 'Low';
+    if (likelihood === 'Medium') return 'Medium';
+    if (likelihood === 'High' || likelihood === 'Very High') return 'High';
+    return '';
 }
 
 function toggleRamOverride() {
     const overrideCheck = document.getElementById('overrideRamCheckbox');
-    const likelihoodSelect = document.getElementById('riskVisualLikelihood_create');
-    const consequenceSelect = document.getElementById('riskVisualConsequence_create');
+    const impactCurrent = document.getElementById('riskVisualImpactCurrent_create');
+    const likelihoodCurrent = document.getElementById('riskVisualLikelihoodCurrent_create');
     
     if (overrideCheck.checked) {
-        likelihoodSelect.removeAttribute('disabled');
-        consequenceSelect.removeAttribute('disabled');
+        impactCurrent.removeAttribute('disabled');
+        likelihoodCurrent.removeAttribute('disabled');
     } else {
-        likelihoodSelect.setAttribute('disabled', 'disabled');
-        consequenceSelect.setAttribute('disabled', 'disabled');
-        // Recalculate based on HSSA
-        calculateRiskVisualRAM();
+        impactCurrent.setAttribute('disabled', 'disabled');
+        likelihoodCurrent.setAttribute('disabled', 'disabled');
+        // Recalculate from HSSE
+        calculateHSSERAM();
     }
 }
 
@@ -2967,10 +3131,14 @@ async function createNewRisk() {
     }
 
     // Get RAM values
-    const hsseLikelihood = document.getElementById('hsseLikelihood_create').value;
-    const hsseConsequence = document.getElementById('hsseConsequence_create').value;
+    const hsseLikelihoodCurrent = document.getElementById('hsseLikelihoodCurrent_create').value;
+    const hsseImpactCurrent = document.getElementById('hsseImpactCurrent_create').value;
+    const hsseLikelihoodTarget = document.getElementById('hsseLikelihoodTarget_create').value;
+    const hsseImpactTarget = document.getElementById('hsseImpactTarget_create').value;
     const hsseRamCurrent = document.getElementById('hsseRamCurrent_create').value;
+    const hsseRamTarget = document.getElementById('hsseRamTarget_create').value;
     const riskVisualRamCurrent = document.getElementById('riskVisualRamCurrent_create').value;
+    const riskVisualRamTarget = document.getElementById('riskVisualRamTarget_create').value;
     const manageability = document.getElementById('manageability_create').value;
     const thresholdChanging = document.getElementById('thresholdChanging_create').value === 'true';
     const impact = document.getElementById('impact_create').value.trim();
@@ -3001,9 +3169,11 @@ async function createNewRisk() {
         exposureEndDate: formatDateForBackend(document.getElementById('exposureEnd_create').value),
         
         // RAM assessment - using field names that match backend EXACTLY
-        occurenceLevel: hsseLikelihood || '',  // This was missing - backend requires this field
+        occurenceLevel: hsseLikelihoodCurrent || '', // Current Likelihood from HSSE
         hsseRamCurrent: hsseRamCurrent || '',
+        hsseRamTarget: hsseRamTarget || '',
         riskVisualRamCurrent: riskVisualRamCurrent || '',
+        riskVisualRamTarget: riskVisualRamTarget || '',
         
         // Additional fields
         manageability: manageability || '',
@@ -3216,15 +3386,21 @@ function openCreateRiskModal() {
     document.getElementById('nextReviewDate_create').value = nextMonthStr;
     
     // Reset RAM fields
-    document.getElementById('hsseLikelihood_create').value = '';
-    document.getElementById('hsseConsequence_create').value = '';
+    document.getElementById('hsseImpactCurrent_create').value = '';
+    document.getElementById('hsseLikelihoodCurrent_create').value = '';
+    document.getElementById('hsseImpactTarget_create').value = '';
+    document.getElementById('hsseLikelihoodTarget_create').value = '';
     document.getElementById('hsseRamCurrent_create').value = '';
-    document.getElementById('riskVisualLikelihood_create').value = '';
-    document.getElementById('riskVisualConsequence_create').value = '';
+    document.getElementById('hsseRamTarget_create').value = '';
+    document.getElementById('riskVisualImpactCurrent_create').value = '';
+    document.getElementById('riskVisualLikelihoodCurrent_create').value = '';
+    document.getElementById('riskVisualImpactTarget_create').value = '';
+    document.getElementById('riskVisualLikelihoodTarget_create').value = '';
     document.getElementById('riskVisualRamCurrent_create').value = '';
+    document.getElementById('riskVisualRamTarget_create').value = '';
     document.getElementById('overrideRamCheckbox').checked = false;
-    document.getElementById('riskVisualLikelihood_create').setAttribute('disabled', 'disabled');
-    document.getElementById('riskVisualConsequence_create').setAttribute('disabled', 'disabled');
+    document.getElementById('riskVisualImpactCurrent_create').setAttribute('disabled', 'disabled');
+    document.getElementById('riskVisualLikelihoodCurrent_create').setAttribute('disabled', 'disabled');
     
     // Reset impact field
     document.getElementById('impact_create').value = '';
@@ -3288,11 +3464,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Initialize RAM fields
-    const likelihoodSelect = document.getElementById('riskVisualLikelihood_create');
-    const consequenceSelect = document.getElementById('riskVisualConsequence_create');
-    if (likelihoodSelect && consequenceSelect) {
-        likelihoodSelect.setAttribute('disabled', 'disabled');
-        consequenceSelect.setAttribute('disabled', 'disabled');
+    const visualImpactCurrent = document.getElementById('riskVisualImpactCurrent_create');
+    const visualLikelihoodCurrent = document.getElementById('riskVisualLikelihoodCurrent_create');
+    if (visualImpactCurrent && visualLikelihoodCurrent) {
+        visualImpactCurrent.setAttribute('disabled', 'disabled');
+        visualLikelihoodCurrent.setAttribute('disabled', 'disabled');
     }
     
     // Setup Risk Owner dropdown event listeners
@@ -3372,7 +3548,8 @@ window.removeControl = removeControl;
 window.updateActionStatus = updateActionStatus;
 window.openRiskVisual = openRiskVisual;
 window.openBowtieView = openBowtieView;
-window.calculateRiskVisualRAM = calculateRiskVisualRAM;
+window.calculateHSSERAM = calculateHSSERAM;
+window.calculateRiskVisualRAMTarget = calculateRiskVisualRAMTarget;
 window.toggleRamOverride = toggleRamOverride;
 window.searchRisks = searchRisks;
 window.showAddSubproject = showAddSubproject;
