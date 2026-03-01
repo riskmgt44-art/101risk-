@@ -163,11 +163,54 @@
         .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
         .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
         .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
-        table { min-width: 2400px; width: 100%; border-collapse: collapse; }
-        thead { position: sticky; top: 0; background: var(--card-bg); z-index: 8; }
-        th { padding: 12.8px 16px; font-size: 11.2px; font-weight: 600; color: var(--text-secondary);
-             border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
-        td { padding: 12.8px 16px; font-size: 12.8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        table { 
+            min-width: 2200px; 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        thead { 
+            position: sticky; 
+            top: 0; 
+            background: var(--card-bg); 
+            z-index: 8; 
+        }
+        th { 
+            padding: 12.8px 16px; 
+            font-size: 11.2px; 
+            font-weight: 600; 
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); 
+            text-align: left; 
+            white-space: nowrap; 
+        }
+        td { 
+            padding: 12.8px 16px; 
+            font-size: 12.8px; 
+            border-bottom: 1px solid var(--border); 
+            white-space: nowrap; 
+        }
+        /* Allow description column to wrap */
+        td:nth-child(4) {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 280px;
+            min-width: 250px;
+        }
+        /* Style for title column */
+        td:nth-child(3) {
+            font-weight: 500;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        /* Style for TECOP column */
+        td:nth-child(9) {
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         tbody tr:hover { background: rgba(93,161,161,0.03); }
 
         /* Skeleton */
@@ -1032,7 +1075,7 @@
 
         /* Responsive */
         @media (max-width: 1024px) { 
-            table { min-width: 2000px; } 
+            table { min-width: 2200px; } 
             .form-row {
                 flex-direction: column;
                 gap: 0;
@@ -1118,6 +1161,13 @@
             }
             .action-item::before {
                 display: none;
+            }
+            .ram-values {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .ram-arrow {
+                transform: rotate(90deg);
             }
             .action-item-header {
                 flex-direction: column;
@@ -1283,6 +1333,74 @@
             border-radius: 8px;
             border-left: 4px solid var(--primary);
         }
+
+        /* Badge styles for Impact/Likelihood */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            background: #f0f0f0;
+            color: var(--text-secondary);
+        }
+
+        /* Description styles */
+        .title-description-cell {
+            max-width: 300px;
+        }
+
+        .title-description-cell .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .title-description-cell .description {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .risk-card-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 12px 0;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            line-height: 1.5;
+        }
+
+        .risk-card-description i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        /* TECOP badge styles */
+        .tecop-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            background: #e8f0fe;
+            color: #1e4b8c;
+        }
+        
+        .tecop-badge.technical { background: #e8f0fe; color: #1e4b8c; }
+        .tecop-badge.environmental { background: #e6f7e6; color: #2e7d32; }
+        .tecop-badge.commercial { background: #fff3e0; color: #b85c00; }
+        .tecop-badge.operational { background: #f3e5f5; color: #7b1fa2; }
+        .tecop-badge.political { background: #fce4e4; color: #b33939; }
     </style>
 </head>
 <body>
@@ -1319,25 +1437,8 @@
                 <div class="table-view">
                     <div class="table-container">
                         <table id="risksTable">
-                            <thead>
-                                <tr>
-                                    <th>Risk ID</th>
-                                    <th>Type</th>
-                                    <th>Title</th>
-                                    <th>Asset</th>
-                                    <th>Status</th>
-                                    <th>Risk Owner</th>
-                                    <th>Sub Project</th>
-                                    <th>Exposure Start</th>
-                                    <th>Exposure End</th>
-                                    <th>Next Review</th>
-                                    <th>HSSA RAM</th>
-                                    <th>Risk Visual RAM</th>
-                                    <th>Manageability</th>
-                                    <th>Created</th>
-                                    <th>Updated</th>
-                                    <th>Actions</th>
-                                </tr>
+                            <thead id="risksTableHeader">
+                                <!-- Headers will be dynamically updated -->
                             </thead>
                             <tbody id="risksTableBody"></tbody>
                         </table>
@@ -1488,7 +1589,7 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="description_create" class="required">Risk Description</label>
+                                    <label for="description_create" class="required">Description</label>
                                     <textarea id="description_create" placeholder="Describe the risk scenario, background, and context in detail..." required rows="3"></textarea>
                                 </div>
                             </div>
@@ -1866,6 +1967,52 @@ function getStatusClass(status) {
     if (status === 'rejected') return 'status-rejected';
     if (status === 'open') return 'status-open';
     return '';
+}
+
+// Helper function to format TECOP
+function formatTecop(tecop) {
+    if (!tecop) return '—';
+    
+    // If it's a string, try to parse if it's JSON
+    if (typeof tecop === 'string') {
+        // Check if it looks like a comma-separated list
+        if (tecop.includes(',')) {
+            const items = tecop.split(',').map(item => item.trim());
+            let html = '';
+            items.forEach(item => {
+                const itemLower = item.toLowerCase();
+                let tecopClass = '';
+                if (itemLower.includes('tech')) tecopClass = 'technical';
+                else if (itemLower.includes('env')) tecopClass = 'environmental';
+                else if (itemLower.includes('comm')) tecopClass = 'commercial';
+                else if (itemLower.includes('oper')) tecopClass = 'operational';
+                else if (itemLower.includes('pol')) tecopClass = 'political';
+                
+                html += `<span class="tecop-badge ${tecopClass}">${escapeHtml(item)}</span>`;
+            });
+            return html;
+        }
+        return escapeHtml(tecop);
+    }
+    
+    // If it's an array
+    if (Array.isArray(tecop)) {
+        let html = '';
+        tecop.forEach(item => {
+            const itemLower = String(item).toLowerCase();
+            let tecopClass = '';
+            if (itemLower.includes('tech')) tecopClass = 'technical';
+            else if (itemLower.includes('env')) tecopClass = 'environmental';
+            else if (itemLower.includes('comm')) tecopClass = 'commercial';
+            else if (itemLower.includes('oper')) tecopClass = 'operational';
+            else if (itemLower.includes('pol')) tecopClass = 'political';
+            
+            html += `<span class="tecop-badge ${tecopClass}">${escapeHtml(item)}</span>`;
+        });
+        return html;
+    }
+    
+    return escapeHtml(tecop);
 }
 
 // Load users for all dropdowns
@@ -2460,7 +2607,7 @@ function showSkeleton() {
     tbody.innerHTML = '';
     mobileContainer.innerHTML = '';
     
-    // Desktop skeleton
+    // Desktop skeleton - updated for 21 columns (added TECOP)
     for (let i = 0; i < 5; i++) {
         const row = document.createElement('tr');
         row.className = 'skeleton-row';
@@ -2468,19 +2615,24 @@ function showSkeleton() {
             <td><div class="skeleton skeleton-cell short"></div></td>
             <td><div class="skeleton skeleton-pill"></div></td>
             <td><div class="skeleton skeleton-cell long"></div></td>
+            <td><div class="skeleton skeleton-cell long"></div></td>
             <td><div class="skeleton skeleton-cell medium"></div></td>
             <td><div class="skeleton skeleton-pill"></div></td>
             <td><div class="skeleton skeleton-cell medium"></div></td>
             <td><div class="skeleton skeleton-cell medium"></div></td>
+            <td><div class="skeleton skeleton-cell medium"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
             <td><div class="skeleton skeleton-pill"></div></td>
             <td><div class="skeleton skeleton-pill"></div></td>
             <td><div class="skeleton skeleton-pill"></div></td>
+            <td><div class="skeleton skeleton-pill"></div></td>
+            <td><div class="skeleton skeleton-pill"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
             <td><div class="skeleton skeleton-cell short"></div></td>
-            <td><div style="width:64px;height:32px;border-radius:8px;" class="skeleton"></div></td>
+            <td><div class="skeleton skeleton-cell short"></div></td>
+            <td><div style="width:100px;height:32px;border-radius:8px;" class="skeleton"></div></td>
         `;
         tbody.appendChild(row);
     }
@@ -2513,7 +2665,7 @@ function showEmptyState() {
     
     const emptyState = `
         <tr>
-            <td colspan="16" style="text-align:center;padding:80px 20px;">
+            <td colspan="21" style="text-align:center;padding:80px 20px;">
                 <i class="fas fa-exclamation-triangle" style="font-size:48px;opacity:0.3;margin-bottom:16px;"></i>
                 <div style="font-size:16px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">
                     No risks found
@@ -2561,12 +2713,48 @@ function renderRisks(risks) {
     // Helper function to get last 4 digits of Risk ID
     function getLastFourDigits(riskId) {
         if (!riskId || riskId === '—') return '—';
-        // If riskId is a string, get the last 4 characters
         const idStr = String(riskId);
         return idStr.slice(-4);
     }
     
-    // Desktop table
+    // Helper function to truncate description
+    function truncateDescription(desc, maxLength = 120) {
+        if (!desc) return '—';
+        if (desc.length <= maxLength) return desc;
+        return desc.substring(0, maxLength) + '...';
+    }
+    
+    // Update table headers - ADDED TECOP column
+    const thead = document.querySelector('#risksTable thead');
+    if (thead) {
+        thead.innerHTML = `
+            <tr>
+                <th style="width: 80px;">Risk ID</th>
+                <th style="width: 70px;">Type</th>
+                <th style="width: 200px;">Title</th>
+                <th style="width: 280px;">Description</th>
+                <th style="width: 70px;">Asset</th>
+                <th style="width: 90px;">Status</th>
+                <th style="width: 120px;">Risk Owner</th>
+                <th style="width: 100px;">Sub Project</th>
+                <th style="width: 100px;">TECOP</th>
+                <th style="width: 70px;">Exp Start</th>
+                <th style="width: 70px;">Exp End</th>
+                <th style="width: 70px;">Next Review</th>
+                <th style="width: 80px;">HSSE RAM C</th>
+                <th style="width: 80px;">HSSE RAM T</th>
+                <th style="width: 80px;">Vis RAM C</th>
+                <th style="width: 80px;">Vis RAM T</th>
+                <th style="width: 90px;">Mgmt</th>
+                <th style="width: 70px;">Thresh</th>
+                <th style="width: 70px;">Created</th>
+                <th style="width: 70px;">Updated</th>
+                <th style="width: 100px;">Actions</th>
+            </tr>
+        `;
+    }
+    
+    // Desktop table - ADDED TECOP column
     risks.forEach(risk => {
         const lastFourId = getLastFourDigits(risk.riskId);
         
@@ -2576,19 +2764,34 @@ function renderRisks(risks) {
             <td><span class="pill ${risk.type?.toLowerCase() === 'upside' ? 'pill-upside' : 'pill-downside'}">
                 ${escapeHtml(risk.type || 'Downside')}
             </span></td>
-            <td>${escapeHtml(risk.title || '—')}</td>
+            <td><strong>${escapeHtml(risk.title || '—')}</strong></td>
+            <td style="max-width: 280px; white-space: normal; word-wrap: break-word;">${escapeHtml(truncateDescription(risk.description))}</td>
             <td>${escapeHtml(risk.assetName || '—')}</td>
             <td><span class="pill ${getStatusClass(risk.status)}">${escapeHtml(risk.status || 'Open')}</span></td>
             <td>${escapeHtml(risk.riskOwnerName || '—')}</td>
             <td>${escapeHtml(risk.subProject || '—')}</td>
+            <td>${formatTecop(risk.functionalAreaTECOP)}</td>
             <td>${formatShortDate(risk.exposureStartDate)}</td>
             <td>${formatShortDate(risk.exposureEndDate)}</td>
             <td>${formatShortDate(risk.nextReviewDate)}</td>
-            <td><span class="${getRamClass(risk.hsseRamCurrent || risk.hssaRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || risk.hssaRamCurrent || '—')}</span></td>
+            
+            <!-- HSSE RAM Calculated (Current/Target) -->
+            <td><span class="${getRamClass(risk.hsseRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || '—')}</span></td>
+            <td><span class="${getRamClass(risk.hsseRamTarget)}">${escapeHtml(risk.hsseRamTarget || '—')}</span></td>
+            
+            <!-- Risk Visual RAM Calculated (Current/Target) -->
             <td><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></td>
+            <td><span class="${getRamClass(risk.riskVisualRamTarget)}">${escapeHtml(risk.riskVisualRamTarget || '—')}</span></td>
+            
+            <!-- Manageability & Threshold -->
             <td><span class="${getManageabilityClass(risk.manageability)}">${escapeHtml(risk.manageability || '—')}</span></td>
+            <td>${risk.thresholdChanging ? 'Changing' : 'Stable'}</td>
+            
+            <!-- Dates -->
             <td>${formatShortDate(risk.createdAt)}</td>
             <td>${formatShortDate(risk.updatedAt)}</td>
+            
+            <!-- Actions -->
             <td style="display: flex; gap: 4px;">
                 <button class="icon-btn" onclick="viewRiskDetail('${risk._id}')" title="View">
                     <i class="fas fa-eye"></i>
@@ -2605,13 +2808,19 @@ function renderRisks(risks) {
         `;
         tbody.appendChild(row);
         
-        // Mobile card
+        // Mobile card - with TECOP added
         const card = document.createElement('div');
         card.className = 'risk-card';
         card.innerHTML = `
             <div class="risk-card-header">
-                <div class="risk-card-title" onclick="viewRiskDetail('${risk._id}')">
-                    ${escapeHtml(lastFourId)}: ${escapeHtml(risk.title || '—')}
+                <div>
+                    <div class="risk-card-title" onclick="viewRiskDetail('${risk._id}')">
+                        ${escapeHtml(lastFourId)}: ${escapeHtml(risk.title || '—')}
+                    </div>
+                    <div class="risk-card-description">
+                        <i class="fas fa-align-left"></i>
+                        ${escapeHtml(risk.description || 'No description provided')}
+                    </div>
                 </div>
                 <div style="display: flex; gap: 4px;">
                     <button class="icon-btn btn-bowtie small" onclick="openBowtieView('${risk._id}')" title="Bowtie View">
@@ -2622,6 +2831,7 @@ function renderRisks(risks) {
                     </button>
                 </div>
             </div>
+            
             <div class="risk-card-grid">
                 <div class="risk-card-label">Type</div>
                 <div><span class="pill ${risk.type?.toLowerCase() === 'upside' ? 'pill-upside' : 'pill-downside'}">
@@ -2637,21 +2847,57 @@ function renderRisks(risks) {
                 <div class="risk-card-label">Owner</div>
                 <div>${escapeHtml(risk.riskOwnerName || '—')}</div>
                 
-                <div class="risk-card-label">HSSA RAM</div>
-                <div><span class="${getRamClass(risk.hsseRamCurrent || risk.hssaRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || risk.hssaRamCurrent || '—')}</span></div>
+                <div class="risk-card-label">Sub Project</div>
+                <div>${escapeHtml(risk.subProject || '—')}</div>
                 
-                <div class="risk-card-label">Visual RAM</div>
-                <div><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></div>
+                <div class="risk-card-label">TECOP</div>
+                <div>${formatTecop(risk.functionalAreaTECOP)}</div>
                 
-                <div class="risk-card-label">Created</div>
-                <div>${formatShortDate(risk.createdAt)}</div>
-                
-                <div class="risk-card-label">Next Review</div>
-                <div>${formatShortDate(risk.nextReviewDate)}</div>
+                <div class="risk-card-label">Event</div>
+                <div><i>${escapeHtml(risk.event || '—')}</i></div>
             </div>
+            
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <div style="font-weight: 600; margin-bottom: 8px; color: var(--primary);">HSSE RAM (5x5)</div>
+                <div class="risk-card-grid">
+                    <div class="risk-card-label">Current</div>
+                    <div><span class="${getRamClass(risk.hsseRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || '—')}</span></div>
+                    
+                    <div class="risk-card-label">Target</div>
+                    <div><span class="${getRamClass(risk.hsseRamTarget)}">${escapeHtml(risk.hsseRamTarget || '—')}</span></div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <div style="font-weight: 600; margin-bottom: 8px; color: var(--amber);">Risk Visual RAM (3x3)</div>
+                <div class="risk-card-grid">
+                    <div class="risk-card-label">Current</div>
+                    <div><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></div>
+                    
+                    <div class="risk-card-label">Target</div>
+                    <div><span class="${getRamClass(risk.riskVisualRamTarget)}">${escapeHtml(risk.riskVisualRamTarget || '—')}</span></div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <div class="risk-card-grid">
+                    <div class="risk-card-label">Manageability</div>
+                    <div><span class="${getManageabilityClass(risk.manageability)}">${escapeHtml(risk.manageability || '—')}</span></div>
+                    
+                    <div class="risk-card-label">Threshold</div>
+                    <div>${risk.thresholdChanging ? 'Changing' : 'Stable'}</div>
+                    
+                    <div class="risk-card-label">Created</div>
+                    <div>${formatShortDate(risk.createdAt)}</div>
+                    
+                    <div class="risk-card-label">Next Review</div>
+                    <div>${formatShortDate(risk.nextReviewDate)}</div>
+                </div>
+            </div>
+            
             <div style="margin-top: 16px; display: flex; gap: 8px;">
                 <button class="btn-secondary" onclick="viewRiskDetail('${risk._id}')" style="flex: 1; padding: 8px;">
-                    View Details
+                    <i class="fas fa-eye"></i> View Details
                 </button>
                 ${risk.status === 'pending' ? '' : `
                 <button class="btn-primary" onclick="editRisk('${risk._id}')" style="flex: 1; padding: 8px;">
@@ -2679,10 +2925,11 @@ function searchRisks() {
         const filteredRisks = risks.filter(risk => {
             return (
                 (risk.title && risk.title.toLowerCase().includes(searchTerm)) ||
-                (risk.riskId && risk.riskId.toLowerCase().includes(searchTerm)) ||
                 (risk.description && risk.description.toLowerCase().includes(searchTerm)) ||
+                (risk.riskId && risk.riskId.toLowerCase().includes(searchTerm)) ||
                 (risk.riskOwnerName && risk.riskOwnerName.toLowerCase().includes(searchTerm)) ||
-                (risk.subProject && risk.subProject.toLowerCase().includes(searchTerm))
+                (risk.subProject && risk.subProject.toLowerCase().includes(searchTerm)) ||
+                (risk.functionalAreaTECOP && risk.functionalAreaTECOP.toLowerCase().includes(searchTerm))
             );
         });
         
@@ -3137,6 +3384,10 @@ async function createNewRisk() {
     const hsseImpactTarget = document.getElementById('hsseImpactTarget_create').value;
     const hsseRamCurrent = document.getElementById('hsseRamCurrent_create').value;
     const hsseRamTarget = document.getElementById('hsseRamTarget_create').value;
+    const riskVisualImpactCurrent = document.getElementById('riskVisualImpactCurrent_create').value;
+    const riskVisualLikelihoodCurrent = document.getElementById('riskVisualLikelihoodCurrent_create').value;
+    const riskVisualImpactTarget = document.getElementById('riskVisualImpactTarget_create').value;
+    const riskVisualLikelihoodTarget = document.getElementById('riskVisualLikelihoodTarget_create').value;
     const riskVisualRamCurrent = document.getElementById('riskVisualRamCurrent_create').value;
     const riskVisualRamTarget = document.getElementById('riskVisualRamTarget_create').value;
     const manageability = document.getElementById('manageability_create').value;
@@ -3168,12 +3419,23 @@ async function createNewRisk() {
         exposureStartDate: formatDateForBackend(document.getElementById('exposureStart_create').value),
         exposureEndDate: formatDateForBackend(document.getElementById('exposureEnd_create').value),
         
-        // RAM assessment - using field names that match backend EXACTLY
-        occurenceLevel: hsseLikelihoodCurrent || '', // Current Likelihood from HSSE
+        // RAM assessment - Impact and Likelihood values
+        hsseImpactCurrent: hsseImpactCurrent || '',
+        hsseLikelihoodCurrent: hsseLikelihoodCurrent || '',
+        hsseImpactTarget: hsseImpactTarget || '',
+        hsseLikelihoodTarget: hsseLikelihoodTarget || '',
         hsseRamCurrent: hsseRamCurrent || '',
         hsseRamTarget: hsseRamTarget || '',
+        
+        riskVisualImpactCurrent: riskVisualImpactCurrent || '',
+        riskVisualLikelihoodCurrent: riskVisualLikelihoodCurrent || '',
+        riskVisualImpactTarget: riskVisualImpactTarget || '',
+        riskVisualLikelihoodTarget: riskVisualLikelihoodTarget || '',
         riskVisualRamCurrent: riskVisualRamCurrent || '',
         riskVisualRamTarget: riskVisualRamTarget || '',
+        
+        // For backward compatibility
+        occurenceLevel: hsseLikelihoodCurrent || '',
         
         // Additional fields
         manageability: manageability || '',
