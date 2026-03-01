@@ -1111,6 +1111,134 @@
             outline: 2px solid var(--primary);
             outline-offset: 2px;
         }
+
+        /* New styles for TECOP and Subproject management */
+        .tecop-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .tecop-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+        
+        .tecop-tag input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            accent-color: var(--primary);
+        }
+        
+        .tecop-tag.selected {
+            background: rgba(93,161,161,0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .subproject-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .subproject-container select {
+            flex: 1;
+        }
+        
+        .btn-add-subproject {
+            padding: 12px 20px;
+            background: white;
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .btn-add-subproject:hover {
+            background: rgba(93,161,161,0.1);
+            border-style: solid;
+        }
+        
+        .subproject-input-container {
+            display: none;
+            margin-top: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .subproject-input-container.show {
+            display: block;
+        }
+        
+        .subproject-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .subproject-input-row input {
+            flex: 1;
+        }
+        
+        .btn-save-subproject {
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-cancel-subproject {
+            padding: 12px 20px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Scoring fields alignment */
+        .scoring-row {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .scoring-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .impact-field {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -1209,19 +1337,31 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="subProject_create" class="required">Sub-Project / Department</label>
-                                    <select id="subProject_create" required>
-                                        <option value="">Select sub-project</option>
-                                        <option value="Phase 1 Construction">Phase 1 Construction</option>
-                                        <option value="Phase 2 Construction">Phase 2 Construction</option>
-                                        <option value="Operations">Operations</option>
-                                        <option value="Maintenance">Maintenance</option>
-                                        <option value="Engineering">Engineering</option>
-                                        <option value="Finance">Finance</option>
-                                        <option value="HR">HR</option>
-                                        <option value="IT">IT</option>
-                                        <option value="Legal">Legal</option>
-                                        <option value="Procurement">Procurement</option>
-                                    </select>
+                                    <div class="subproject-container">
+                                        <select id="subProject_create" required>
+                                            <option value="">Select sub-project</option>
+                                            <option value="Phase 1 Construction">Phase 1 Construction</option>
+                                            <option value="Phase 2 Construction">Phase 2 Construction</option>
+                                            <option value="Operations">Operations</option>
+                                            <option value="Maintenance">Maintenance</option>
+                                            <option value="Engineering">Engineering</option>
+                                            <option value="Finance">Finance</option>
+                                            <option value="HR">HR</option>
+                                            <option value="IT">IT</option>
+                                            <option value="Legal">Legal</option>
+                                            <option value="Procurement">Procurement</option>
+                                        </select>
+                                        <button type="button" class="btn-add-subproject" onclick="showAddSubproject()">
+                                            <i class="fas fa-plus"></i> Add New
+                                        </button>
+                                    </div>
+                                    <div class="subproject-input-container" id="subprojectInput">
+                                        <div class="subproject-input-row">
+                                            <input type="text" id="newSubprojectName" placeholder="Enter new sub-project name" maxlength="50">
+                                            <button type="button" class="btn-save-subproject" onclick="addNewSubproject()">Save</button>
+                                            <button type="button" class="btn-cancel-subproject" onclick="hideAddSubproject()">Cancel</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -1266,6 +1406,26 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <label for="functionalArea_create">Functional Area (TECOP)</label>
+                                    <div class="tecop-tags" id="tecopTags">
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Technical"> Technical
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Environmental"> Environmental
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Commercial"> Commercial
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Operational"> Operational
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Political"> Political
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1285,7 +1445,7 @@
                                 
                                 <div class="form-group">
                                     <label for="description_create" class="required">Risk Description</label>
-                                    <textarea id="description_create" placeholder="Describe the risk scenario, background, and context..." required rows="2"></textarea>
+                                    <textarea id="description_create" placeholder="Describe the risk scenario, background, and context in detail..." required rows="3"></textarea>
                                 </div>
                             </div>
                             
@@ -1402,7 +1562,7 @@
                             <div class="ram-grid">
                                 <div class="ram-card">
                                     <div class="ram-card-header">
-                                        <span class="ram-card-title">HSSA RAM (5x5)</span>
+                                        <span class="ram-card-title">HSSA RAM (5x5) - Primary</span>
                                     </div>
                                     <div class="ram-values">
                                         <div class="form-group">
@@ -1437,7 +1597,7 @@
                                 
                                 <div class="ram-card">
                                     <div class="ram-card-header">
-                                        <span class="ram-card-title">Risk Visual RAM (3x3)</span>
+                                        <span class="ram-card-title">Risk Visual RAM (3x3) - Derived</span>
                                     </div>
                                     <div class="ram-values">
                                         <div class="form-group">
@@ -1473,14 +1633,8 @@
                                 </div>
                             </div>
                             
-                            <div class="form-row" style="margin-top: 24px;">
-                                <div class="form-group">
-                                    <label for="impact_create">Impact Description</label>
-                                    <textarea id="impact_create" placeholder="Describe the potential impact..." rows="2"></textarea>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
+                            <!-- Aligned scoring fields -->
+                            <div class="scoring-row">
                                 <div class="form-group">
                                     <label for="manageability_create">Manageability</label>
                                     <select id="manageability_create">
@@ -1491,11 +1645,19 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="thresholdChanging_create">Threshold Changing</label>
+                                    <label for="thresholdChanging_create">Threshold</label>
                                     <select id="thresholdChanging_create">
-                                        <option value="false">No (Stable)</option>
-                                        <option value="true">Yes (Changing)</option>
+                                        <option value="false">Stable</option>
+                                        <option value="true">Changing</option>
                                     </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Impact field -->
+                            <div class="impact-field">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label for="impact_create">Impact Description</label>
+                                    <textarea id="impact_create" placeholder="Describe the potential business impact, including financial, operational, and strategic implications..." rows="3"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1525,6 +1687,9 @@ let assignedAssets = [];
 // User data for dropdowns
 let allUsers = [];
 let selectedRiskOwner = null;
+
+// Subproject management
+let customSubprojects = [];
 
 // Map to store selected action owners (key: action element ID, value: selected user)
 let selectedActionOwners = new Map();
@@ -2042,6 +2207,50 @@ function updateAssetDropdown() {
             assetSelect.appendChild(option);
         });
     }
+}
+
+// Subproject management functions
+function showAddSubproject() {
+    document.getElementById('subprojectInput').classList.add('show');
+}
+
+function hideAddSubproject() {
+    document.getElementById('subprojectInput').classList.remove('show');
+    document.getElementById('newSubprojectName').value = '';
+}
+
+function addNewSubproject() {
+    const newName = document.getElementById('newSubprojectName').value.trim();
+    if (!newName) {
+        showToast('Please enter a sub-project name', 'error');
+        return;
+    }
+    
+    // Check if already exists
+    const select = document.getElementById('subProject_create');
+    const existingOptions = Array.from(select.options).map(opt => opt.value);
+    
+    if (existingOptions.includes(newName)) {
+        showToast('This sub-project already exists', 'error');
+        return;
+    }
+    
+    // Add to select dropdown
+    const option = document.createElement('option');
+    option.value = newName;
+    option.textContent = newName;
+    select.appendChild(option);
+    
+    // Select the new option
+    select.value = newName;
+    
+    // Store in custom subprojects list
+    customSubprojects.push(newName);
+    
+    // Hide input
+    hideAddSubproject();
+    
+    showToast('Sub-project added successfully', 'success');
 }
 
 // Load risks
@@ -2695,6 +2904,16 @@ function collectConsequences() {
     return consequences;
 }
 
+// Collect TECOP functional areas as comma-separated string
+function collectTecopAreas() {
+    const tecopAreas = [];
+    const checkboxes = document.querySelectorAll('#tecopTags input[type="checkbox"]:checked');
+    checkboxes.forEach(cb => {
+        tecopAreas.push(cb.value);
+    });
+    return tecopAreas.join(', ');
+}
+
 // Helper function to format date for backend
 function formatDateForBackend(dateString) {
     if (!dateString) return null;
@@ -2754,6 +2973,10 @@ async function createNewRisk() {
     const riskVisualRamCurrent = document.getElementById('riskVisualRamCurrent_create').value;
     const manageability = document.getElementById('manageability_create').value;
     const thresholdChanging = document.getElementById('thresholdChanging_create').value === 'true';
+    const impact = document.getElementById('impact_create').value.trim();
+    
+    // Get TECOP areas - combine into comma-separated string as backend expects
+    const functionalAreaTECOP = collectTecopAreas();
 
     // Collect form data matching backend CreateRiskRequest structure
     const riskData = {
@@ -2765,6 +2988,7 @@ async function createNewRisk() {
         assetId: assetId || '',
         riskOwnerName: riskOwnerName,
         subProject: document.getElementById('subProject_create').value || '',
+        functionalAreaTECOP: functionalAreaTECOP,
         
         // Causes, event, consequences
         causes: causes,
@@ -2776,14 +3000,15 @@ async function createNewRisk() {
         exposureStartDate: formatDateForBackend(document.getElementById('exposureStart_create').value),
         exposureEndDate: formatDateForBackend(document.getElementById('exposureEnd_create').value),
         
-        // RAM assessment - using field names that match backend
-        occurenceLevel: hsseLikelihood || '',
+        // RAM assessment - using field names that match backend EXACTLY
+        occurenceLevel: hsseLikelihood || '',  // This was missing - backend requires this field
         hsseRamCurrent: hsseRamCurrent || '',
         riskVisualRamCurrent: riskVisualRamCurrent || '',
         
         // Additional fields
         manageability: manageability || '',
-        thresholdChanging: thresholdChanging
+        thresholdChanging: thresholdChanging,
+        impact: impact
     };
 
     console.log('Creating risk with data:', riskData);
@@ -2923,6 +3148,14 @@ function openCreateRiskModal() {
     // Clear action owners map
     selectedActionOwners.clear();
     
+    // Reset TECOP checkboxes
+    document.querySelectorAll('#tecopTags input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+    
+    // Reset subproject input
+    hideAddSubproject();
+    
     // Reset dynamic sections
     document.getElementById('causes-container').innerHTML = `
         <div class="item-card" data-cause-index="0">
@@ -2992,6 +3225,9 @@ function openCreateRiskModal() {
     document.getElementById('overrideRamCheckbox').checked = false;
     document.getElementById('riskVisualLikelihood_create').setAttribute('disabled', 'disabled');
     document.getElementById('riskVisualConsequence_create').setAttribute('disabled', 'disabled');
+    
+    // Reset impact field
+    document.getElementById('impact_create').value = '';
     
     // Load assets if not already loaded
     if (assignedAssets.length === 0) {
@@ -3139,6 +3375,9 @@ window.openBowtieView = openBowtieView;
 window.calculateRiskVisualRAM = calculateRiskVisualRAM;
 window.toggleRamOverride = toggleRamOverride;
 window.searchRisks = searchRisks;
+window.showAddSubproject = showAddSubproject;
+window.hideAddSubproject = hideAddSubproject;
+window.addNewSubproject = addNewSubproject;
 </script>
 </body>
 </html>
