@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings • RiskMGT Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --primary-light: rgba(93,161,161,0.1);
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            padding: 32px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+
+        .settings-group {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .group-header {
+            background: rgba(93,161,161,0.05);
+            padding: 16px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .group-content {
+            padding: 24px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .setting-desc {
+            font-size: 13px;
+            color: var(--neutral);
+            margin-top: 4px;
+        }
+
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            width: 280px;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 28px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--neutral);
+            transition: var(--transition);
+            border-radius: 28px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 32px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .setting-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+            input[type="text"], input[type="email"], select { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2 class="section-title">System Settings</h2>
+
+    <!-- General Settings -->
+    <div class="settings-group">
+        <div class="group-header">General</div>
+        <div class="group-content">
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Organization Name</div>
+                    <div class="setting-desc">Displayed in header and reports</div>
+                </div>
+                <div class="setting-control">
+                    <input type="text" value="Global Enterprises Ltd">
+                </div>
+            </div>
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Timezone</div>
+                    <div class="setting-desc">All dates and times use this timezone</div>
+                </div>
+                <div class="setting-control">
+                    <select>
+                        <option>UTC</option>
+                        <option selected>UTC+08:00 (Singapore)</option>
+                        <option>UTC-05:00 (New York)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Date Format</div>
+                </div>
+                <div class="setting-control">
+                    <select>
+                        <option>DD/MM/YYYY</option>
+                        <option selected>MM/DD/YYYY</option>
+                        <option>YYYY-MM-DD</option>
+                    </select>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Default Currency</div>
+                </div>
+                <div class="setting-control">
+                    <select>
+                        <option>USD</option>
+                        <option selected>SGD</option>
+                        <option>EUR</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Governance -->
+    <div class="settings-group">
+        <div class="group-header">Data Governance & Retention</div>
+        <div class="group-content">
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Risk & Action Retention</div>
+                    <div class="setting-desc">Closed records kept for</div>
+                </div>
+                <div class="setting-control">
+                    <select>
+                        <option>7 years</option>
+                        <option selected>10 years</option>
+                        <option>Indefinite</option>
+                    </select>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Auto-Archive Closed Items</div>
+                    <div class="setting-desc">After 365 days of closure</div>
+                </div>
+                <div class="setting-control">
+                    <label class="toggle">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Require Comment on Delete Requests</div>
+                </div>
+                <div class="setting-control">
+                    <label class="toggle">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Button -->
+    <div style="text-align: right;">
+        <button class="btn-primary">Save Changes</button>
+    </div>
+
+</body>
+</html>

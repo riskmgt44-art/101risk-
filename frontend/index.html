@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Modern Risk & Compliance Management Platform"/>
+  <title>RiskMGT – Modern Risk & Compliance</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary:          #5DA1A1;
+      --primary-hover:    #4e9393;
+      --primary-dark:     #3d7a7a;
+      --text-primary:     #111111;
+      --text-secondary:   #666666;
+      --text-lighter:     #888888;
+      --border:           #e0e0e0;
+      --bg:               #ffffff;
+      --surface:          #ffffff;
+      --shadow:           0 10px 30px rgba(0,0,0,0.08);
+      --shadow-sm:        0 4px 12px rgba(0,0,0,0.06);
+      --radius:           20px;
+      --radius-pill:      9999px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .welcome-container {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .left-content {
+      padding-right: 20px;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.12;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin-bottom: 48px;
+      line-height: 1.55;
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      margin-bottom: 48px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(93, 161, 161, 0.10);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .feature-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--primary);
+    }
+
+    .feature-text h4 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .feature-text p {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .right-panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 48px 40px;
+      text-align: center;
+    }
+
+    .right-panel h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .right-panel > p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-bottom: 40px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: rgba(93, 161, 161, 0.06);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 32px 0;
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .divider span {
+      padding: 0 24px;
+    }
+
+    .sign-in-link {
+      display: block;
+      color: var(--primary);
+      font-weight: 500;
+      font-size: 16px;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .sign-in-link:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+
+    .trust-badges {
+      margin-top: 48px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .trust-item svg {
+      width: 18px;
+      height: 18px;
+      fill: #10b981;
+    }
+
+    @media (max-width: 960px) {
+      .welcome-container {
+        grid-template-columns: 1fr;
+        gap: 64px;
+        max-width: 520px;
+      }
+
+      .left-content {
+        text-align: center;
+        padding-right: 0;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      .features {
+        align-items: center;
+      }
+
+      .feature-item {
+        max-width: 420px;
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .right-panel {
+        padding: 40px 28px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<main>
+  <div class="welcome-container">
+
+    <!-- Left - Value Proposition -->
+    <div class="left-content">
+      <img 
+        src="assets/images/logo.png" 
+        alt="RiskMGT" 
+        class="logo"
+      >
+
+      <h1>Modern Risk & Compliance Management</h1>
+
+      <p class="subtitle">
+        Powerful, intuitive platform built for today's risk professionals and compliance teams.
+      </p>
+
+      <div class="features">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="feature-text">
+            <h4>Enterprise-grade Risk Register</h4>
+            <p>Full audit trail, custom fields, risk scoring & heatmaps</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M17 17l5-5-5-5M8 12h12"/></svg>
+          </div>
+          <div class="feature-text">
+            <h4>Control & Action Management</h4>
+            <p>Track remediation, assign owners, set deadlines</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="feature-text">
+            <h4>Real-time Analytics & Reporting</h4>
+            <p>Executive dashboards, export, scheduled reports</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right - Call to Action -->
+    <div class="right-panel">
+      <h2>Get Started</h2>
+      <p>Choose how you'd like to begin</p>
+
+      <a href="create-organization.html" class="btn btn-primary">
+        Create New Organization
+      </a>
+
+
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <a href="auth/login.html" class="sign-in-link">
+        Sign in to existing account →
+      </a>
+
+      <div class="trust-badges">
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+          <span>Enterprise Security</span>
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          <span>SOC 2 Compliant</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

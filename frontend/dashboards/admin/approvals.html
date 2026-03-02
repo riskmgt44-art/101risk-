@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+        .main { height: 100%; display: flex; flex-direction: column; }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .search-input {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            width: 340px;
+            background: #fafafa;
+        }
+        .filter-actions { display: flex; gap: 12px; }
+        .nav-btn {
+            padding: 9px 18px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* KPI Row */
+        .kpi-row {
+            display: flex;
+            gap: 16px;
+            padding: 20px 32px;
+            overflow-x: auto;
+            background: var(--bg);
+        }
+        .kpi-card {
+            flex: 1;
+            min-width: 210px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .kpi-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .kpi-label {
+            font-size: 13px;
+            color: var(--neutral);
+        }
+
+        /* Table & Cards Container */
+        .content-area {
+            flex: 1;
+            overflow: hidden;
+            padding: 0 32px 32px;
+        }
+        .table-container {
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            z-index: 8;
+        }
+        th {
+            text-align: left;
+            padding: 14px 16px;
+            font-weight: 600;
+            color: var(--neutral);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        tbody tr:hover { background: rgba(93,161,161,0.04); }
+        .type-pill, .status-pill {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+        .type-risk    { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .type-action  { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .type-ram     { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .type-user    { background: rgba(168,85,247,0.1); color: #a855f7; }
+        .type-policy  { background: rgba(34,197,94,0.1); color: #22c55e; }
+        .type-asset   { background: rgba(249,115,22,0.1); color: #f97316; }
+        .status-pending { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .status-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .status-rejected { background: rgba(239,68,68,0.1); color: var(--red); }
+        .status-cancelled { background: rgba(107,114,128,0.1); color: var(--neutral); }
+        .sla-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11.5px;
+        }
+        .sla-normal   { background: #f1f5f9; color: var(--neutral); }
+        .sla-warning  { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .sla-breach   { background: rgba(239,68,68,0.1); color: var(--red); }
+        .action-btns { display: flex; gap: 8px; }
+        .btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-approve { background: var(--green); color: white; border: none; }
+        .btn-approve:hover { background: #059669; }
+        .btn-reject  { background: var(--red); color: white; border: none; }
+        .btn-reject:hover  { background: #dc2626; }
+        .btn-view    { background: transparent; border: 1px solid var(--border); color: var(--neutral); }
+        .btn-view:hover    { border-color: var(--primary); color: var(--primary); }
+        .btn-request { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-request:hover { background: rgba(93,161,161,0.1); }
+
+        /* Skeleton */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            width: 620px;
+            max-width: 92%;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 28px;
+            position: relative;
+        }
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            color: var(--neutral);
+            cursor: pointer;
+        }
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .modal-section {
+            margin-bottom: 24px;
+        }
+        .modal-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+        .comment-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            min-height: 100px;
+            resize: vertical;
+        }
+        .comment-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        .diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .diff-table th,
+        .diff-table td {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        .diff-table th {
+            background: #f9fafb;
+            font-weight: 600;
+        }
+
+        /* Mobile Cards */
+        .cards-container {
+            padding: 16px;
+            overflow-y: auto;
+            display: none;
+        }
+        .approval-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            border-radius: var(--radius);
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(93,161,161,0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .filter-bar { flex-direction: column; gap: 12px; padding: 16px; }
+            .search-input { width: 100%; }
+            .kpi-row { flex-direction: column; padding: 16px; }
+            .table-container { display: none; }
+            .cards-container { display: block; }
+        }
+        @media (min-width: 769px) {
+            .cards-container { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main">
+    <div class="filter-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by ID, title, owner...">
+        <div class="filter-actions">
+            <button class="nav-btn" id="filterBtn"><i class="fas fa-filter"></i> Filter</button>
+            <button class="nav-btn" id="exportBtn"><i class="fas fa-file-export"></i> Export</button>
+            <button class="nav-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+    </div>
+
+    <div class="kpi-row">
+        <div class="kpi-card active" id="kpiPending" onclick="filterByStatus('pending')">
+            <div class="kpi-value" style="color: var(--amber);">0</div>
+            <div class="kpi-label">Pending Approvals</div>
+        </div>
+        <div class="kpi-card" id="kpiApproved" onclick="filterByStatus('approved')">
+            <div class="kpi-value" style="color: var(--green);">0</div>
+            <div class="kpi-label">Approved Today</div>
+        </div>
+        <div class="kpi-card" id="kpiRejected" onclick="filterByStatus('rejected')">
+            <div class="kpi-value" style="color: var(--red);">0</div>
+            <div class="kpi-label">Rejected Today</div>
+        </div>
+        <div class="kpi-card" id="kpiAvgTime">
+            <div class="kpi-value">—</div>
+            <div class="kpi-label">Avg Approval Time</div>
+        </div>
+        <div class="kpi-card" id="kpiTotal">
+            <div class="kpi-value" style="color: var(--primary);">0</div>
+            <div class="kpi-label">Total Approvals</div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <!-- Desktop Table -->
+        <div class="table-container">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+                <div>Loading approvals...</div>
+            </div>
+            <table id="approvalsTable">
+                <thead>
+                    <tr>
+                        <th class="checkbox"><input type="checkbox" id="selectAll"></th>
+                        <th>Type</th>
+                        <th>ID</th>
+                        <th>Title / Description</th>
+                        <th>Requested Change</th>
+                        <th>Requested By</th>
+                        <th>Owner</th>
+                        <th>Sub Project</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>SLA</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="cards-container" id="cardsContainer"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="approvalModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-title" id="modalTitle">Approval Decision</div>
+
+            <div class="modal-section">
+                <div class="modal-label">Context</div>
+                <div id="modalContext"></div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-label">Change Details</div>
+                <table class="diff-table" id="diffTable">
+                    <thead><tr><th>Field</th><th>Old</th><th>New</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-label">Comment <span style="color:var(--red);">*</span></div>
+                <textarea class="comment-box" id="commentBox" placeholder="Your comment (required for reject/request change)"></textarea>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-approve" onclick="handleDecision('approve')">Approve</button>
+                <button class="btn btn-reject" onclick="handleDecision('reject')">Reject</button>
+                <button class="btn btn-request" onclick="handleDecision('request')">Request Change</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let approvalsData = [];
+let currentFilter = 'all';
+let currentApprovalId = null;
+
+// Main initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Fetch initial data
+    fetchApprovals();
+});
+
+function setupEventListeners() {
+    // Search input
+    document.getElementById('searchInput').addEventListener('input', debounce((e) => {
+        filterApprovals(e.target.value.trim());
+    }, 300));
+    
+    // Select all checkbox
+    document.getElementById('selectAll').addEventListener('change', (e) => {
+        const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
+    
+    // Buttons
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+        fetchApprovals();
+        fetchApprovalStats();
+    });
+    document.getElementById('filterBtn').addEventListener('click', showFilterOptions);
+    document.getElementById('exportBtn').addEventListener('click', exportApprovals);
+    
+    // KPI card clicks
+    document.querySelectorAll('.kpi-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('approvalModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('approvalModal')) {
+            closeModal();
+        }
+    });
+}
+
+async function fetchApprovals() {
+    showLoading(true);
+    
+    try {
+        const token = getToken();
+        if (!token) {
+            showEmptyState('Authentication Required', 'Please login to view approvals');
+            return;
+        }
+        
+        const response = await fetch('/api/approvals', {
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.status === 401) {
+            showEmptyState('Session Expired', 'Please login again');
+            return;
+        }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.approvals) {
+            approvalsData = data.approvals;
+            console.log('✅ Fetched approvals:', approvalsData.length, 'items');
+            
+            // Debug: log status counts
+            debugData(approvalsData);
+            
+            renderApprovals(approvalsData);
+            updateKPIsFromData(approvalsData);
+            
+            // Also fetch stats for better accuracy
+            fetchApprovalStats();
+        } else {
+            showEmptyState('No Approvals', 'No approvals found');
+            resetKPIs();
+        }
+    } catch (err) {
+        console.error('Error fetching approvals:', err);
+        showEmptyState('Connection Error', 'Failed to load approvals. Please try again.');
+        resetKPIs();
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function fetchApprovalStats() {
+    try {
+        const token = getToken();
+        if (!token) return;
+        
+        const response = await fetch('/api/approvals/stats', {
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Stats received:', data);
+            
+            if (data.success && data.stats) {
+                updateKPIsFromStats(data.stats);
+            }
+        } else {
+            console.log('⚠️ Could not fetch stats, using data calculations');
+        }
+    } catch (err) {
+        console.error('Error fetching stats:', err);
+        // Fallback to data calculations
+    }
+}
+
+function debugData(approvals) {
+    console.log('=== DEBUG DATA ===');
+    console.log('Total approvals received:', approvals.length);
+    
+    if (approvals.length > 0) {
+        console.log('Sample approval:', approvals[0]);
+        
+        // Count by status
+        const statusCount = {};
+        approvals.forEach(a => {
+            const status = a.status || 'unknown';
+            statusCount[status] = (statusCount[status] || 0) + 1;
+        });
+        console.log('Count by status:', statusCount);
+        
+        // Check dates
+        const today = new Date().toISOString().split('T')[0];
+        const approvedToday = approvals.filter(a => 
+            a.status === 'approved' && 
+            a.processedAt && 
+            a.processedAt.includes(today)
+        ).length;
+        console.log('Approved today count:', approvedToday);
+        console.log('Today date:', today);
+        
+        // Show first few processedAt dates
+        const processedApprovals = approvals.filter(a => a.processedAt);
+        console.log('Processed approvals:', processedApprovals.length);
+        if (processedApprovals.length > 0) {
+            console.log('First processedAt dates:', processedApprovals.slice(0, 3).map(a => a.processedAt));
+        }
+    }
+}
+
+function updateKPIsFromStats(stats) {
+    console.log('Updating KPIs from stats:', stats);
+    
+    // Update from stats API response
+    const byStatus = stats.byStatus || {};
+    
+    // Get pending count
+    const pending = byStatus.pending || 0;
+    document.getElementById('kpiPending').querySelector('.kpi-value').textContent = pending;
+    
+    // Calculate today's counts
+    const today = new Date().toISOString().split('T')[0];
+    let approvedToday = 0;
+    let rejectedToday = 0;
+    
+    if (approvalsData.length > 0) {
+        approvedToday = approvalsData.filter(a => 
+            a.status === 'approved' && 
+            a.processedAt && 
+            typeof a.processedAt === 'string' && 
+            a.processedAt.includes(today)
+        ).length;
+        
+        rejectedToday = approvalsData.filter(a => 
+            a.status === 'rejected' && 
+            a.processedAt && 
+            typeof a.processedAt === 'string' && 
+            a.processedAt.includes(today)
+        ).length;
+    }
+    
+    console.log('Today calculations:', { approvedToday, rejectedToday, today });
+    
+    document.getElementById('kpiApproved').querySelector('.kpi-value').textContent = approvedToday;
+    document.getElementById('kpiRejected').querySelector('.kpi-value').textContent = rejectedToday;
+    
+    // Calculate total count
+    let totalCount = 0;
+    for (const status in byStatus) {
+        totalCount += byStatus[status];
+    }
+    document.getElementById('kpiTotal').querySelector('.kpi-value').textContent = totalCount;
+    
+    // Update average time
+    const avgTime = stats.averageProcessingTime || 0;
+    if (avgTime > 0) {
+        const avgHours = avgTime / (1000 * 60 * 60); // Convert ms to hours
+        let avgTimeText = '—';
+        
+        if (avgHours < 1) {
+            const minutes = Math.round(avgHours * 60);
+            avgTimeText = `${minutes}m`;
+        } else if (avgHours < 24) {
+            avgTimeText = `${avgHours.toFixed(1)}h`;
+        } else {
+            avgTimeText = `${(avgHours / 24).toFixed(1)}d`;
+        }
+        document.getElementById('kpiAvgTime').querySelector('.kpi-value').textContent = avgTimeText;
+    } else {
+        document.getElementById('kpiAvgTime').querySelector('.kpi-value').textContent = '—';
+    }
+}
+
+function updateKPIsFromData(data) {
+    if (!data || data.length === 0) {
+        resetKPIs();
+        return;
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    
+    let pending = 0;
+    let approvedToday = 0;
+    let rejectedToday = 0;
+    let total = data.length;
+    let totalProcessingTime = 0;
+    let processedCount = 0;
+    
+    data.forEach(approval => {
+        const status = approval.status || 'pending';
+        
+        if (status === 'pending') {
+            pending++;
+        } else if (status === 'approved') {
+            // Check if approved today
+            if (approval.processedAt && typeof approval.processedAt === 'string') {
+                const processedDate = approval.processedAt.split('T')[0];
+                if (processedDate === today) {
+                    approvedToday++;
+                }
+            }
+        } else if (status === 'rejected') {
+            // Check if rejected today
+            if (approval.processedAt && typeof approval.processedAt === 'string') {
+                const processedDate = approval.processedAt.split('T')[0];
+                if (processedDate === today) {
+                    rejectedToday++;
+                }
+            }
+        }
+        
+        // Calculate processing time for processed approvals
+        if ((status === 'approved' || status === 'rejected') &&
+            approval.submittedAt && approval.processedAt) {
+            try {
+                const submitted = new Date(approval.submittedAt);
+                const processed = new Date(approval.processedAt);
+                const processingTime = processed - submitted; // in milliseconds
+                
+                if (!isNaN(processingTime) && processingTime > 0) {
+                    totalProcessingTime += processingTime;
+                    processedCount++;
+                }
+            } catch (e) {
+                console.log('Error calculating processing time:', e);
+            }
+        }
+    });
+    
+    console.log('KPI Calculations:', { 
+        pending, 
+        approvedToday, 
+        rejectedToday, 
+        total, 
+        processedCount,
+        today 
+    });
+    
+    // Update KPI values
+    document.getElementById('kpiPending').querySelector('.kpi-value').textContent = pending;
+    document.getElementById('kpiApproved').querySelector('.kpi-value').textContent = approvedToday;
+    document.getElementById('kpiRejected').querySelector('.kpi-value').textContent = rejectedToday;
+    document.getElementById('kpiTotal').querySelector('.kpi-value').textContent = total;
+    
+    // Calculate and update average time
+    let avgTimeText = '—';
+    if (processedCount > 0) {
+        const avgMs = totalProcessingTime / processedCount;
+        const avgHours = avgMs / (1000 * 60 * 60);
+        
+        if (avgHours < 1) {
+            const minutes = Math.round(avgHours * 60);
+            avgTimeText = `${minutes}m`;
+        } else if (avgHours < 24) {
+            avgTimeText = `${avgHours.toFixed(1)}h`;
+        } else {
+            avgTimeText = `${(avgHours / 24).toFixed(1)}d`;
+        }
+    }
+    
+    document.getElementById('kpiAvgTime').querySelector('.kpi-value').textContent = avgTimeText;
+}
+
+function resetKPIs() {
+    document.getElementById('kpiPending').querySelector('.kpi-value').textContent = '0';
+    document.getElementById('kpiApproved').querySelector('.kpi-value').textContent = '0';
+    document.getElementById('kpiRejected').querySelector('.kpi-value').textContent = '0';
+    document.getElementById('kpiAvgTime').querySelector('.kpi-value').textContent = '—';
+    document.getElementById('kpiTotal').querySelector('.kpi-value').textContent = '0';
+}
+
+function filterByStatus(status) {
+    currentFilter = status;
+    let filtered = approvalsData;
+    
+    if (status !== 'all') {
+        if (status === 'approved' || status === 'rejected') {
+            // For approved/rejected, show only from today
+            const today = new Date().toISOString().split('T')[0];
+            filtered = approvalsData.filter(a => 
+                a.status === status && 
+                a.processedAt && 
+                typeof a.processedAt === 'string' &&
+                a.processedAt.includes(today)
+            );
+        } else {
+            filtered = approvalsData.filter(a => a.status === status);
+        }
+    }
+    
+    renderApprovals(filtered);
+    
+    // Update KPI cards for filtered view
+    updateKPIsFromData(filtered);
+    
+    // Update active state
+    document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active'));
+    if (status === 'pending') {
+        document.getElementById('kpiPending').classList.add('active');
+    } else if (status === 'approved') {
+        document.getElementById('kpiApproved').classList.add('active');
+    } else if (status === 'rejected') {
+        document.getElementById('kpiRejected').classList.add('active');
+    } else {
+        document.getElementById('kpiTotal').classList.add('active');
+    }
+}
+
+function filterApprovals(searchTerm) {
+    if (!searchTerm) {
+        filterByStatus(currentFilter);
+        return;
+    }
+    
+    const term = searchTerm.toLowerCase();
+    const filtered = approvalsData.filter(item => {
+        return (
+            (item._id && item._id.toLowerCase().includes(term)) ||
+            (item.title && item.title.toLowerCase().includes(term)) ||
+            (item.type && item.type.toLowerCase().includes(term)) ||
+            (item.submittedBy && item.submittedBy.toLowerCase().includes(term)) ||
+            (item.submittedByEmail && item.submittedByEmail.toLowerCase().includes(term)) ||
+            (item.description && item.description.toLowerCase().includes(term))
+        );
+    });
+    
+    renderApprovals(filtered);
+    updateKPIsFromData(filtered);
+}
+
+function renderApprovals(items) {
+    const tableBody = document.getElementById('tableBody');
+    const cardsContainer = document.getElementById('cardsContainer');
+    
+    // Clear current content
+    tableBody.innerHTML = '';
+    cardsContainer.innerHTML = '';
+    
+    if (!items || items.length === 0) {
+        if (currentFilter !== 'all' || document.getElementById('searchInput').value.trim()) {
+            showEmptyState('No Results', 'No approvals match your criteria');
+        } else {
+            showEmptyState('No Approvals', 'No approvals found');
+        }
+        return;
+    }
+    
+    // Render table rows
+    items.forEach(item => {
+        const row = createTableRow(item);
+        tableBody.appendChild(row);
+        
+        // Render mobile card
+        const card = createMobileCard(item);
+        cardsContainer.appendChild(card);
+    });
+}
+
+function createTableRow(item) {
+    const tr = document.createElement('tr');
+    tr.dataset.id = item._id;
+    
+    const id = item._id || '';
+    const shortId = id.length > 8 ? id.substring(0, 8) + '...' : id;
+    const type = item.type || 'risk';
+    const title = item.title || 'Untitled Request';
+    const description = item.description || '';
+    const change = getChangeDescription(item);
+    const requestedBy = item.submittedByEmail || item.submittedBy || 'Unknown';
+    const owner = item.owner || '—';
+    const subProject = item.subProject || '—';
+    const submitted = item.submittedAt ? formatDate(item.submittedAt) : '—';
+    const status = item.status || 'pending';
+    
+    // Determine SLA status
+    const slaStatus = calculateSLAStatus(item);
+    const slaText = getSLAText(slaStatus);
+    
+    tr.innerHTML = `
+        <td><input type="checkbox" data-id="${id}"></td>
+        <td><span class="type-pill type-${getTypeClass(type)}">${formatType(type)}</span></td>
+        <td><a href="#" class="id-link" onclick="viewApproval('${id}'); return false;" title="${id}">${shortId}</a></td>
+        <td>
+            <div style="font-weight: 500; margin-bottom: 4px;">${escapeHtml(title)}</div>
+            <div style="font-size: 12px; color: var(--neutral);">${escapeHtml(description.substring(0, 100))}${description.length > 100 ? '...' : ''}</div>
+        </td>
+        <td>${escapeHtml(change)}</td>
+        <td>${escapeHtml(requestedBy)}</td>
+        <td>${escapeHtml(owner)}</td>
+        <td>${escapeHtml(subProject)}</td>
+        <td><span class="status-pill status-${status}">${formatStatus(status)}</span></td>
+        <td>${submitted}</td>
+        <td><span class="sla-badge sla-${slaStatus}">${slaText}</span></td>
+        <td class="action-btns">
+            ${status === 'pending' ? `
+                <button class="btn btn-approve" onclick="openModal('${id}')">Approve</button>
+                <button class="btn btn-reject" onclick="openModal('${id}')">Reject</button>
+            ` : ''}
+            <button class="btn btn-view" onclick="viewApproval('${id}')">View</button>
+        </td>
+    `;
+    
+    return tr;
+}
+
+function createMobileCard(item) {
+    const id = item._id || '';
+    const type = item.type || 'risk';
+    const title = item.title || 'Untitled Request';
+    const description = item.description || '';
+    const change = getChangeDescription(item);
+    const requestedBy = item.submittedByEmail || item.submittedBy || 'Unknown';
+    const owner = item.owner || '—';
+    const subProject = item.subProject || '—';
+    const submitted = item.submittedAt ? formatDate(item.submittedAt) : '—';
+    const status = item.status || 'pending';
+    const slaStatus = calculateSLAStatus(item);
+    const slaText = getSLAText(slaStatus);
+    
+    const card = document.createElement('div');
+    card.className = 'approval-card';
+    card.dataset.id = id;
+    
+    card.innerHTML = `
+        <div class="card-header">
+            <span class="type-pill type-${getTypeClass(type)}">${formatType(type)}</span>
+            <span class="status-pill status-${status}">${formatStatus(status)}</span>
+        </div>
+        <div class="card-title">${escapeHtml(title)}</div>
+        <div class="card-desc">${escapeHtml(change)}</div>
+        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">
+            ${escapeHtml(description.substring(0, 100))}${description.length > 100 ? '...' : ''}
+        </div>
+        <div class="card-meta">Requested By: ${escapeHtml(requestedBy)}</div>
+        <div class="card-meta">Owner: ${escapeHtml(owner)} | Sub: ${escapeHtml(subProject)}</div>
+        <div class="card-meta">Submitted: ${submitted} | SLA: <span class="sla-badge sla-${slaStatus}">${slaText}</span></div>
+        <div class="card-actions" style="margin-top: 12px;">
+            ${status === 'pending' ? `
+                <button class="btn btn-approve" onclick="openModal('${id}')">Approve</button>
+                <button class="btn btn-reject" onclick="openModal('${id}')">Reject</button>
+            ` : ''}
+            <button class="btn btn-view" onclick="viewApproval('${id}')">View</button>
+        </div>
+    `;
+    
+    return card;
+}
+
+function getChangeDescription(item) {
+    if (item.additionalData && item.additionalData.changeDescription) {
+        return item.additionalData.changeDescription;
+    }
+    
+    if (item.type === 'risk_submission' && item.riskTitle) {
+        return `New risk: ${item.riskTitle}`;
+    }
+    
+    if (item.entityType && item.entityId) {
+        return `${item.entityType} update`;
+    }
+    
+    return item.type === 'user_create' ? 'New user creation' : 
+           item.type === 'policy_change' ? 'Policy update' : 
+           item.type === 'asset' ? 'Asset modification' : 'Change request';
+}
+
+function openModal(approvalId) {
+    const item = approvalsData.find(a => a._id === approvalId);
+    if (!item) return;
+    
+    currentApprovalId = approvalId;
+    
+    // Populate modal
+    document.getElementById('modalTitle').textContent = `Decision for ${approvalId.substring(0, 8)}`;
+    document.getElementById('modalContext').innerHTML = `
+        <strong>Type:</strong> ${formatType(item.type)}<br>
+        <strong>Title:</strong> ${escapeHtml(item.title)}<br>
+        <strong>Submitted By:</strong> ${escapeHtml(item.submittedByEmail || item.submittedBy || 'Unknown')}<br>
+        <strong>Submitted:</strong> ${item.submittedAt ? formatDateTime(item.submittedAt) : '—'}<br>
+        <strong>Status:</strong> ${formatStatus(item.status)}
+    `;
+    
+    // Populate diff table
+    const diffTable = document.querySelector('#diffTable tbody');
+    diffTable.innerHTML = '';
+    
+    if (item.additionalData && item.additionalData.changes) {
+        Object.entries(item.additionalData.changes).forEach(([field, change]) => {
+            const row = diffTable.insertRow();
+            row.innerHTML = `
+                <td>${escapeHtml(field)}</td>
+                <td>${escapeHtml(change.old || '—')}</td>
+                <td>${escapeHtml(change.new || '—')}</td>
+            `;
+        });
+    } else {
+        diffTable.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--neutral);">No change details available</td></tr>';
+    }
+    
+    // Clear comment box
+    document.getElementById('commentBox').value = '';
+    
+    // Show modal
+    document.getElementById('approvalModal').style.display = 'flex';
+    document.getElementById('commentBox').focus();
+}
+
+function closeModal() {
+    document.getElementById('approvalModal').style.display = 'none';
+    currentApprovalId = null;
+}
+
+async function handleDecision(decision) {
+    const comment = document.getElementById('commentBox').value.trim();
+    
+    if ((decision === 'reject' || decision === 'request') && !comment) {
+        alert('Comment is required for reject / request change');
+        document.getElementById('commentBox').focus();
+        return;
+    }
+    
+    const token = getToken();
+    if (!token) {
+        alert('Session expired. Please login again.');
+        return;
+    }
+    
+    const status = decision === 'approve' ? 'approved' : 
+                  decision === 'reject' ? 'rejected' : 'pending';
+    const actionTaken = decision === 'request' ? 'changes_requested' : decision;
+    
+    try {
+        const response = await fetch(`/api/approvals/${currentApprovalId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                status: status,
+                comment: comment,
+                actionTaken: actionTaken
+            })
+        });
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`Request ${status} successfully.`);
+            closeModal();
+            setTimeout(() => {
+                fetchApprovals();
+                fetchApprovalStats();
+            }, 500);
+        }
+    } catch (err) {
+        console.error('Error updating approval:', err);
+        alert('Failed to update approval. Please try again.');
+    }
+}
+
+function viewApproval(approvalId) {
+    const item = approvalsData.find(a => a._id === approvalId);
+    if (item) {
+        const details = `
+ID: ${item._id}
+Type: ${item.type}
+Title: ${item.title}
+Status: ${item.status}
+Submitted By: ${item.submittedByEmail || item.submittedBy}
+Submitted At: ${item.submittedAt ? formatDateTime(item.submittedAt) : '—'}
+${item.processedAt ? `Processed At: ${formatDateTime(item.processedAt)}` : ''}
+${item.processedByEmail ? `Processed By: ${item.processedByEmail}` : ''}
+${item.comment ? `Comment: ${item.comment}` : ''}
+Description: ${item.description || 'No description'}
+        `;
+        alert(details);
+    }
+}
+
+function showFilterOptions() {
+    const options = `
+Filter Options:
+• By Status (Pending/Approved/Rejected/Cancelled)
+• By Type (Risk/Action/User/Policy/Asset)
+• By Time Range (Today/Yesterday/This Week/This Month)
+• By Submitter
+
+Use the search bar for keyword search.
+    `;
+    alert(options);
+}
+
+function exportApprovals() {
+    if (approvalsData.length === 0) {
+        alert('No approvals to export.');
+        return;
+    }
+    
+    // Export as CSV
+    const headers = ['ID', 'Type', 'Title', 'Status', 'Submitted By', 'Submitted At', 'Processed At', 'Comment'];
+    const csvRows = [];
+    
+    csvRows.push(headers.join(','));
+    
+    approvalsData.forEach(item => {
+        const row = [
+            item._id,
+            item.type,
+            `"${escapeCsv(item.title)}"`,
+            item.status,
+            `"${escapeCsv(item.submittedByEmail || item.submittedBy || '')}"`,
+            item.submittedAt || '',
+            item.processedAt || '',
+            `"${escapeCsv(item.comment || '')}"`
+        ];
+        csvRows.push(row.join(','));
+    });
+    
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `approvals_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function calculateSLAStatus(item) {
+    if (item.status !== 'pending') return 'normal';
+    
+    if (!item.submittedAt) return 'normal';
+    
+    try {
+        const submitted = new Date(item.submittedAt);
+        const now = new Date();
+        const hoursDiff = (now - submitted) / (1000 * 60 * 60);
+        
+        if (hoursDiff > 72) return 'breach';    // Over 3 days
+        if (hoursDiff > 48) return 'warning';   // 2-3 days
+        return 'normal';                        // Less than 2 days
+    } catch (e) {
+        return 'normal';
+    }
+}
+
+function getSLAText(status) {
+    switch(status) {
+        case 'breach': return 'SLA Breach';
+        case 'warning': return 'Approaching SLA';
+        default: return 'Within SLA';
+    }
+}
+
+function getTypeClass(type) {
+    if (!type) return 'risk';
+    
+    const typeLower = type.toLowerCase();
+    const typeMap = {
+        'risk': 'risk',
+        'risk_submission': 'risk',
+        'action': 'action',
+        'access': 'user',
+        'user_create': 'user',
+        'user_create_admin': 'user',
+        'policy': 'policy',
+        'policy_change': 'policy',
+        'asset': 'asset',
+        'ram': 'ram'
+    };
+    
+    return typeMap[typeLower] || typeLower;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '—';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        
+        const now = new Date();
+        const diffHours = (now - date) / (1000 * 60 * 60);
+        
+        if (diffHours < 1) {
+            return 'Just now';
+        } else if (diffHours < 24) {
+            const hours = Math.floor(diffHours);
+            return `${hours}h ago`;
+        } else if (diffHours < 48) {
+            return 'Yesterday';
+        } else if (diffHours < 168) {
+            const days = Math.floor(diffHours / 24);
+            return `${days}d ago`;
+        } else {
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+        }
+    } catch (e) {
+        return '—';
+    }
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return '—';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        
+        return date.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (e) {
+        return '—';
+    }
+}
+
+function formatType(type) {
+    if (!type) return 'Risk';
+    
+    return type
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
+function formatStatus(status) {
+    if (!status) return 'Pending';
+    return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function escapeCsv(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/"/g, '""');
+}
+
+function getToken() {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+}
+
+function showLoading(show) {
+    document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+}
+
+function showEmptyState(title, message) {
+    const tableBody = document.getElementById('tableBody');
+    const cardsContainer = document.getElementById('cardsContainer');
+    
+    const emptyHTML = `
+        <div style="text-align:center;padding:120px 20px;color:var(--text-secondary);">
+            <i class="fas fa-inbox" style="font-size:64px;opacity:0.4;margin-bottom:24px;"></i><br>
+            <div style="font-size:18px;font-weight:500;">${title}</div>
+            <div style="font-size:14px;margin-top:8px;margin-bottom:24px;">${message}</div>
+            <button class="btn btn-approve" onclick="fetchApprovals()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>`;
+    
+    tableBody.innerHTML = `<tr><td colspan="12">${emptyHTML}</td></tr>`;
+    cardsContainer.innerHTML = emptyHTML;
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+</script>
+</body>
+</html>

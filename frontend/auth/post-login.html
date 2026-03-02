@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signing in… • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --text-primary: #111111;
+            --text-secondary: #666666;
+            --shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #FFFFFF;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .access-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 40px 32px;
+            text-align: center;
+            max-width: 380px;
+            width: 100%;
+            animation: fadeUp 0.8s ease-out;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 32px;
+            display: block;
+        }
+
+        .headline {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .supporting {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes pulse {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .role-indicator {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            opacity: 0;
+            animation: fadeIn 0.6s 1.2s ease-out forwards;
+        }
+
+        .role-indicator svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--text-secondary);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .access-card {
+                padding: 40px 24px;
+                margin: 20px;
+            }
+
+            .logo {
+                width: 52px;
+                height: 52px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="access-card">
+        <img src="img/logo.png" alt="RiskMGT" class="logo">
+
+        <div class="headline">Signing you in…</div>
+        <div class="supporting">Verifying access and preparing your workspace</div>
+
+        <div class="loader">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+
+        <div class="role-indicator" id="roleIndicator">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+            </svg>
+            Access level: <span id="roleText">Verifying...</span>
+        </div>
+    </div>
+
+    <script>
+        // This file should be located at: /auth/signing-in.html or root-level protected route
+        // All dashboard folders must be server-protected (no direct access without session)
+
+        async function initiateSecureRedirect() {
+            try {
+                // Call backend endpoint that validates session/token and returns authorized role + redirect URL
+                const response = await fetch('/api/auth/finalize-login', {
+                    method: 'GET',
+                    credentials: 'include', // Important: send cookies/sessions
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Authentication failed');
+                }
+
+                const data = await response.json();
+
+                // Safely update UI with confirmed role
+                document.getElementById('roleText').textContent = data.role || 'User';
+
+                // Perform server-authorized redirect only
+                setTimeout(() => {
+                    window.location.href = data.redirectUrl; // e.g., "/dashboards/executive/" or full path
+                }, 1800);
+
+            } catch (error) {
+                // On failure, redirect to login with error
+                setTimeout(() => {
+                    window.location.href = '/auth/login.html?error=session_expired';
+                }, 2000);
+            }
+        }
+
+        // Start process immediately
+        initiateSecureRedirect();
+    </script>
+</body>
+</html>
