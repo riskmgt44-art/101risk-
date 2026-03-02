@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Action View • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { 
+            height: 100%; 
+            overflow: hidden; 
+        }
+        body {
+            height: 100%;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* Completely hide scrollbars across all browsers */
+        html::-webkit-scrollbar { display: none; width: 0; height: 0; }
+        body::-webkit-scrollbar { display: none; width: 0; height: 0; }
+        ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
+
+        html, body {
+            -ms-overflow-style: none;      /* IE and Edge */
+            scrollbar-width: none;         /* Firefox */
+        }
+
+        /* Main scrollable area - keep functionality but no visible bar */
+        .main { 
+            height: 100%; 
+            overflow-y: scroll; 
+            overflow-x: hidden; 
+            padding: 32px; 
+            -webkit-overflow-scrolling: touch;
+        }
+        .main::-webkit-scrollbar { 
+            display: none; 
+            width: 0; 
+            height: 0; 
+            background: transparent; 
+        }
+        .main { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
+
+        /* Hero Summary Card */
+        .hero-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 32px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 32px;
+        }
+        .hero-left {
+            flex: 1;
+        }
+        .hero-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .hero-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .hero-right {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            font-size: 13px;
+        }
+        .hero-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .hero-meta-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .hero-meta-value {
+            font-weight: 600;
+        }
+        .hero-meta-link {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .hero-meta-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .card-section {
+            margin-bottom: 16px;
+        }
+        .card-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .card-text {
+            font-size: 14px;
+        }
+        .timeline-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            position: relative;
+            margin-top: 16px;
+        }
+        .timeline-progress {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            width: 50%; /* Example progress */
+        }
+        .linked-risks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .linked-risk-item {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .linked-risk-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .linked-risk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .linked-risk-id {
+            font-weight: 600;
+        }
+        .linked-risk-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .linked-risk-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Full Width Section */
+        .audit-trail-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .audit-info {
+            font-size: 14px;
+        }
+        .audit-btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 9.6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .audit-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            bottom: 0;
+            width: 480px;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border);
+            box-shadow: -3.2px 0 9.6px rgba(0,0,0,0.06);
+            transition: right 0.3s ease;
+            z-index: 9;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+        .side-panel::-webkit-scrollbar { 
+            display: none; 
+            width: 0; 
+            height: 0; 
+            background: transparent; 
+        }
+        .side-panel { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
+        .side-panel.active {
+            right: 0;
+        }
+        .side-panel-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+        .side-panel-tab {
+            padding: 16px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .side-panel-tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            font-weight: 600;
+        }
+        .side-panel-tab:hover {
+            color: var(--primary);
+        }
+        .side-panel-content {
+            padding: 24px;
+        }
+        .progress-section {
+            margin-bottom: 24px;
+        }
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .progress-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            width: 75%; /* Example */
+        }
+        .progress-text {
+            font-size: 13px;
+            text-align: right;
+        }
+        .comments-thread {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .comment {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .comment-author {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .comment-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .comment-text {
+            font-size: 13px;
+        }
+        .info-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            font-size: 13px;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .info-value {
+            font-weight: 600;
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .history-item {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .history-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .history-change {
+            font-size: 13px;
+        }
+
+        /* Close Button */
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 20px;
+            transition: var(--transition);
+        }
+        .close-btn:hover {
+            color: var(--primary);
+        }
+
+        /* Pills */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; }
+        .pill-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-progress { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .pill-proposed { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-closed { background: rgba(107,114,128,0.1); color: var(--neutral); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .main { padding: 16px; }
+            .hero-card {
+                flex-direction: column;
+                padding: 24px;
+            }
+            .hero-right {
+                grid-template-columns: 1fr;
+            }
+            .card { padding: 20px; }
+            .audit-trail-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            .side-panel {
+                width: 100%;
+                right: -100%;
+                top: 0;
+                bottom: 0;
+                border-left: none;
+                box-shadow: none;
+                z-index: 20;
+            }
+            .side-panel-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="main">
+        <!-- Hero Summary Card -->
+        <div class="hero-card">
+            <div class="hero-left">
+                <div class="hero-title">ACTION-101: Implement Multi-Factor Authentication</div>
+                <div class="hero-description">Enhance security by requiring multiple forms of verification for system access.</div>
+            </div>
+            <div class="hero-right">
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Status</span>
+                    <span class="hero-meta-value"><span class="pill pill-progress">In Progress</span></span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Action Owner</span>
+                    <span class="hero-meta-value">IT Security Team</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Sub Project</span>
+                    <span class="hero-meta-value">Digital Transformation</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Linked Risk(s)</span>
+                    <span class="hero-meta-value"><a href="risk-view.html" class="hero-meta-link">RISK-001, RISK-005</a></span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Planned Start Date</span>
+                    <span class="hero-meta-value">2025-07-01</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Planned Finish Date</span>
+                    <span class="hero-meta-value">2026-01-31</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Cost of Action</span>
+                    <span class="hero-meta-value">$450,000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div>
+                <!-- Action Description Card -->
+                <div class="card">
+                    <div class="card-title">Action Description</div>
+                    <div class="card-section">
+                        <div class="card-label">Description</div>
+                        <div class="card-text">Roll out MFA to all user accounts and integrate with existing authentication systems.</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Purpose / Objective</div>
+                        <div class="card-text">To reduce the risk of unauthorized access and data breaches.</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Expected Outcome</div>
+                        <div class="card-text">100% compliance with MFA across the organization.</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Why the Action Exists</div>
+                        <div class="card-text">Identified as a key mitigation for cybersecurity risks.</div>
+                    </div>
+                </div>
+
+                <!-- Timeline & Schedule Card -->
+                <div class="card">
+                    <div class="card-title">Timeline & Schedule</div>
+                    <div class="card-section">
+                        <div class="card-label">Planned Start Date</div>
+                        <div class="card-text">2025-07-01</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Planned Finish Date</div>
+                        <div class="card-text">2026-01-31</div>
+                    </div>
+                    <div class="timeline-bar">
+                        <div class="timeline-progress"></div>
+                    </div>
+                    <!-- Optional delay indicator -->
+                    <div class="card-text" style="color: var(--amber); margin-top: 8px;">No delay</div>
+                </div>
+
+                <!-- Linked Risks Card -->
+                <div class="card">
+                    <div class="card-title">Linked Risks</div>
+                    <div class="linked-risks-list">
+                        <div class="linked-risk-item" onclick="window.location.href='risk-view.html'">
+                            <div class="linked-risk-header">
+                                <span class="linked-risk-id">RISK-001</span>
+                                <span class="pill pill-progress">In Progress</span>
+                            </div>
+                            <div class="linked-risk-title">Cybersecurity Breach</div>
+                            <div class="linked-risk-meta">Owner: IT Security Team</div>
+                        </div>
+                        <div class="linked-risk-item" onclick="window.location.href='risk-view.html'">
+                            <div class="linked-risk-header">
+                                <span class="linked-risk-id">RISK-005</span>
+                                <span class="pill pill-proposed">Proposed</span>
+                            </div>
+                            <div class="linked-risk-title">Data Leakage</div>
+                            <div class="linked-risk-meta">Owner: Compliance Officer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Ownership & Governance Card -->
+                <div class="card">
+                    <div class="card-title">Ownership & Governance</div>
+                    <div class="card-section">
+                        <div class="card-label">Action Owner</div>
+                        <div class="card-text">IT Security Team</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Responsible Team</div>
+                        <div class="card-text">IT Department</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Approver</div>
+                        <div class="card-text">CTO</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Approval Date</div>
+                        <div class="card-text">2025-06-15</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Current Approval Status</div>
+                        <div class="card-text"><span class="pill pill-progress">In Progress</span></div>
+                    </div>
+                </div>
+
+                <!-- Financial Impact Card -->
+                <div class="card">
+                    <div class="card-title">Financial Impact</div>
+                    <div class="card-section">
+                        <div class="card-label">Cost of Action</div>
+                        <div class="card-text">$450,000</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Budget Source</div>
+                        <div class="card-text">IT Budget FY2025</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Cost Type</div>
+                        <div class="card-text">CapEx</div>
+                    </div>
+                    <div class="card-section">
+                        <div class="card-label">Financial Notes</div>
+                        <div class="card-text">Includes software licenses and training costs.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Trail Summary -->
+        <div class="audit-trail-card">
+            <div class="audit-info">
+                <strong>Number of updates:</strong> 5<br>
+                <strong>Last modified date:</strong> 2025-12-10<br>
+                <strong>Who modified it last:</strong> John Doe
+            </div>
+            <button class="audit-btn" onclick="toggleSidePanel('history')">View Full History</button>
+        </div>
+    </main>
+
+    <!-- Right-Side Slide Panel -->
+    <div class="side-panel" id="sidePanel">
+        <button class="close-btn" onclick="toggleSidePanel()"><i class="fas fa-times"></i></button>
+        <div class="side-panel-tabs">
+            <div class="side-panel-tab active" onclick="switchTab(this, 'progress')">Progress</div>
+            <div class="side-panel-tab" onclick="switchTab(this, 'comments')">Comments</div>
+            <div class="side-panel-tab" onclick="switchTab(this, 'information')">Information</div>
+            <div class="side-panel-tab" onclick="switchTab(this, 'history')">History</div>
+        </div>
+        <div class="side-panel-content" id="progressContent">
+            <div class="progress-section">
+                <div class="progress-title">Status Changes Over Time</div>
+                <!-- Example content -->
+                <div>2025-06-15: Proposed → Approved</div>
+                <div>2025-07-01: Approved → In Progress</div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-title">% Completion</div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text">75%</div>
+            </div>
+        </div>
+        <div class="side-panel-content" id="commentsContent" style="display: none;">
+            <div class="comments-thread">
+                <div class="comment">
+                    <div class="comment-author">John Doe</div>
+                    <div class="comment-time">2025-12-05 14:30</div>
+                    <div class="comment-text">Progress update: Integration testing started.</div>
+                </div>
+                <div class="comment">
+                    <div class="comment-author">Jane Smith</div>
+                    <div class="comment-time">2025-12-10 09:15</div>
+                    <div class="comment-text">@John Doe Looks good, approve the next phase.</div>
+                </div>
+            </div>
+        </div>
+        <div class="side-panel-content" id="informationContent" style="display: none;">
+            <div class="info-meta">
+                <div class="info-item">
+                    <div class="info-label">Created By</div>
+                    <div class="info-value">System Admin</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Created Date</div>
+                    <div class="info-value">2025-06-01</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Last Updated By</div>
+                    <div class="info-value">John Doe</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Last Updated Date</div>
+                    <div class="info-value">2025-12-10</div>
+                </div>
+            </div>
+        </div>
+        <div class="side-panel-content" id="historyContent" style="display: none;">
+            <div class="history-list">
+                <div class="history-item">
+                    <div class="history-date">2025-12-10 09:15</div>
+                    <div class="history-change">Status changed to In Progress by John Doe</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-date">2025-07-01 10:00</div>
+                    <div class="history-change">Action approved by CTO</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-date">2025-06-15 14:30</div>
+                    <div class="history-change">Action proposed by IT Security Team</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Side Panel Toggle
+        function toggleSidePanel(tab) {
+            const panel = document.getElementById('sidePanel');
+            panel.classList.toggle('active');
+            if (tab) {
+                const tabs = document.querySelectorAll('.side-panel-tab');
+                tabs.forEach(t => t.classList.remove('active'));
+                const targetTab = Array.from(tabs).find(t => t.textContent.toLowerCase().trim() === tab.toLowerCase());
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                    switchTab(targetTab, tab);
+                }
+            }
+        }
+
+        // Switch Tabs in Side Panel
+        function switchTab(element, contentId) {
+            document.querySelectorAll('.side-panel-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            document.querySelectorAll('.side-panel-content').forEach(content => content.style.display = 'none');
+            document.getElementById(contentId + 'Content').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

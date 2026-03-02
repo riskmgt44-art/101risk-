@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Matrix • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --border-light: #f0f0f0;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.04);
+            --shadow-md: 0 12px 28px rgba(0,0,0,0.06);
+            --shadow-lg: 0 20px 40px rgba(0,0,0,0.08);
+            --radius: 14px;
+            --radius-sm: 10px;
+            
+            /* Matrix colors */
+            --matrix-critical: #d32f2f;
+            --matrix-critical-bg: #ffcdd2;
+            --matrix-critical-text: #b71c1c;
+            
+            --matrix-high: #f57c00;
+            --matrix-high-bg: #ffe0b2;
+            --matrix-high-text: #bf360c;
+            
+            --matrix-medium: #fdd835;
+            --matrix-medium-bg: #fff9c4;
+            --matrix-medium-text: #b27700;
+            
+            --matrix-low: #7cb342;
+            --matrix-low-bg: #dcedc8;
+            --matrix-low-text: #33691e;
+            
+            --matrix-highlight: #5DA1A1;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #f5f7fa;
+            color: var(--text-primary);
+        }
+
+        .top-nav {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 68px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .back-btn:hover { background: #f5f5f5; }
+        
+        .nav-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-title i { color: var(--primary); }
+        
+        .risk-badge {
+            background: rgba(93,161,161,0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 30px;
+            background: transparent;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .btn-icon:hover { background: #f5f5f5; }
+        
+        .btn-refresh {
+            padding: 8px 18px;
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-refresh:hover { background: rgba(93,161,161,0.04); }
+        .btn-refresh.refreshing i { animation: spin 0.8s linear infinite; }
+
+        .main {
+            position: fixed;
+            top: 68px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            padding: 28px;
+        }
+
+        .matrix-container { max-width: 1260px; margin: 0 auto; }
+
+        .risk-header-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        
+        .risk-info { flex: 1; }
+        
+        .risk-id {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .risk-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .risk-meta { display: flex; gap: 28px; flex-wrap: wrap; }
+        
+        .risk-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            background: #f4f6f9;
+            padding: 6px 14px;
+            border-radius: 30px;
+        }
+        .risk-meta-item i { color: var(--primary); }
+        
+        .last-updated {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .current-rating {
+            background: #f8fafd;
+            padding: 22px 30px;
+            border-radius: var(--radius);
+            text-align: center;
+            min-width: 220px;
+            border: 1px solid var(--border-light);
+        }
+        .rating-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+        .rating-value {
+            font-size: 44px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .rating-category {
+            font-size: 15px;
+            font-weight: 600;
+            padding: 6px 20px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+        .category-critical { background: #ffcdd2; color: #b71c1c; }
+        .category-high { background: #ffe0b2; color: #bf360c; }
+        .category-medium { background: #fff9c4; color: #b27700; }
+        .category-low { background: #dcedc8; color: #33691e; }
+
+        .matrix-grid-section {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 28px;
+            margin-bottom: 28px;
+        }
+        
+        .matrix-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .matrix-title i { color: var(--primary); }
+        
+        .matrix-table-wrapper {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: 12px;
+        }
+        
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            min-width: 650px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .matrix-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 16px 12px;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #dee2e6;
+        }
+        
+        .matrix-table th:first-child {
+            background: #1e2b37;
+        }
+        
+        .matrix-table td {
+            padding: 16px 12px;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #dee2e6;
+        }
+        
+        .matrix-table td:first-child {
+            background: #e9ecef;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: left;
+            padding-left: 20px;
+        }
+        
+        .matrix-cell-critical {
+            background-color: #ffcdd2 !important;
+            color: #b71c1c !important;
+            font-weight: 700;
+        }
+        
+        .matrix-cell-high {
+            background-color: #ffe0b2 !important;
+            color: #bf360c !important;
+            font-weight: 700;
+        }
+        
+        .matrix-cell-medium {
+            background-color: #fff9c4 !important;
+            color: #b27700 !important;
+            font-weight: 700;
+        }
+        
+        .matrix-cell-low {
+            background-color: #dcedc8 !important;
+            color: #33691e !important;
+            font-weight: 600;
+        }
+        
+        .matrix-cell-highlight {
+            border: 4px solid #5DA1A1 !important;
+            box-shadow: 0 0 0 2px rgba(93,161,161,0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .matrix-legend {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 28px 0 8px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .legend-color.critical { background: #ffcdd2; }
+        .legend-color.high { background: #ffe0b2; }
+        .legend-color.medium { background: #fff9c4; }
+        .legend-color.low { background: #dcedc8; }
+
+        .assessment-panel {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 28px;
+        }
+        
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+        }
+        
+        .assessment-item {
+            background: #f8fafd;
+            padding: 24px;
+            border-radius: 12px;
+        }
+        
+        .assessment-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        .assessment-value {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .assessment-sub { font-size: 14px; color: var(--text-secondary); }
+        
+        .score-calculation {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+        
+        .score-formula {
+            font-size: 15px;
+            background: #f4f6f9;
+            padding: 8px 18px;
+            border-radius: 40px;
+        }
+        .score-formula strong {
+            color: var(--primary);
+            font-size: 20px;
+            margin-left: 4px;
+        }
+
+        .assessment-badge {
+            display: inline-block;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .badge-acceptable { background: #d1fae5; color: #065f46; }
+        .badge-unacceptable { background: #fee2e2; color: #991b1b; }
+
+        .data-source-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .data-source-badge.api { background: #e0f2f2; color: #2c6b6b; }
+
+        .toast {
+            position: fixed;
+            top: 84px;
+            right: 24px;
+            background: white;
+            border-radius: 40px;
+            padding: 14px 24px;
+            box-shadow: var(--shadow-lg);
+            border-left: 5px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-radius: var(--radius);
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-left">
+            <button class="back-btn" onclick="closeWindow()">
+                <i class="fas fa-times"></i>
+                <span>Close</span>
+            </button>
+            <div class="nav-title">
+                <i class="fas fa-th"></i>
+                <span>Risk Matrix</span>
+                <span class="risk-badge" id="riskIdBadge"></span>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <button class="btn-refresh" onclick="refreshData()" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i>
+                <span>Refresh</span>
+            </button>
+            <button class="btn-icon" onclick="printMatrix()" title="Print">
+                <i class="fas fa-print"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="matrix-container" id="matrixContainer">
+            <!-- Content will be populated by real API data -->
+            <div class="risk-header-card">
+                <div class="risk-info">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+                        <div class="risk-id" id="riskId">Loading...</div>
+                        <span class="data-source-badge api" id="dataSourceBadge">
+                            <i class="fas fa-cloud"></i> live
+                        </span>
+                    </div>
+                    <h1 class="risk-title" id="riskTitle">Loading risk data...</h1>
+                    <div class="risk-meta">
+                        <div class="risk-meta-item"><i class="fas fa-user"></i> <span id="riskOwner">—</span></div>
+                        <div class="risk-meta-item"><i class="fas fa-calendar"></i> <span id="lastReviewed">—</span></div>
+                        <div class="risk-meta-item"><i class="fas fa-tag"></i> <span id="functionalArea">—</span></div>
+                    </div>
+                    <div class="last-updated" id="lastUpdated">
+                        <i class="fas fa-clock"></i> Last updated: <span id="updateTime">—</span>
+                    </div>
+                </div>
+                <div class="current-rating">
+                    <div class="rating-label">Current rating</div>
+                    <div class="rating-value" id="currentScore">—</div>
+                    <div class="rating-category" id="currentCategory">—</div>
+                </div>
+            </div>
+
+            <div class="matrix-grid-section">
+                <div class="matrix-title">
+                    <i class="fas fa-border-all"></i> 5×5 risk matrix
+                </div>
+                
+                <div class="matrix-table-wrapper">
+                    <table class="matrix-table" id="riskMatrix">
+                        <thead>
+                            <tr>
+                                <th>Likelihood / Severity</th>
+                                <th>Catastrophic (5)</th>
+                                <th>Critical (4)</th>
+                                <th>Moderate (3)</th>
+                                <th>Marginal (2)</th>
+                                <th>Negligible (1)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="matrix-legend">
+                    <div class="legend-item"><div class="legend-color critical"></div><span>Critical (15-25)</span></div>
+                    <div class="legend-item"><div class="legend-color high"></div><span>High (10-14)</span></div>
+                    <div class="legend-item"><div class="legend-color medium"></div><span>Medium (5-9)</span></div>
+                    <div class="legend-item"><div class="legend-color low"></div><span>Low (1-4)</span></div>
+                </div>
+            </div>
+
+            <div class="assessment-panel">
+                <div class="panel-title"><i class="fas fa-clipboard-check"></i> Current Assessment</div>
+                <div class="assessment-grid">
+                    <div class="assessment-item">
+                        <div class="assessment-label">Likelihood</div>
+                        <div class="assessment-value" id="likelihoodValue">—</div>
+                        <div class="assessment-sub" id="likelihoodDesc">—</div>
+                    </div>
+                    <div class="assessment-item">
+                        <div class="assessment-label">Severity / Impact</div>
+                        <div class="assessment-value" id="impactValue">—</div>
+                        <div class="assessment-sub" id="impactDesc">—</div>
+                    </div>
+                </div>
+                <div class="score-calculation">
+                    <div class="score-formula" id="scoreFormula">
+                        <span id="likelihoodNum">—</span> × <span id="impactNum">—</span> = <strong id="scoreCalculation">—</strong>
+                    </div>
+                    <div>
+                        <span class="assessment-badge" id="acceptabilityBadge"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = window.location.origin.includes('localhost') 
+            ? 'http://localhost:8080/api' 
+            : window.location.origin + '/api';
+        
+        // Risk Matrix Data (static structure, no mock values)
+        const riskMatrix = {
+            likelihoodLevels: [
+                { name: 'Frequent', value: 5 },
+                { name: 'Probable', value: 4 },
+                { name: 'Occasional', value: 3 },
+                { name: 'Remote', value: 2 },
+                { name: 'Improbable', value: 1 }
+            ],
+            
+            severityLevels: [
+                { name: 'Catastrophic', value: 5 },
+                { name: 'Critical', value: 4 },
+                { name: 'Moderate', value: 3 },
+                { name: 'Marginal', value: 2 },
+                { name: 'Negligible', value: 1 }
+            ],
+            
+            cells: [
+                // Frequent (5)
+                [
+                    { score: 25, category: 'CRITICAL' },
+                    { score: 20, category: 'CRITICAL' },
+                    { score: 15, category: 'HIGH' },
+                    { score: 10, category: 'HIGH' },
+                    { score: 5, category: 'MEDIUM' }
+                ],
+                // Probable (4)
+                [
+                    { score: 20, category: 'CRITICAL' },
+                    { score: 16, category: 'HIGH' },
+                    { score: 12, category: 'HIGH' },
+                    { score: 8, category: 'MEDIUM' },
+                    { score: 4, category: 'LOW' }
+                ],
+                // Occasional (3)
+                [
+                    { score: 15, category: 'HIGH' },
+                    { score: 12, category: 'HIGH' },
+                    { score: 9, category: 'MEDIUM' },
+                    { score: 6, category: 'MEDIUM' },
+                    { score: 3, category: 'LOW' }
+                ],
+                // Remote (2)
+                [
+                    { score: 10, category: 'HIGH' },
+                    { score: 8, category: 'MEDIUM' },
+                    { score: 6, category: 'MEDIUM' },
+                    { score: 4, category: 'LOW' },
+                    { score: 2, category: 'LOW' }
+                ],
+                // Improbable (1)
+                [
+                    { score: 5, category: 'MEDIUM' },
+                    { score: 4, category: 'LOW' },
+                    { score: 3, category: 'LOW' },
+                    { score: 2, category: 'LOW' },
+                    { score: 1, category: 'LOW' }
+                ]
+            ],
+            
+            getCellClass: (category) => {
+                switch(category) {
+                    case 'CRITICAL': return 'matrix-cell-critical';
+                    case 'HIGH': return 'matrix-cell-high';
+                    case 'MEDIUM': return 'matrix-cell-medium';
+                    case 'LOW': return 'matrix-cell-low';
+                    default: return '';
+                }
+            },
+            
+            getLikelihoodName: (value) => {
+                const map = { 5: 'Frequent', 4: 'Probable', 3: 'Occasional', 2: 'Remote', 1: 'Improbable' };
+                return map[value] || 'Unknown';
+            },
+            
+            getSeverityName: (value) => {
+                const map = { 5: 'Catastrophic', 4: 'Critical', 3: 'Moderate', 2: 'Marginal', 1: 'Negligible' };
+                return map[value] || 'Unknown';
+            },
+            
+            calculateScore: (likelihood, impact) => likelihood * impact,
+            
+            getCategoryFromScore: (score) => {
+                if (score >= 15) return 'CRITICAL';
+                if (score >= 10) return 'HIGH';
+                if (score >= 5) return 'MEDIUM';
+                return 'LOW';
+            },
+            
+            isAcceptable: (category) => !['CRITICAL', 'HIGH'].includes(category)
+        };
+
+        // State
+        let currentRiskId = null;
+        let refreshInterval = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get risk ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentRiskId = urlParams.get('riskId');
+            
+            if (!currentRiskId) {
+                showToast('No risk ID provided', 'error');
+                return;
+            }
+            
+            // Load real data
+            fetchRiskData();
+            
+            // Set up auto-refresh every 30 seconds
+            startAutoRefresh();
+        });
+
+        // Clean up
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+
+        // Fetch real data from API
+        async function fetchRiskData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.classList.add('refreshing');
+            
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                
+                const response = await fetch(`${API_BASE_URL}/risks/${currentRiskId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const riskData = await response.json();
+                updateMatrixWithData(riskData);
+                
+                // Update timestamp
+                document.getElementById('updateTime').textContent = new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                console.error('Error fetching risk data:', error);
+                showToast(`Failed to load risk data: ${error.message}`, 'error');
+            } finally {
+                refreshBtn.classList.remove('refreshing');
+            }
+        }
+
+        // Update UI with real data
+        function updateMatrixWithData(riskData) {
+            // Extract likelihood and impact from real data
+            const likelihood = extractLikelihood(riskData);
+            const impact = extractImpact(riskData);
+            const score = riskMatrix.calculateScore(likelihood, impact);
+            const category = riskMatrix.getCategoryFromScore(score);
+            
+            // Update header
+            document.getElementById('riskIdBadge').textContent = riskData.riskId || riskData.id || currentRiskId;
+            document.getElementById('riskId').textContent = `ID: ${riskData.riskId || riskData.id || currentRiskId}`;
+            document.getElementById('riskTitle').textContent = riskData.title || riskData.name || 'Untitled Risk';
+            document.getElementById('riskOwner').textContent = riskData.riskOwnerName || riskData.owner || riskData.assignedTo || '—';
+            
+            // Handle dates
+            if (riskData.updatedAt || riskData.lastReviewed) {
+                const date = new Date(riskData.updatedAt || riskData.lastReviewed);
+                document.getElementById('lastReviewed').textContent = date.toLocaleDateString();
+            }
+            
+            document.getElementById('functionalArea').textContent = 
+                riskData.functionalAreaTECOP || riskData.functionalArea || riskData.department || '—';
+            
+            // Update matrix with highlighting
+            populateMatrix(likelihood, impact);
+            
+            // Update assessment panel
+            updateAssessment(likelihood, impact, score, category);
+        }
+
+        // Extract likelihood from various possible field names
+        function extractLikelihood(data) {
+            // Try different field names commonly used in risk APIs
+            const likelihoodFields = [
+                data.likelihood,
+                data.likelihoodLevel,
+                data.occurrenceLevel,
+                data.occurenceLevel,
+                data.probability,
+                data.riskLevel
+            ];
+            
+            for (const field of likelihoodFields) {
+                if (field !== undefined && field !== null) {
+                    if (typeof field === 'number') {
+                        return Math.min(5, Math.max(1, field));
+                    }
+                    if (typeof field === 'string') {
+                        const lower = field.toLowerCase();
+                        if (lower.includes('frequent') || lower === 'high') return 5;
+                        if (lower.includes('probable')) return 4;
+                        if (lower.includes('occasional') || lower === 'medium') return 3;
+                        if (lower.includes('remote')) return 2;
+                        if (lower.includes('improbable') || lower === 'low') return 1;
+                    }
+                }
+            }
+            
+            // Default if not found
+            console.warn('Could not extract likelihood, defaulting to 3');
+            return 3;
+        }
+
+        // Extract impact from various possible field names
+        function extractImpact(data) {
+            const impactFields = [
+                data.impact,
+                data.impactLevel,
+                data.severity,
+                data.severityLevel,
+                data.consequence
+            ];
+            
+            for (const field of impactFields) {
+                if (field !== undefined && field !== null) {
+                    if (typeof field === 'number') {
+                        return Math.min(5, Math.max(1, field));
+                    }
+                    if (typeof field === 'string') {
+                        const lower = field.toLowerCase();
+                        if (lower.includes('catastrophic') || lower === 'high') return 5;
+                        if (lower.includes('critical')) return 4;
+                        if (lower.includes('moderate') || lower === 'medium') return 3;
+                        if (lower.includes('marginal')) return 2;
+                        if (lower.includes('negligible') || lower === 'low') return 1;
+                    }
+                }
+            }
+            
+            console.warn('Could not extract impact, defaulting to 3');
+            return 3;
+        }
+
+        // Populate matrix with real data highlighting
+        function populateMatrix(likelihood, impact) {
+            const tbody = document.getElementById('matrixBody');
+            if (!tbody) return;
+            
+            // Calculate indices (5 = index 0, 1 = index 4)
+            const likelihoodIndex = 5 - likelihood;
+            const impactIndex = 5 - impact;
+            
+            let html = '';
+            
+            riskMatrix.likelihoodLevels.forEach((likelihoodLevel, rowIdx) => {
+                html += '<tr>';
+                html += `<td>${likelihoodLevel.name} (${likelihoodLevel.value})</td>`;
+                
+                riskMatrix.severityLevels.forEach((severityLevel, colIdx) => {
+                    const cell = riskMatrix.cells[rowIdx][colIdx];
+                    const cellClass = riskMatrix.getCellClass(cell.category);
+                    const isHighlighted = (rowIdx === likelihoodIndex && colIdx === impactIndex);
+                    
+                    html += `<td class="${cellClass} ${isHighlighted ? 'matrix-cell-highlight' : ''}">
+                        ${cell.score}
+                    </td>`;
+                });
+                
+                html += '</tr>';
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        // Update assessment panel
+        function updateAssessment(likelihood, impact, score, category) {
+            const isAcceptable = riskMatrix.isAcceptable(category);
+            
+            // Update likelihood section
+            document.getElementById('likelihoodValue').textContent = riskMatrix.getLikelihoodName(likelihood);
+            document.getElementById('likelihoodDesc').textContent = `Level ${likelihood}`;
+            
+            // Update impact section
+            document.getElementById('impactValue').textContent = riskMatrix.getSeverityName(impact);
+            document.getElementById('impactDesc').textContent = `Level ${impact}`;
+            
+            // Update score calculation
+            document.getElementById('likelihoodNum').textContent = likelihood;
+            document.getElementById('impactNum').textContent = impact;
+            document.getElementById('scoreCalculation').textContent = score;
+            
+            // Update current rating
+            document.getElementById('currentScore').textContent = score;
+            const categoryElement = document.getElementById('currentCategory');
+            categoryElement.textContent = category;
+            categoryElement.className = `rating-category category-${category.toLowerCase()}`;
+            
+            // Update acceptability badge
+            const badgeElement = document.getElementById('acceptabilityBadge');
+            if (isAcceptable) {
+                badgeElement.innerHTML = '<i class="fas fa-check-circle"></i> Acceptable';
+                badgeElement.className = 'assessment-badge badge-acceptable';
+            } else {
+                badgeElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Unacceptable';
+                badgeElement.className = 'assessment-badge badge-unacceptable';
+            }
+        }
+
+        // Auto-refresh
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                if (currentRiskId) {
+                    fetchRiskData();
+                }
+            }, 30000); // 30 seconds
+        }
+
+        // Manual refresh
+        function refreshData() {
+            if (currentRiskId) {
+                fetchRiskData();
+            } else {
+                showToast('No risk ID available', 'error');
+            }
+        }
+
+        // Close window
+        function closeWindow() {
+            window.close();
+        }
+
+        // Print matrix
+        function printMatrix() {
+            window.print();
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <div>${message}</div>
+            `;
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // Make functions globally available
+        window.refreshData = refreshData;
+        window.closeWindow = closeWindow;
+        window.printMatrix = printMatrix;
+    </script>
+</body>
+</html>

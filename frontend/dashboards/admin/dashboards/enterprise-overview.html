@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Risk Dashboard • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+        body::-webkit-scrollbar, ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
+        html, body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .top-bar {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+        }
+        .top-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .select-control, .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            background: var(--bg);
+            cursor: pointer;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+        }
+        .btn:hover { border-color: var(--primary); color: var(--primary); }
+        .refresh-time {
+            font-size: 12px;
+            color: var(--neutral);
+            white-space: nowrap;
+        }
+
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 32px 80px 32px;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .kpi-card:hover { border-color: var(--primary); }
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .kpi-label {
+            font-size: 13px;
+            color: var(--neutral);
+        }
+        .kpi-trend {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .trend-up { color: var(--red); }
+        .trend-down { color: var(--green); }
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            transition: color 0.4s ease;
+        }
+        .kpi-sub {
+            font-size: 13px;
+            color: var(--neutral);
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .chart-container {
+            position: relative;
+            flex: 1;
+            min-height: 320px;
+        }
+
+        .secondary-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .attention-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+        }
+        .attention-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--red);
+        }
+        .attention-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .attention-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(239,68,68,0.05);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .attention-empty {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--neutral);
+            font-style: italic;
+            font-size: 15px;
+        }
+        .attention-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .attention-link:hover { text-decoration: underline; }
+
+        @media (max-width: 1024px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .top-bar { padding: 16px; flex-direction: column; align-items: stretch; gap: 16px; }
+            .top-controls { justify-content: stretch; }
+            .select-control, .btn { width: 100%; justify-content: center; }
+            .main { padding: 20px 16px 80px 16px; }
+            .kpi-row, .secondary-row { grid-template-columns: 1fr; }
+            .analytics-grid { gap: 24px; }
+            .chart-container { min-height: 280px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-title">Enterprise Risk Dashboard</div>
+        <div class="top-controls">
+            <select class="select-control">
+                <option>Last 30 days</option>
+                <option>Last 90 days</option>
+                <option>Last 180 days</option>
+                <option>Custom range</option>
+            </select>
+            <select class="select-control">
+                <option>All Organizations</option>
+                <option>Corporate</option>
+                <option>Subsidiary A</option>
+                <option>Subsidiary B</option>
+            </select>
+            <button class="btn"><i class="fas fa-file-export"></i> Export Snapshot</button>
+            <div class="refresh-time">Last updated: —</div>
+        </div>
+    </div>
+
+    <main class="main">
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label">Total Active Risks</div>
+                    <div class="kpi-trend trend-down" id="total-risks-trend">-12%</div>
+                </div>
+                <div class="kpi-value" id="total-risks">—</div>
+                <div class="kpi-sub">vs previous period</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label">High & Extreme Risks</div>
+                    <div class="kpi-trend trend-up" id="high-risks-trend">+5%</div>
+                </div>
+                <div class="kpi-value" id="high-risks" style="color:var(--red);">—</div>
+                <div class="kpi-sub">of total active risks</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label">Risk Exposure Index</div>
+                </div>
+                <div class="kpi-value" id="exposure-index">—</div>
+                <div class="kpi-sub">Medium (RAM-weighted)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label">Actions Effectiveness</div>
+                </div>
+                <div class="kpi-value" id="actions-effectiveness" style="color:var(--green);">—</div>
+                <div class="kpi-sub">On Track • —% Overdue</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label">Pending Approvals</div>
+                </div>
+                <div class="kpi-value" id="pending-approvals" style="color:var(--amber);">—</div>
+                <div class="kpi-sub">SLA breaches: —</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label">Upcoming Reviews</div>
+                </div>
+                <div class="kpi-value" id="upcoming-reviews">—</div>
+                <div class="kpi-sub">Next 30 days</div>
+            </div>
+        </div>
+
+        <!-- Charts (from previous dynamic version - kept as is) -->
+        <div class="analytics-grid">
+            <div class="chart-card">
+                <div class="chart-title">Risk Heat Map (Likelihood × Impact)</div>
+                <div class="chart-container">
+                    <canvas id="heatMapChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Risk Trend Over Time</div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Action Status Breakdown</div>
+                <div class="chart-container">
+                    <canvas id="actionDonut"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Functional Area Exposure</div>
+                <div class="chart-container">
+                    <canvas id="areaBar"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="secondary-row">
+            <div class="chart-card">
+                <div class="chart-title">Top Risk Drivers</div>
+                <div class="chart-container">
+                    <canvas id="driversPie"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">RAM Movement Summary (Last 90 days)</div>
+                <div class="chart-container">
+                    <canvas id="ramMovement"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="attention-panel">
+            <div class="attention-title">Attention Required</div>
+            <div class="attention-list" id="attention-list">
+                <!-- Items will be inserted here dynamically -->
+            </div>
+            <div id="attention-empty" class="attention-empty" style="display: none;">
+                No immediate attention required — all risks and actions are on track.
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ── Chart Colors & Common Options ────────────────────────────────
+        const COLORS = {
+            primary: '#5DA1A1',
+            red: '#ef4444',
+            green: '#10b981',
+            amber: '#f59e0b',
+            blue: '#3b82f6',
+            neutral: '#9ca3af'
+        };
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } },
+                tooltip: { backgroundColor: 'rgba(0,0,0,0.8)', titleFont: { family: 'Inter' }, bodyFont: { family: 'Inter' }, cornerRadius: 8 }
+            },
+            interaction: { intersect: false, mode: 'index' }
+        };
+
+        // ── Initialize Charts (from previous version) ─────────────────────
+        let heatMapChart = new Chart(document.getElementById('heatMapChart'), {
+            type: 'bubble',
+            data: { datasets: [{ label: 'Risks', data: [], backgroundColor: 'rgba(239,68,68,0.6)', borderColor: COLORS.red, borderWidth: 1 }] },
+            options: { ...commonOptions, scales: { x: { min: 0.5, max: 5.5, ticks: { stepSize: 1, callback: v => ['','Rare','Unlikely','Possible','Likely','Almost Certain'][v] || '' }, title: { display: true, text: 'Likelihood' } }, y: { min: 0.5, max: 5.5, ticks: { stepSize: 1, callback: v => ['','Insignificant','Minor','Moderate','Major','Catastrophic'][v] || '' }, title: { display: true, text: 'Impact' } } } }
+        });
+
+        let trendChart = new Chart(document.getElementById('trendChart'), { type: 'line', data: { labels: [], datasets: [] }, options: commonOptions });
+        let actionDonut = new Chart(document.getElementById('actionDonut'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0 }] }, options: { ...commonOptions, cutout: '70%' } });
+        let driversPie = new Chart(document.getElementById('driversPie'), { type: 'pie', data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] }, options: commonOptions });
+        let ramMovement = new Chart(document.getElementById('ramMovement'), { type: 'bar', data: { labels: ['Increased','Decreased','Stable'], datasets: [{ label: 'RAM Count', data: [0,0,0], backgroundColor: [COLORS.red, COLORS.green, COLORS.neutral] }] }, options: commonOptions });
+        
+        // Initialize area bar chart (missing from your code)
+        let areaBar = new Chart(document.getElementById('areaBar'), {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Exposure Score',
+                    data: [],
+                    backgroundColor: COLORS.primary,
+                    borderColor: COLORS.primary,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Risk Count'
+                        }
+                    }
+                }
+            }
+        });
+
+        // ── Real-time Polling ────────────────────────────────────────────
+        const REFRESH_INTERVAL_MS = 45000;
+        const API_ENDPOINT = '/api/dashboard/executive'; // CORRECTED ENDPOINT
+
+        async function updateDashboard() {
+            try {
+                console.log('Fetching dashboard data from:', API_ENDPOINT);
+                
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.error('No authentication token found');
+                    throw new Error('No authentication token');
+                }
+
+                const res = await fetch(API_ENDPOINT, {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`, 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Response status:', res.status);
+                
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('Server error response:', errorText);
+                    throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 100)}`);
+                }
+
+                const data = await res.json();
+                console.log('Dashboard data received:', data);
+
+                // Update KPIs
+                document.getElementById('total-risks').textContent = data.totalRisks ?? '—';
+                document.getElementById('high-risks').textContent = data.highSeverityRisks ?? '—';
+                document.getElementById('exposure-index').textContent = data.exposureIndex ?? '—';
+                document.getElementById('actions-effectiveness').textContent = data.actionsEffectiveness ?? '—';
+                document.getElementById('pending-approvals').textContent = data.pendingApprovals ?? '—';
+                document.getElementById('upcoming-reviews').textContent = data.upcomingReviews ?? '—';
+                
+                // Update trends
+                if (data.totalRisksTrend) {
+                    document.getElementById('total-risks-trend').textContent = data.totalRisksTrend;
+                    document.getElementById('total-risks-trend').className = 
+                        data.totalRisksTrend.includes('+') ? 'kpi-trend trend-up' : 'kpi-trend trend-down';
+                }
+                
+                if (data.highRisksTrend) {
+                    document.getElementById('high-risks-trend').textContent = data.highRisksTrend;
+                    document.getElementById('high-risks-trend').className = 
+                        data.highRisksTrend.includes('+') ? 'kpi-trend trend-up' : 'kpi-trend trend-down';
+                }
+
+                // Update chart colors based on values
+                const highEl = document.getElementById('high-risks');
+                const highCount = data.highSeverityRisks || 0;
+                highEl.style.color = (highCount >= 30) ? 'var(--red)' :
+                                     (highCount >= 15) ? 'var(--amber)' : 'var(--green)';
+
+                // Update all charts
+                if (data.heatMapData) { 
+                    heatMapChart.data.datasets[0].data = data.heatMapData; 
+                    heatMapChart.update(); 
+                }
+                
+                if (data.trendData) { 
+                    trendChart.data.labels = data.trendData.labels || []; 
+                    trendChart.data.datasets = data.trendData.datasets || []; 
+                    trendChart.update(); 
+                }
+                
+                if (data.actionStatusData) { 
+                    actionDonut.data.labels = data.actionStatusData.labels || []; 
+                    actionDonut.data.datasets[0].data = data.actionStatusData.values || []; 
+                    actionDonut.data.datasets[0].backgroundColor = data.actionStatusData.colors || [COLORS.amber, COLORS.primary, COLORS.blue, COLORS.green]; 
+                    actionDonut.update(); 
+                }
+                
+                if (data.riskDriversData) { 
+                    driversPie.data.labels = data.riskDriversData.labels || []; 
+                    driversPie.data.datasets[0].data = data.riskDriversData.values || []; 
+                    driversPie.data.datasets[0].backgroundColor = data.riskDriversData.colors || [COLORS.red, COLORS.amber, COLORS.primary, COLORS.neutral, COLORS.blue]; 
+                    driversPie.update(); 
+                }
+                
+                if (data.ramMovementData) { 
+                    ramMovement.data.datasets[0].data = [
+                        data.ramMovementData.increased || 0, 
+                        data.ramMovementData.decreased || 0, 
+                        data.ramMovementData.stable || 0
+                    ]; 
+                    ramMovement.update(); 
+                }
+                
+                if (data.areaBarData) {
+                    areaBar.data.labels = data.areaBarData.labels || [];
+                    areaBar.data.datasets[0].data = data.areaBarData.values || [];
+                    areaBar.data.datasets[0].backgroundColor = data.areaBarData.colors || COLORS.primary;
+                    areaBar.update();
+                }
+
+                // ── Attention Required ────────────────────────────────
+                const attentionList = document.getElementById('attention-list');
+                const emptyMsg = document.getElementById('attention-empty');
+                attentionList.innerHTML = ''; // clear previous items
+
+                if (data.attentionItems && Array.isArray(data.attentionItems) && data.attentionItems.length > 0) {
+                    emptyMsg.style.display = 'none';
+                    data.attentionItems.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'attention-item';
+                        div.innerHTML = `
+                            <div>${item.title || 'Attention needed'}</div>
+                            <a class="attention-link" href="${item.link || '#'}">${item.action || 'View'}</a>
+                        `;
+                        attentionList.appendChild(div);
+                    });
+                } else {
+                    emptyMsg.style.display = 'block';
+                }
+
+                // Update timestamp
+                const now = new Date();
+                document.querySelector('.refresh-time').textContent =
+                    `Last updated: ${now.toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' })} UTC`;
+
+                console.log('Dashboard updated successfully');
+
+            } catch (err) {
+                console.error('Dashboard refresh failed:', err);
+                document.querySelector('.refresh-time').textContent = `Update failed: ${err.message}`;
+                
+                // Show error in attention panel
+                const attentionList = document.getElementById('attention-list');
+                const emptyMsg = document.getElementById('attention-empty');
+                attentionList.innerHTML = '';
+                emptyMsg.style.display = 'none';
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'attention-item';
+                errorDiv.innerHTML = `
+                    <div>Unable to load dashboard data: ${err.message}</div>
+                    <a class="attention-link" href="#" onclick="updateDashboard();return false;">Retry</a>
+                `;
+                attentionList.appendChild(errorDiv);
+            }
+        }
+
+        window.addEventListener('load', () => {
+            console.log('Dashboard page loaded, initializing...');
+            updateDashboard();
+            setInterval(updateDashboard, REFRESH_INTERVAL_MS);
+        });
+    </script>
+</body>
+</html>

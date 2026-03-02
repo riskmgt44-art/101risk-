@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Actions • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        /* Shimmer Skeleton Animation */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 0.5s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer {
+            0%   { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        /* Top Nav */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 40px;
+            background: rgba(93,161,161,0.08);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: none;
+        }
+        .nav-tab:hover:not(.active) { background: rgba(93,161,161,0.15); }
+        .nav-tab .favicon {
+            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+        }
+        .actions-group { display: flex; align-items: center; gap: 19.2px; }
+        .search-box input {
+            padding: 8px 12.8px; border: 1px solid var(--border); border-radius: 9.6px;
+            width: 320px; font-size: 12px; background: #f9f9f9;
+        }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
+        .btn-primary {
+            padding: 8px 16px; background: var(--primary); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* Main */
+        .main { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+        .content-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .page-content { display: none; height: 100%; overflow: auto; padding: 32px; }
+
+        /* Table View */
+        .table-view { display: block; height: calc(100% - 64px); }
+        .table-container {
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { position: sticky; top: 0; background: var(--card-bg); z-index: 8; }
+        th { padding: 12.8px 16px; font-size: 11.2px; font-weight: 600; color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+        td { padding: 12.8px 16px; font-size: 12.8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+
+        /* Skeleton Rows */
+        .skeleton-row td {
+            padding: 16px;
+        }
+        .skeleton-cell {
+            height: 20px;
+            width: 80%;
+            border-radius: 4px;
+        }
+        .skeleton-cell.short { width: 50%; }
+        .skeleton-cell.medium { width: 70%; }
+        .skeleton-pill {
+            height: 24px;
+            width: 90px;
+            border-radius: 999px;
+        }
+
+        /* Mobile Cards Skeleton */
+        .skeleton-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .skeleton-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .skeleton-title {
+            height: 24px;
+            width: 70%;
+            border-radius: 6px;
+        }
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 12px;
+        }
+        .skeleton-label {
+            height: 16px;
+            width: 60%;
+            border-radius: 4px;
+        }
+        .skeleton-value {
+            height: 20px;
+            width: 85%;
+            border-radius: 4px;
+        }
+
+        /* Mobile Cards */
+        .card-view { display: none; padding: 16px; overflow-y: auto; height: 100%; }
+        .action-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .action-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .action-card-title { font-size: 16px; font-weight: 600; cursor: pointer; }
+        .action-card-title:hover { color: var(--primary); }
+        .action-card-grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: 13px; }
+        .action-card-label { color: var(--text-secondary); font-weight: 500; }
+
+        /* Pills */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; }
+        .pill-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-progress { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .pill-proposed { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-closed { background: rgba(107,114,128,0.1); color: var(--neutral); }
+
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+        }
+        .icon-btn:hover { background: rgba(93,161,161,0.1); color: var(--primary); }
+
+        /* Responsive */
+        @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .page-content { padding: 16px; }
+            .top-nav { padding: 0 16px; }
+            .search-box input { width: 100%; }
+            .actions-group { flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+            .table-view { display: none; }
+            .card-view { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" data-content="actions-content">
+                <div class="favicon">A</div>
+                <span>Actions</span>
+            </div>
+            <div class="nav-tab" data-content="history-content">
+                <div class="favicon">H</div>
+                <span>History</span>
+            </div>
+            <div class="nav-tab" data-content="view-content">
+                <div class="favicon">V</div>
+                <span>View</span>
+            </div>
+        </div>
+        <div class="actions-group">
+            <div class="search-box">
+                <input type="text" placeholder="Search actions..." id="searchInput">
+            </div>
+            <button class="btn-icon"><i class="fas fa-filter"></i></button>
+            <button class="btn-primary"><i class="fas fa-file-export"></i> Export</button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="content-wrapper" id="contentWrapper">
+            <div id="actions-content" class="page-content" style="display: block;">
+                <!-- Desktop Table -->
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="actionsTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>ID</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Action Owner</th>
+                                    <th>Sub Project</th>
+                                    <th>Planned Start Date</th>
+                                    <th>Planned Finish Date</th>
+                                    <th>Audit Trail</th>
+                                    <th>Linked Risk</th>
+                                    <th>Cost of Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="actionsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="card-view" id="mobileActions"></div>
+            </div>
+
+            <div id="history-content" class="page-content" style="display: none;">
+                <iframe id="historyFrame" style="width:100%; height:100%; border:none;" src="history.html"></iframe>
+            </div>
+
+            <div id="view-content" class="page-content" style="display: none;">
+                <iframe id="viewFrame" style="width:100%; height:100%; border:none;" src="view.html"></iframe>
+            </div>
+
+            <div id="action-view-content" class="page-content" style="display: none;">
+                <h2>Action Detail View (to be implemented)</h2>
+            </div>
+        </div>
+    </main>
+
+<script>
+        document.addEventListener('DOMContentLoaded', async () => {
+        const tbody = document.querySelector('#actionsTableBody');
+        const cardContainer = document.getElementById('mobileActions');
+
+        if (!tbody || !cardContainer) {
+            console.error('Critical table elements not found!');
+            return;
+        }
+
+        showSkeletonLoading();
+
+        // Try to fetch actions from backend
+        try {
+            await fetchActionsFromBackend();
+        } catch (error) {
+            console.error('Failed to fetch actions:', error);
+            showEmptyState();
+        }
+
+        // Keep the message listener for backward compatibility
+        window.addEventListener('message', function(event) {
+            if (event.data?.type === 'ACTIONS_DATA') {
+                const actions = event.data.data ?? [];
+                const safeActions = Array.isArray(actions) ? actions : [];
+                renderActions(safeActions);
+            }
+        });
+
+        // Fallback timeout
+        setTimeout(() => {
+            if (tbody.children.length > 0 && tbody.querySelector('.skeleton-row')) {
+                showEmptyState();
+            }
+        }, 3000);
+
+        // Function to fetch actions from backend API
+        async function fetchActionsFromBackend() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.warn('No authentication token found');
+                    showEmptyState();
+                    return;
+                }
+
+                // API Configuration
+                const API_BASE_URL = window.location.origin.includes('localhost') 
+                    ? 'http://localhost:8080/api' 
+                    : '/api';
+
+                console.log('Fetching actions from backend...');
+
+                const response = await fetch(`${API_BASE_URL}/actions`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        console.log('Actions endpoint not found - showing empty state');
+                        showEmptyState();
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const actions = await response.json();
+                console.log(`Fetched ${actions?.length || 0} actions from backend`);
+
+                // Handle null or undefined responses
+                if (!actions || actions === null) {
+                    console.log('Server returned null for actions');
+                    showEmptyState();
+                    return;
+                }
+
+                // Ensure it's an array
+                const safeActions = Array.isArray(actions) ? actions : [];
+                renderActions(safeActions);
+
+            } catch (error) {
+                console.error('Error fetching actions:', error);
+                showEmptyState();
+            }
+        }
+
+        function showSkeletonLoading() {
+            tbody.innerHTML = '';
+            cardContainer.innerHTML = '';
+
+            for (let i = 0; i < 5; i++) {
+                const row = document.createElement('tr');
+                row.className = 'skeleton-row';
+                row.innerHTML = `
+                    <td><div class="skeleton" style="width:24px;height:24px;border-radius:8px;"></div></td>
+                    <td><div class="skeleton skeleton-cell short"></div></td>
+                    <td><div class="skeleton skeleton-cell long"></div></td>
+                    <td><div class="skeleton skeleton-pill"></div></td>
+                    <td><div class="skeleton skeleton-cell medium"></div></td>
+                    <td><div class="skeleton skeleton-cell medium"></div></td>
+                    <td><div class="skeleton skeleton-cell short"></div></td>
+                    <td><div class="skeleton skeleton-cell short"></div></td>
+                    <td><div class="skeleton skeleton-cell short"></div></td>
+                    <td><div class="skeleton skeleton-cell short"></div></td>
+                    <td><div class="skeleton skeleton-cell short"></div></td>
+                `;
+                tbody.appendChild(row);
+            }
+
+            for (let i = 0; i < 3; i++) {
+                const card = document.createElement('div');
+                card.className = 'skeleton-card';
+                card.innerHTML = `
+                    <div class="skeleton-header">
+                        <div class="skeleton skeleton-title"></div>
+                        <div class="skeleton" style="width:32px;height:32px;border-radius:8px;"></div>
+                    </div>
+                    <div class="skeleton-grid">
+                        <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                        <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                        <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                        <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                        <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                        <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                        <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                        <div class="skeleton-label"></div><div class="skeleton skeleton-value"></div>
+                    </div>
+                `;
+                cardContainer.appendChild(card);
+            }
+        }
+
+        function showEmptyState() {
+            const emptyBoxImg = `
+                <img src="https://www.clipartmax.com/png/middle/217-2174009_empty-box-comments-box-vector-icon-png.png" 
+                     alt="Empty box icon" 
+                     style="width:80px;height:80px;opacity:0.7;margin-bottom:16px;">
+            `;
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="11" style="text-align:center;padding:80px 16px;color:var(--text-secondary);">
+                        ${emptyBoxImg}
+                        <div style="margin-top:20px;font-size:16px;font-weight:500;">No actions found</div>
+                        <div style="margin-top:8px;font-size:14px;color:var(--text-secondary);">
+                            Create actions from the Risk Details page or main dashboard
+                        </div>
+                    </td>
+                </tr>`;
+
+            cardContainer.innerHTML = `
+                <div style="text-align:center;padding:80px 16px;color:var(--text-secondary);">
+                    ${emptyBoxImg}
+                    <div style="margin-top:20px;font-size:16px;font-weight:500;">No actions found</div>
+                    <div style="margin-top:8px;font-size:14px;color:var(--text-secondary);">
+                        Create actions from the Risk Details page or main dashboard
+                    </div>
+                </div>`;
+        }
+
+        function renderActions(actions) {
+            tbody.innerHTML = '';
+            cardContainer.innerHTML = '';
+
+            if (actions.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            console.log('Rendering', actions.length, 'actions');
+
+            actions.forEach(action => {
+                const statusClass = getStatusClass(action?.status);
+
+                // Format risk link - show risk title if available
+                let riskLink = 'No Risk Linked';
+                if (action?.riskId && action.riskId !== '000000000000000000000000') {
+                    // If risk object is populated, show the title
+                    if (action.risk && action.risk.title) {
+                        riskLink = `<a href="#" style="color:var(--primary); text-decoration:none;" 
+                                   onclick="viewRisk('${action.riskId}')">
+                                   ${escapeHtml(action.risk.title)}</a>`;
+                    } else {
+                        // Just show the risk ID
+                        riskLink = `<a href="#" style="color:var(--primary); text-decoration:none;" 
+                                   onclick="viewRisk('${action.riskId}')">
+                                   Risk: ${action.riskId.substring(0, 8)}...</a>`;
+                    }
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><button class="icon-btn" onclick="showActionMenu('${action._id || action.id}')"><i class="fas fa-ellipsis-v"></i></button></td>
+                    <td><a href="#" style="color:var(--primary); text-decoration:none;" onclick="viewAction('${action._id || action.id}')">${escapeHtml(action?.title?.substring(0, 20) || 'Action')}</a></td>
+                    <td>${escapeHtml(action?.description?.substring(0, 50) || '')}${action?.description?.length > 50 ? '...' : ''}</td>
+                    <td><span class="pill ${statusClass}">${escapeHtml(action?.status || 'Unknown')}</span></td>
+                    <td>${escapeHtml(action?.owner || 'N/A')}</td>
+                    <td>${escapeHtml(action?.subProject || 'N/A')}</td>
+                    <td>${action?.startDate ? new Date(action.startDate).toLocaleDateString() : 'N/A'}</td>
+                    <td>${action?.endDate ? new Date(action.endDate).toLocaleDateString() : 'N/A'}</td>
+                    <td>${Number(action?.auditTrailCount || 0)} updates</td>
+                    <td>${riskLink}</td>
+                    <td>$${Number(action?.cost || 0).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+
+                const card = document.createElement('div');
+                card.className = 'action-card';
+                card.innerHTML = `
+                    <div class="action-card-header">
+                        <div class="action-card-title" onclick="viewAction('${action._id || action.id}')">${escapeHtml(action?.title || 'Untitled Action')}</div>
+                        <button class="icon-btn" onclick="showActionMenu('${action._id || action.id}')"><i class="fas fa-ellipsis-v"></i></button>
+                    </div>
+                    <div class="action-card-grid">
+                        <div class="action-card-label">Description</div>
+                        <div class="action-card-value">${escapeHtml(action?.description?.substring(0, 100) || '')}${action?.description?.length > 100 ? '...' : ''}</div>
+                        <div class="action-card-label">Status</div>
+                        <div class="action-card-value"><span class="pill ${statusClass}">${escapeHtml(action?.status || 'Unknown')}</span></div>
+                        <div class="action-card-label">Owner</div>
+                        <div class="action-card-value">${escapeHtml(action?.owner || 'N/A')}</div>
+                        <div class="action-card-label">Priority</div>
+                        <div class="action-card-value">${escapeHtml(action?.priority || 'Medium')}</div>
+                        <div class="action-card-label">Progress</div>
+                        <div class="action-card-value">${Number(action?.progress || 0)}%</div>
+                        <div class="action-card-label">Start Date</div>
+                        <div class="action-card-value">${action?.startDate ? new Date(action.startDate).toLocaleDateString() : 'N/A'}</div>
+                        <div class="action-card-label">End Date</div>
+                        <div class="action-card-value">${action?.endDate ? new Date(action.endDate).toLocaleDateString() : 'N/A'}</div>
+                        <div class="action-card-label">Linked Risk</div>
+                        <div class="action-card-value">${riskLink}</div>
+                        <div class="action-card-label">Cost</div>
+                        <div class="action-card-value">$${Number(action?.cost || 0).toLocaleString()}</div>
+                    </div>
+                `;
+                cardContainer.appendChild(card);
+            });
+        }
+
+        function getStatusClass(status) {
+            if (!status) return 'pill-progress';
+            switch (status.toLowerCase()) {
+                case 'in progress': return 'pill-progress';
+                case 'proposed':    return 'pill-proposed';
+                case 'completed':   return 'pill-approved';
+                case 'approved':    return 'pill-approved';
+                case 'closed':      return 'pill-closed';
+                default:            return 'pill-progress';
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    });
+
+    // Global functions for action management
+    function showActionMenu(actionId) {
+        alert('Action menu for action ID: ' + actionId);
+        // TODO: Implement action menu with Edit/Delete options
+    }
+
+    function viewAction(actionId) {
+        // Store the action ID to view details
+        localStorage.setItem('viewingAction', JSON.stringify({ id: actionId }));
+        // Navigate to action details page (you'll need to create this)
+        window.location.href = 'action-details.html';
+    }
+
+    function viewRisk(riskId) {
+        // Store the risk ID to view details
+        localStorage.setItem('viewingRisk', JSON.stringify({ _id: riskId }));
+        // Navigate to risk details page
+        window.location.href = 'risk-details.html';
+    }
+
+    function showContent(contentId) {
+        document.querySelectorAll('.page-content').forEach(el => el.style.display = 'none');
+        document.getElementById(contentId).style.display = 'block';
+
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.getAttribute('data-content') === contentId) {
+                tab.classList.add('active');
+            }
+        });
+    }
+
+    // Initialize tab switching
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetContent = this.getAttribute('data-content');
+                showContent(targetContent);
+            });
+        });
+    });
+</script>
+</body>
+</html>

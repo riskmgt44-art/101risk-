@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Details • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* All your existing CSS remains exactly the same */
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --shadow-lg: 0 16px 40px rgba(0,0,0,0.1);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --sidebar-width: 280px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .back-btn:hover {
+            background: rgba(93,161,161,0.06);
+            color: var(--primary);
+        }
+        
+        .nav-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9.6px;
+            background: transparent;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+        
+        .btn-icon:hover {
+            background: rgba(93,161,161,0.06);
+            color: var(--primary);
+        }
+        
+        .btn-primary {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 9.6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Main Content */
+        .main {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* Hero Summary Card */
+        .hero-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .hero-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .hero-title {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        
+        .hero-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        
+        .hero-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+        
+        .meta-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .meta-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            min-width: 140px;
+        }
+        
+        .meta-value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        @media (max-width: 1200px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .card-content {
+            line-height: 1.6;
+        }
+
+        /* RAM Assessment Table */
+        .ram-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        
+        .ram-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .ram-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .ram-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            margin-top: 16px;
+        }
+        
+        .timeline-dates {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .timeline-bar {
+            height: 12px;
+            background: var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .timeline-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+            border-radius: 6px;
+            position: relative;
+            transition: width 0.5s ease;
+        }
+        
+        .timeline-fill::after {
+            content: 'Today';
+            position: absolute;
+            right: -30px;
+            top: -24px;
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            top: -6px;
+            width: 2px;
+            height: 24px;
+            background: var(--red);
+        }
+        
+        .timeline-marker::after {
+            content: 'Next Review';
+            position: absolute;
+            top: -24px;
+            left: 4px;
+            font-size: 12px;
+            color: var(--red);
+            white-space: nowrap;
+        }
+
+        /* Actions */
+        .actions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .action-item {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            transition: var(--transition);
+            background: white;
+            cursor: pointer;
+        }
+        
+        .action-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-2px);
+        }
+        
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .action-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .action-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .action-progress {
+            margin-top: 12px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: var(--radius);
+        }
+
+        /* Pills */
+        .pill {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .pill-downside { background: rgba(239,68,68,0.1); color: var(--red); }
+        .pill-upside { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-opportunity { background: rgba(59,130,246,0.1); color: var(--blue); }
+        
+        .status-open { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .status-in-progress { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .status-completed { background: rgba(16,185,129,0.1); color: var(--green); }
+        .status-proposed { background: rgba(156,163,175,0.1); color: var(--neutral); }
+        
+        .ram-pill { padding: 4px 10px; }
+        .ram-low { background: rgba(16,185,129,0.1); color: var(--green); }
+        .ram-medium { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .ram-high { background: rgba(239,68,68,0.1); color: var(--red); }
+        
+        .manageability-pill { padding: 4px 10px; }
+        .can-control { background: rgba(16,185,129,0.1); color: var(--green); }
+        .can-influence { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .cannot-influence { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            background: rgba(93,161,161,0.05);
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .tab:hover {
+            background: rgba(93,161,161,0.1);
+        }
+        
+        .tab.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Bowtie Placeholder */
+        .bowtie-placeholder {
+            height: 280px;
+            background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            border: 2px dashed var(--border);
+            margin-bottom: 16px;
+        }
+        
+        .bowtie-placeholder i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+
+        /* Occurrence Indicator */
+        .occurrence-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+        }
+        
+        .arrow-high { border-bottom: 12px solid var(--red); }
+        .arrow-medium { border-bottom: 12px solid var(--amber); }
+        .arrow-low { border-bottom: 12px solid var(--green); }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        
+        .modal-close:hover {
+            background: rgba(93,161,161,0.06);
+            color: var(--primary);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            background: white;
+        }
+        
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .btn-secondary {
+            padding: 8px 16px;
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 9.6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(93,161,161,0.06);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-primary:disabled, .btn-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main { padding: 16px; }
+            .top-nav { padding: 0 16px; }
+            .hero-card { padding: 24px; }
+            .hero-title { font-size: 24px; }
+            .hero-meta-grid { grid-template-columns: 1fr; }
+            .meta-item { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .meta-label { min-width: auto; }
+            .tab { padding: 10px 16px; font-size: 13px; }
+            .card { padding: 20px; }
+            .modal { width: 95%; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </button>
+            <div class="nav-title">Risk Details</div>
+        </div>
+        <div class="nav-actions">
+            <button class="btn-icon" onclick="editRisk()" title="Edit Risk">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn-icon" onclick="shareRisk()" title="Share">
+                <i class="fas fa-share-alt"></i>
+            </button>
+            <button class="btn-icon" onclick="printRisk()" title="Print">
+                <i class="fas fa-print"></i>
+            </button>
+            <button class="btn-primary" onclick="openActionModal()" id="createActionBtn">
+                <i class="fas fa-plus"></i>
+                New Action
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Risk Summary -->
+        <div class="hero-card">
+            <div class="hero-header">
+                <div>
+                    <h1 class="hero-title" id="riskTitle">RISK-001: Cyber Security Breach</h1>
+                    <p class="hero-subtitle" id="riskDescription">Unauthorized access leading to data exfiltration, potential financial loss and reputational damage</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <span class="pill pill-downside" id="riskType">
+                        <i class="fas fa-arrow-down"></i>
+                        Downside Risk
+                    </span>
+                    <span class="pill status-open" id="riskStatus">
+                        <i class="fas fa-circle" style="font-size: 8px;"></i>
+                        Open
+                    </span>
+                </div>
+            </div>
+            
+            <div class="hero-meta-grid">
+                <div class="meta-group">
+                    <div class="meta-item">
+                        <span class="meta-label">Risk ID:</span>
+                        <span class="meta-value" id="riskId">RISK-001</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Risk Owner:</span>
+                        <span class="meta-value" id="riskOwner">Alex Chen</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Sub Project:</span>
+                        <span class="meta-value" id="subProject">Digital Transformation</span>
+                    </div>
+                </div>
+                
+                <div class="meta-group">
+                    <div class="meta-item">
+                        <span class="meta-label">Manageability:</span>
+                        <span class="pill manageability-pill can-influence" id="manageability">
+                            Can Influence
+                        </span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Occurrence Level:</span>
+                        <div class="occurrence-indicator">
+                            <div class="arrow arrow-high" id="occurrenceArrow"></div>
+                            <span id="occurrenceLevel">High</span>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Functional Area:</span>
+                        <span class="meta-value" id="functionalArea">IT</span>
+                    </div>
+                </div>
+                
+                <div class="meta-group">
+                    <div class="meta-item">
+                        <span class="meta-label">Created:</span>
+                        <span class="meta-value" id="createdAt">2025-01-15</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Last Updated:</span>
+                        <span class="meta-value" id="updatedAt">2025-01-25</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Next Review:</span>
+                        <span class="meta-value" id="nextReviewDate">2026-03-15</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <div class="tab active" onclick="switchTab('overview')">Overview</div>
+            <div class="tab" onclick="switchTab('actions')" id="actionsTabBtn">Actions (0)</div>
+            <div class="tab" onclick="switchTab('history')">History</div>
+            <div class="tab" onclick="switchTab('documents')">Documents</div>
+            <div class="tab" onclick="switchTab('settings')">Settings</div>
+        </div>
+
+        <!-- Tab Content: Overview -->
+        <div id="overviewTab" class="tab-content">
+            <div class="grid">
+                <!-- Left Column -->
+                <div>
+                    <!-- Risk Description -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <h2 class="card-title">Risk Description</h2>
+                        </div>
+                        <div class="card-content">
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">Causes</h3>
+                                <p id="causes">Weak access controls, insufficient multi-factor authentication, outdated software patches, lack of employee security training.</p>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">Event</h3>
+                                <p id="event">Unauthorized access by external threat actors leading to data exfiltration of sensitive customer and financial information.</p>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">Consequences</h3>
+                                <p id="consequences">Significant financial loss, reputational damage, regulatory fines (GDPR, CCPA), potential loss of customer trust, operational disruption.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exposure Timeline -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <h2 class="card-title">Risk Exposure Timeline</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="timeline-dates">
+                                <span id="exposureStart">2025-01-01</span>
+                                <span id="exposureEnd">2026-12-31</span>
+                            </div>
+                            <div class="timeline-bar">
+                                <div class="timeline-fill" style="width: 45%;"></div>
+                                <div class="timeline-marker" style="left: 70%;"></div>
+                            </div>
+                            <div style="margin-top: 20px; display: flex; gap: 32px;">
+                                <div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">Days Remaining</div>
+                                    <div id="daysRemaining" style="font-size: 24px; font-weight: 600; color: var(--primary);">320</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">Exposure Level</div>
+                                    <div id="exposureLevel" style="font-size: 24px; font-weight: 600; color: var(--amber);">Calculating...</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">Progress</div>
+                                    <div id="progressPercentage" style="font-size: 24px; font-weight: 600; color: var(--green);">Calculating...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Linked Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Linked Actions</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="actions-list" id="actionsList">
+                                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
+                                    <div>Loading actions...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <!-- RAM Assessment -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <h2 class="card-title">RAM Assessment</h2>
+                        </div>
+                        <div class="card-content">
+                            <table class="ram-table">
+                                <thead>
+                                    <tr>
+                                        <th>RAM Type</th>
+                                        <th>Current</th>
+                                        <th>Target</th>
+                                        <th>Gap</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Project RAM</td>
+                                        <td><span class="pill ram-pill ram-high">High</span></td>
+                                        <td><span class="pill ram-pill ram-medium">Medium</span></td>
+                                        <td><span style="color: var(--red);">-1</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Risk Visual RAM</td>
+                                        <td><span class="pill ram-pill ram-high">High</span></td>
+                                        <td><span class="pill ram-pill ram-medium">Medium</span></td>
+                                        <td><span style="color: var(--red);">-1</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HSSE RAM</td>
+                                        <td><span class="pill ram-pill ram-medium">Medium</span></td>
+                                        <td><span class="pill ram-pill ram-low">Low</span></td>
+                                        <td><span style="color: var(--amber);">-1</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Bowtie Diagram -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Bowtie Diagram</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="bowtie-placeholder">
+                                <i class="fas fa-project-diagram"></i>
+                                Interactive Bowtie Diagram
+                                <div style="font-size: 12px; margin-top: 8px;">Visualize causes, events, consequences and controls</div>
+                            </div>
+                            <button class="btn-primary" onclick="viewBowtie()" style="width: 100%; margin-top: 16px;">
+                                <i class="fas fa-external-link-alt"></i>
+                                View Full Bowtie Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Quick Stats</h2>
+                        </div>
+                        <div class="card-content">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div style="text-align: center;">
+                                    <div id="linkedActionsCount" style="font-size: 24px; font-weight: 600; color: var(--primary);">0</div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">Linked Actions</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div id="auditLogsCount" style="font-size: 24px; font-weight: 600; color: var(--amber);">Calculating...</div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">Audit Logs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Actions (hidden by default) -->
+        <div id="actionsTab" class="tab-content" style="display: none;">
+            <!-- Actions tab content will be populated dynamically -->
+        </div>
+
+        <!-- Tab Content: History (hidden by default) -->
+        <div id="historyTab" class="tab-content" style="display: none;">
+            <!-- History tab content -->
+        </div>
+    </main>
+
+    <!-- Add Action Modal -->
+    <div class="modal-overlay" id="actionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Create New Action</h2>
+                <button class="modal-close" onclick="closeActionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="actionForm" onsubmit="handleSubmitAction(event)">
+                    <input type="hidden" id="actionRiskId" name="actionRiskId" value="">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="actionTitle">Action Title *</label>
+                        <input type="text" id="actionTitle" name="actionTitle" class="form-input" required 
+                               placeholder="Enter a clear, descriptive title for this action" 
+                               aria-label="Action title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="actionDescription">Description</label>
+                        <textarea id="actionDescription" name="actionDescription" class="form-textarea" 
+                                  placeholder="Describe the action in detail, including objectives and methodology"
+                                  aria-label="Action description"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="actionStatus">Status *</label>
+                            <select id="actionStatus" name="actionStatus" class="form-select" required aria-label="Action status">
+                                <option value="">Select status</option>
+                                <option value="Proposed">Proposed</option>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="actionPriority">Priority</label>
+                            <select id="actionPriority" name="actionPriority" class="form-select" aria-label="Action priority">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="actionOwner">Owner</label>
+                            <input type="text" id="actionOwner" name="actionOwner" class="form-input" 
+                                   placeholder="Person responsible" aria-label="Action owner">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="actionCost">Estimated Cost ($)</label>
+                            <input type="number" id="actionCost" name="actionCost" class="form-input" min="0" step="0.01"
+                                   placeholder="0.00" aria-label="Estimated cost in dollars">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="actionStartDate">Start Date</label>
+                            <input type="date" id="actionStartDate" name="actionStartDate" class="form-input" aria-label="Action start date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="actionEndDate">End Date</label>
+                            <input type="date" id="actionEndDate" name="actionEndDate" class="form-input" aria-label="Action end date">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="actionProgress">Progress (%)</label>
+                        <input type="range" id="actionProgress" name="actionProgress" class="form-input" min="0" max="100" value="0" 
+                               oninput="updateProgressValue(this.value)" aria-label="Action progress percentage">
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span style="font-size: 12px; color: var(--text-secondary);">0%</span>
+                            <span id="progressValue" style="font-size: 14px; font-weight: 500; color: var(--primary);">0%</span>
+                            <span style="font-size: 12px; color: var(--text-secondary);">100%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="actionNotes">Additional Notes</label>
+                        <textarea id="actionNotes" name="actionNotes" class="form-textarea" 
+                                  placeholder="Any additional information or context"
+                                  aria-label="Additional notes"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeActionModal()">
+                    Cancel
+                </button>
+                <button type="submit" form="actionForm" class="btn-primary" id="submitActionBtn">
+                    <i class="fas fa-plus"></i>
+                    Create Action
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// Get risk data from localStorage
+const riskData = JSON.parse(localStorage.getItem('viewingRisk') || '{}');
+
+// API Configuration
+const API_BASE_URL = window.location.origin.includes('localhost') 
+    ? 'http://localhost:8080/api' 
+    : '/api';
+
+// Polling interval for audit logs (60 seconds)
+const AUDIT_LOGS_POLL_INTERVAL = 60000;
+
+// Global variables
+let auditLogsPollInterval = null;
+let riskStats = {
+    auditLogs: 0,
+    lastUpdated: null
+};
+let allAssets = [];
+
+// Modal state
+let actionModal = null;
+
+// Populate the page with risk data
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('=== Risk Details Page Initialization ===');
+    
+    if (Object.keys(riskData).length === 0) {
+        console.warn('No risk data found in localStorage, loading sample data');
+        // If no risk data, load sample data
+        loadSampleData();
+    } else {
+        console.log('Risk data found:', riskData);
+        populateRiskData(riskData);
+    }
+    
+    // Initialize modal
+    actionModal = document.getElementById('actionModal');
+    
+    // Set up tab switching
+    setupTabs();
+    
+    // Set up action click handlers
+    setupActionClickHandlers();
+    
+    // Start polling for audit logs
+    startAuditLogsPolling();
+    
+    // Fetch all dynamic data
+    await fetchAllDynamicData();
+    
+    // Debug risk data
+    debugRiskData();
+    
+    // Initialize occurrence arrow
+    initializeOccurrenceArrow();
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+    stopAuditLogsPolling();
+});
+
+// ==================== INITIALIZATION ====================
+
+function initializeOccurrenceArrow() {
+    const occurrenceArrow = document.getElementById('occurrenceArrow');
+    const occurrenceLevel = document.getElementById('occurrenceLevel').textContent.toLowerCase();
+    
+    if (occurrenceLevel === 'high') {
+        occurrenceArrow.className = 'arrow arrow-high';
+    } else if (occurrenceLevel === 'medium') {
+        occurrenceArrow.className = 'arrow arrow-medium';
+    } else {
+        occurrenceArrow.className = 'arrow arrow-low';
+    }
+}
+
+// ==================== MODAL FUNCTIONS ====================
+
+function openActionModal() {
+    // Get current risk details from the riskData object
+    const riskId = riskData._id || riskData.id || '';
+    const riskTitle = riskData.title || 'Untitled Risk';
+    const riskOwner = riskData.riskOwnerName || '—';
+    
+    console.log('Opening action modal for risk:', { 
+        riskId, 
+        riskTitle,
+        riskHumanId: riskData.riskId 
+    });
+    
+    // Set the risk ID in the form
+    document.getElementById('actionRiskId').value = riskId;
+    document.getElementById('actionTitle').value = `Mitigate: ${riskTitle}`;
+    document.getElementById('actionOwner').value = riskOwner;
+    
+    // Set default dates (today and 30 days from now)
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(today.getDate() + 30);
+    
+    document.getElementById('actionStartDate').value = today.toISOString().split('T')[0];
+    document.getElementById('actionEndDate').value = futureDate.toISOString().split('T')[0];
+    
+    // Reset form state
+    document.getElementById('actionDescription').value = '';
+    document.getElementById('actionStatus').value = 'Proposed';
+    document.getElementById('actionPriority').value = 'Medium';
+    document.getElementById('actionCost').value = '';
+    document.getElementById('actionProgress').value = '0';
+    document.getElementById('progressValue').textContent = '0%';
+    document.getElementById('actionNotes').value = '';
+    
+    // Show modal
+    actionModal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    
+    // Check for label accessibility issues after modal is shown
+    setTimeout(() => {
+        checkLabelAccessibility();
+    }, 100);
+}
+
+function closeActionModal() {
+    actionModal.classList.remove('active');
+    document.body.style.overflow = ''; // Restore scrolling
+}
+
+function updateProgressValue(value) {
+    document.getElementById('progressValue').textContent = `${value}%`;
+}
+
+async function handleSubmitAction(event) {
+    event.preventDefault();
+    
+    const submitBtn = document.getElementById('submitActionBtn');
+    const originalText = submitBtn.innerHTML;
+    const loadingText = '<div class="loading-spinner"></div> Creating...';
+    
+    submitBtn.innerHTML = loadingText;
+    submitBtn.disabled = true;
+    
+    try {
+        // Gather form data
+        const actionData = {
+            title: document.getElementById('actionTitle').value,
+            description: document.getElementById('actionDescription').value,
+            status: document.getElementById('actionStatus').value,
+            priority: document.getElementById('actionPriority').value,
+            owner: document.getElementById('actionOwner').value,
+            cost: parseFloat(document.getElementById('actionCost').value) || 0,
+            progress: parseInt(document.getElementById('actionProgress').value) || 0,
+            startDate: document.getElementById('actionStartDate').value || new Date().toISOString().split('T')[0],
+            endDate: document.getElementById('actionEndDate').value || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            notes: document.getElementById('actionNotes').value
+        };
+        
+        // Validate required fields
+        if (!actionData.title || !actionData.status) {
+            throw new Error('Please fill in all required fields');
+        }
+        
+        console.log('Submitting action data:', actionData);
+        
+        // Send to backend - the risk ID is handled inside createActionOnBackend
+        const newAction = await createActionOnBackend(actionData);
+        
+        // Close modal
+        closeActionModal();
+        
+        // Reset form
+        document.getElementById('actionForm').reset();
+        
+        // Restore button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        // Refresh actions list after a short delay
+        setTimeout(() => {
+            fetchAllDynamicData();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Error creating action:', error);
+        
+        // Restore button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        // Error is already shown by createActionOnBackend
+    }
+}
+
+// Check label accessibility (for debugging)
+function checkLabelAccessibility() {
+    const labels = document.querySelectorAll('label[for]');
+    let hasIssues = false;
+    
+    labels.forEach(label => {
+        const forId = label.getAttribute('for');
+        const element = document.getElementById(forId);
+        if (!element) {
+            console.warn(`Label accessibility issue: label for="${forId}" has no matching element`);
+            hasIssues = true;
+        }
+    });
+    
+    if (!hasIssues) {
+        console.log('All labels have matching form elements ✓');
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (event) => {
+    if (actionModal && actionModal.classList.contains('active') && event.target === actionModal) {
+        closeActionModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && actionModal && actionModal.classList.contains('active')) {
+        closeActionModal();
+    }
+});
+
+// ==================== API FUNCTIONS ====================
+
+async function fetchActionsFromBackend() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.warn('No authentication token found');
+            return [];
+        }
+
+        // Try to fetch actions with risk data populated
+        const response = await fetch(`${API_BASE_URL}/actions?populate=risk`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            // If populate fails, try without populate
+            console.log('Populated fetch failed, trying regular fetch...');
+            return fetchActionsWithoutPopulate();
+        }
+        
+        const actions = await response.json();
+        console.log('Fetched actions with risk populated:', actions);
+        
+        // Handle different response formats
+        if (Array.isArray(actions)) {
+            return actions;
+        } else if (actions && Array.isArray(actions.data)) {
+            return actions.data;
+        } else {
+            console.warn('Unexpected actions response format:', actions);
+            return [];
+        }
+        
+    } catch (error) {
+        console.error('Error fetching actions with populate:', error);
+        return fetchActionsWithoutPopulate();
+    }
+}
+
+async function fetchActionsWithoutPopulate() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/actions`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            console.error(`HTTP error! status: ${response.status}`);
+            return [];
+        }
+        
+        const actions = await response.json();
+        console.log('Fetched actions without populate:', actions);
+        
+        // Handle different response formats
+        if (Array.isArray(actions)) {
+            return actions;
+        } else if (actions && Array.isArray(actions.data)) {
+            return actions.data;
+        } else {
+            console.warn('Unexpected actions response format:', actions);
+            return [];
+        }
+        
+    } catch (error) {
+        console.error('Error fetching actions:', error);
+        return [];
+    }
+}
+
+async function fetchAuditLogsCount() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.warn('No authentication token found');
+            return 0;
+        }
+
+        // Try to fetch audit logs count from your Go endpoint
+        const response = await fetch(`${API_BASE_URL}/audit-logs?limit=1`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            // If endpoint doesn't exist or returns error, use fallback
+            console.log('Audit logs API not available, using fallback');
+            return calculateFallbackAuditLogs();
+        }
+        
+        const logs = await response.json();
+        
+        // Handle null responses
+        if (!logs || logs === null) {
+            return 0;
+        }
+        
+        return Array.isArray(logs) ? logs.length : 0;
+        
+    } catch (error) {
+        console.error('Error fetching audit logs count:', error);
+        return calculateFallbackAuditLogs();
+    }
+}
+
+async function createActionOnBackend(actionData) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        // Get the current risk ID properly
+        const currentRiskId = riskData._id || riskData.id || '';
+        const currentRiskIdStr = riskData.riskId || '';
+        
+        console.log('Creating action for risk:', {
+            mongoId: currentRiskId,
+            riskId: currentRiskIdStr,
+            actionTitle: actionData.title
+        });
+        
+        // Prepare payload - try both formats
+        const payload = {
+            title: actionData.title,
+            description: actionData.description || "",
+            riskId: currentRiskId, // Try with MongoDB _id
+            risk: currentRiskId, // Some backends might expect this field
+            riskIdString: currentRiskIdStr, // Include human-readable ID
+            status: actionData.status || "Proposed",
+            priority: actionData.priority || "Medium",
+            owner: actionData.owner || "",
+            cost: parseFloat(actionData.cost) || 0,
+            progress: parseInt(actionData.progress) || 0,
+            startDate: actionData.startDate || "",
+            endDate: actionData.endDate || "",
+            notes: actionData.notes || ""
+        };
+
+        console.log('Creating action with payload:', payload);
+
+        const response = await fetch(`${API_BASE_URL}/actions`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        const responseText = await response.text();
+        console.log('Server response:', responseText);
+        
+        if (!response.ok) {
+            let errorMessage = `Failed to create action: ${response.status}`;
+            try {
+                const errorData = JSON.parse(responseText);
+                errorMessage = errorData.error || errorData.message || errorMessage;
+            } catch (e) {
+                if (responseText) {
+                    errorMessage = responseText;
+                }
+            }
+            throw new Error(errorMessage);
+        }
+        
+        let newAction;
+        try {
+            newAction = JSON.parse(responseText);
+        } catch (e) {
+            throw new Error('Invalid JSON response from server');
+        }
+        
+        console.log('Action created successfully:', newAction);
+        
+        // Show success message with the new action details
+        showNotification(`Action "${newAction.title || actionData.title}" created successfully!`, 'success');
+        
+        return newAction;
+    } catch (error) {
+        console.error('Error creating action:', error);
+        showNotification(`Failed to create action: ${error.message}`, 'error');
+        throw error;
+    }
+}
+
+// ==================== DYNAMIC DATA FETCHING ====================
+
+async function fetchAllDynamicData() {
+    try {
+        // Fetch actions and update UI
+        const actions = await populateActions();
+        
+        // Calculate and update all dynamic metrics
+        updateAllDynamicMetrics(actions);
+        
+    } catch (error) {
+        console.error('Error fetching dynamic data:', error);
+        showNotification('Failed to load some data. Please refresh.', 'error');
+    }
+}
+
+async function fetchAuditLogs() {
+    try {
+        const auditLogsCount = await fetchAuditLogsCount();
+        updateAuditLogsDisplay(auditLogsCount);
+    } catch (error) {
+        console.error('Error fetching audit logs:', error);
+    }
+}
+
+function updateAuditLogsDisplay(count) {
+    const auditLogsElement = document.getElementById('auditLogsCount');
+    
+    if (auditLogsElement) {
+        auditLogsElement.textContent = count.toLocaleString();
+        
+        // Update color based on count
+        if (count > 100) {
+            auditLogsElement.style.color = 'var(--red)';
+        } else if (count > 50) {
+            auditLogsElement.style.color = 'var(--amber)';
+        } else {
+            auditLogsElement.style.color = 'var(--amber)'; // Default amber
+        }
+        
+        riskStats.auditLogs = count;
+        riskStats.lastUpdated = new Date().toISOString();
+    }
+}
+
+// ==================== DATA POPULATION ====================
+
+function populateRiskData(data) {
+    // Basic info
+    document.getElementById('riskTitle').textContent = data.riskId ? `${data.riskId}: ${data.title}` : data.title;
+    document.getElementById('riskDescription').textContent = data.description || 'No description available';
+    document.getElementById('riskId').textContent = data.riskId || '—';
+    document.getElementById('riskOwner').textContent = data.riskOwnerName || '—';
+    document.getElementById('subProject').textContent = data.subProject || '—';
+    document.getElementById('functionalArea').textContent = data.functionalAreaTECOP || '—';
+    document.getElementById('createdAt').textContent = data.createdAt ? new Date(data.createdAt).toLocaleDateString() : '—';
+    document.getElementById('updatedAt').textContent = data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : '—';
+    document.getElementById('nextReviewDate').textContent = data.nextReviewDate ? new Date(data.nextReviewDate).toLocaleDateString() : '—';
+    
+    // Risk type and status
+    const riskTypePill = document.getElementById('riskType');
+    const riskStatusPill = document.getElementById('riskStatus');
+    
+    if (data.type === 'Upside') {
+        riskTypePill.className = 'pill pill-upside';
+        riskTypePill.innerHTML = '<i class="fas fa-arrow-up"></i> Upside Risk';
+    } else if (data.type === 'Opportunity') {
+        riskTypePill.className = 'pill pill-opportunity';
+        riskTypePill.innerHTML = '<i class="fas fa-bullseye"></i> Opportunity';
+    } else {
+        riskTypePill.className = 'pill pill-downside';
+        riskTypePill.innerHTML = '<i class="fas fa-arrow-down"></i> Downside Risk';
+    }
+    
+    if (data.status === 'Open') {
+        riskStatusPill.className = 'pill status-open';
+        riskStatusPill.innerHTML = '<i class="fas fa-circle" style="font-size: 8px;"></i> Open';
+    } else if (data.status === 'In Progress') {
+        riskStatusPill.className = 'pill status-in-progress';
+        riskStatusPill.innerHTML = '<i class="fas fa-circle" style="font-size: 8px;"></i> In Progress';
+    } else if (data.status === 'Closed' || data.status === 'Completed') {
+        riskStatusPill.className = 'pill status-completed';
+        riskStatusPill.innerHTML = '<i class="fas fa-circle" style="font-size: 8px;"></i> Completed';
+    } else {
+        riskStatusPill.className = 'pill status-proposed';
+        riskStatusPill.innerHTML = '<i class="fas fa-circle" style="font-size: 8px;"></i> ' + (data.status || 'Proposed');
+    }
+    
+    // Manageability
+    const manageabilityPill = document.getElementById('manageability');
+    if (data.manageability === 'Can Control') {
+        manageabilityPill.className = 'pill manageability-pill can-control';
+        manageabilityPill.textContent = 'Can Control';
+    } else if (data.manageability === 'Cannot Influence') {
+        manageabilityPill.className = 'pill manageability-pill cannot-influence';
+        manageabilityPill.textContent = 'Cannot Influence';
+    } else {
+        manageabilityPill.className = 'pill manageability-pill can-influence';
+        manageabilityPill.textContent = 'Can Influence';
+    }
+    
+    // Occurrence level
+    const occurrenceArrow = document.getElementById('occurrenceArrow');
+    const occurrenceLevel = document.getElementById('occurrenceLevel');
+    const occLevel = data.occurenceLevel || 'Medium';
+    
+    if (occLevel.toLowerCase() === 'high') {
+        occurrenceArrow.className = 'arrow arrow-high';
+        occurrenceLevel.textContent = 'High';
+    } else if (occLevel.toLowerCase() === 'low') {
+        occurrenceArrow.className = 'arrow arrow-low';
+        occurrenceLevel.textContent = 'Low';
+    } else {
+        occurrenceArrow.className = 'arrow arrow-medium';
+        occurrenceLevel.textContent = 'Medium';
+    }
+    
+    // Risk description details
+    document.getElementById('causes').textContent = Array.isArray(data.causes) ? data.causes.join(', ') : (data.causes || 'No causes identified');
+    document.getElementById('event').textContent = data.event || 'No event description';
+    document.getElementById('consequences').textContent = Array.isArray(data.consequences) ? data.consequences.join(', ') : (data.consequences || 'No consequences identified');
+    
+    // Dates
+    document.getElementById('exposureStart').textContent = data.exposureStartDate ? new Date(data.exposureStartDate).toLocaleDateString() : '—';
+    document.getElementById('exposureEnd').textContent = data.exposureEndDate ? new Date(data.exposureEndDate).toLocaleDateString() : '—';
+}
+
+function loadSampleData() {
+    const sampleData = {
+        _id: 'sample-risk-id-123',
+        riskId: 'RISK-001',
+        title: 'Cyber Security Breach',
+        description: 'Unauthorized access leading to data exfiltration, potential financial loss and reputational damage',
+        type: 'Downside',
+        status: 'Open',
+        riskOwnerName: 'Alex Chen',
+        subProject: 'Digital Transformation',
+        functionalAreaTECOP: 'IT',
+        createdAt: '2025-01-15',
+        updatedAt: '2025-01-25',
+        nextReviewDate: '2026-03-15',
+        manageability: 'Can Influence',
+        occurenceLevel: 'High',
+        causes: ['Weak access controls', 'Insufficient multi-factor authentication', 'Outdated software patches', 'Lack of employee security training'],
+        event: 'Unauthorized access by external threat actors leading to data exfiltration of sensitive customer and financial information',
+        consequences: ['Significant financial loss', 'Reputational damage', 'Regulatory fines (GDPR, CCPA)', 'Potential loss of customer trust', 'Operational disruption'],
+        exposureStartDate: '2025-01-01',
+        exposureEndDate: '2026-12-31',
+        linkedAssets: ['696d3ac654b57879bbb65ac3', 'AST-002', 'AST-003'] // Sample asset IDs
+    };
+    
+    populateRiskData(sampleData);
+    return sampleData;
+}
+
+async function populateActions() {
+    const actionsList = document.getElementById('actionsList');
+    
+    try {
+        // Show loading state
+        actionsList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
+                <div>Loading actions...</div>
+            </div>
+        `;
+        
+        // Fetch actions from backend
+        const actions = await fetchActionsFromBackend();
+        
+        // Ensure actions is an array
+        const safeActions = Array.isArray(actions) ? actions : [];
+        
+        // Get the current risk ID from riskData
+        const currentRiskId = riskData._id || riskData.id || '';
+        const currentRiskIdStr = riskData.riskId || '';
+        
+        console.log('Current risk details for filtering:', {
+            mongoId: currentRiskId,
+            riskIdStr: currentRiskIdStr,
+            riskData: riskData
+        });
+        
+        if (!currentRiskId && !currentRiskIdStr) {
+            console.warn('No risk ID found for filtering actions');
+            actionsList.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <i class="fas fa-tasks" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <div>No risk ID available for filtering actions</div>
+                </div>
+            `;
+            return [];
+        }
+        
+        // Filter actions for this specific risk
+        const riskActions = safeActions.filter(action => {
+            if (!action) return false;
+            
+            // Check multiple ways the risk could be linked:
+            
+            // 1. Direct string comparison of MongoDB _id
+            if (action.riskId === currentRiskId) {
+                console.log('Match found via action.riskId === currentRiskId', action.title);
+                return true;
+            }
+            
+            // 2. Risk object with _id field
+            if (action.risk && action.risk._id === currentRiskId) {
+                console.log('Match found via action.risk._id', action.title);
+                return true;
+            }
+            
+            // 3. Risk object with id field (without underscore)
+            if (action.risk && action.risk.id === currentRiskId) {
+                console.log('Match found via action.risk.id', action.title);
+                return true;
+            }
+            
+            // 4. Compare human-readable risk IDs (like "RISK-001")
+            if (currentRiskIdStr && action.riskId === currentRiskIdStr) {
+                console.log('Match found via human-readable ID', action.title);
+                return true;
+            }
+            
+            // 5. Risk object with riskId field
+            if (action.risk && action.risk.riskId === currentRiskIdStr) {
+                console.log('Match found via action.risk.riskId', action.title);
+                return true;
+            }
+            
+            // 6. Check if riskId is an object that needs to be stringified
+            if (typeof action.riskId === 'object' && action.riskId) {
+                const riskIdObj = action.riskId;
+                if (riskIdObj._id === currentRiskId || 
+                    riskIdObj.id === currentRiskId ||
+                    riskIdObj.riskId === currentRiskIdStr) {
+                    console.log('Match found via riskId object', action.title);
+                    return true;
+                }
+            }
+            
+            // 7. Also check if the risk ID is stored in a nested way
+            if (action.risk && (action.risk._id === currentRiskId || action.risk.id === currentRiskId)) {
+                console.log('Match found via nested risk object', action.title);
+                return true;
+            }
+            
+            return false;
+        });
+        
+        console.log(`Filtered actions: ${riskActions.length} of ${safeActions.length} total actions`);
+        
+        // Log all actions for debugging
+        if (safeActions.length > 0) {
+            console.log('All available actions:');
+            safeActions.forEach((action, index) => {
+                console.log(`${index + 1}. ${action.title || 'Untitled'} - riskId: ${action.riskId}, risk:`, action.risk);
+            });
+        }
+        
+        // Update the Actions tab count
+        const actionsTabBtn = document.getElementById('actionsTabBtn');
+        if (actionsTabBtn) {
+            actionsTabBtn.textContent = `Actions (${riskActions.length})`;
+        }
+        
+        // Update linked actions count in Quick Stats
+        updateLinkedActionsCount(riskActions);
+        
+        if (riskActions.length === 0) {
+            actionsList.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <i class="fas fa-tasks" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <div>No actions found for this risk</div>
+                    <div style="font-size: 12px; margin-top: 8px; color: var(--text-secondary);">
+                        Create actions from the "New Action" button above
+                    </div>
+                    ${safeActions.length > 0 ? `
+                        <div style="font-size: 11px; margin-top: 12px; color: var(--amber); padding: 8px; background: rgba(245,158,11,0.05); border-radius: 6px;">
+                            <i class="fas fa-info-circle"></i> 
+                            There are ${safeActions.length} total actions in the system, but none are linked to this specific risk.<br>
+                            Current risk ID: ${currentRiskId || currentRiskIdStr || 'Unknown'}<br>
+                            Please ensure actions are created with the correct risk association.
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            return riskActions;
+        }
+        
+        // Display the actions
+        actionsList.innerHTML = riskActions.map(action => {
+            // Determine status class based on action status
+            let statusClass = 'status-proposed';
+            if (action.status === 'In Progress') statusClass = 'status-in-progress';
+            else if (action.status === 'Completed') statusClass = 'status-completed';
+            else if (action.status === 'Open') statusClass = 'status-open';
+            
+            // Format dates
+            const startDate = action.startDate ? new Date(action.startDate).toLocaleDateString() : '—';
+            const endDate = action.endDate ? new Date(action.endDate).toLocaleDateString() : '—';
+            const dates = `${startDate} – ${endDate}`;
+            
+            // Use actionId or _id for display
+            const displayId = action.actionId || (action._id ? action._id.substring(0, 8) : '') || 'ACTION-000';
+            
+            return `
+                <div class="action-item" data-action-id="${action._id || action.id || ''}">
+                    <div class="action-header">
+                        <div class="action-title">${displayId} - ${escapeHtml(action.title || 'Untitled Action')}</div>
+                        <span class="pill ${statusClass}">${action.status || 'Proposed'}</span>
+                    </div>
+                    <div class="action-details">
+                        <div><strong>Owner:</strong> ${escapeHtml(action.owner || '—')}</div>
+                        <div><strong>Planned:</strong> ${dates}</div>
+                        <div><strong>Cost:</strong> $${(action.cost || 0).toLocaleString()}</div>
+                        ${action.priority ? `<div><strong>Priority:</strong> ${action.priority}</div>` : ''}
+                    </div>
+                    ${action.progress > 0 ? `
+                        <div class="action-progress">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                <span>Progress</span>
+                                <span>${action.progress}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${action.progress}%"></div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+        
+        return riskActions;
+        
+    } catch (error) {
+        console.error('Error populating actions:', error);
+        actionsList.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: var(--red);">
+                <i class="fas fa-exclamation-triangle"></i>
+                Failed to load actions: ${error.message}
+                <button class="btn-primary" onclick="populateActions()" style="margin-top: 16px;">
+                    <i class="fas fa-redo"></i>
+                    Retry
+                </button>
+            </div>
+        `;
+        return [];
+    }
+}
+
+// ==================== DYNAMIC METRICS CALCULATION ====================
+
+function updateAllDynamicMetrics(actions = []) {
+    // Update timeline and days remaining
+    updateTimelineMetrics();
+    
+    // Update progress based on actions
+    updateProgressMetrics(actions);
+    
+    // Update exposure level based on all factors
+    updateExposureLevelMetrics(actions);
+}
+
+function updateTimelineMetrics() {
+    const data = Object.keys(riskData).length === 0 ? loadSampleData() : riskData;
+    
+    if (data.exposureStartDate && data.exposureEndDate) {
+        const start = new Date(data.exposureStartDate);
+        const end = new Date(data.exposureEndDate);
+        const today = new Date();
+        
+        // Ensure dates are valid
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            console.error('Invalid dates provided');
+            return;
+        }
+        
+        const totalDuration = end.getTime() - start.getTime();
+        const elapsedDuration = today.getTime() - start.getTime();
+        
+        // Calculate accurate percentage (0-100)
+        let percentage = 0;
+        if (totalDuration > 0) {
+            percentage = Math.min(Math.max((elapsedDuration / totalDuration) * 100, 0), 100);
+        }
+        
+        // Update timeline fill
+        const timelineFill = document.querySelector('.timeline-fill');
+        if (timelineFill) {
+            timelineFill.style.width = `${percentage}%`;
+        }
+        
+        // Calculate accurate days remaining
+        const daysRemaining = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Update Days Remaining
+        const daysRemainingElement = document.getElementById('daysRemaining');
+        const daysRemainingValue = Math.max(daysRemaining, 0); // Never show negative days
+        daysRemainingElement.textContent = daysRemainingValue;
+        
+        // Update Days Remaining color based on urgency
+        if (daysRemainingValue < 30) {
+            daysRemainingElement.style.color = 'var(--red)';
+        } else if (daysRemainingValue < 90) {
+            daysRemainingElement.style.color = 'var(--amber)';
+        } else {
+            daysRemainingElement.style.color = 'var(--primary)';
+        }
+        
+        // Update marker position based on next review date
+        updateTimelineMarker(data.nextReviewDate, start, end);
+    }
+}
+
+function updateTimelineMarker(nextReviewDate, exposureStart, exposureEnd) {
+    const timelineMarker = document.querySelector('.timeline-marker');
+    if (!timelineMarker || !nextReviewDate) return;
+    
+    const reviewDate = new Date(nextReviewDate);
+    const start = new Date(exposureStart);
+    const end = new Date(exposureEnd);
+    
+    if (isNaN(reviewDate.getTime()) || isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return;
+    }
+    
+    const totalDuration = end.getTime() - start.getTime();
+    const reviewPosition = reviewDate.getTime() - start.getTime();
+    
+    if (totalDuration > 0) {
+        const markerPercentage = (reviewPosition / totalDuration) * 100;
+        timelineMarker.style.left = `${Math.min(Math.max(markerPercentage, 0), 100)}%`;
+    }
+}
+
+function updateProgressMetrics(actions) {
+    const progressElement = document.getElementById('progressPercentage');
+    if (!progressElement) return;
+    
+    if (actions && actions.length > 0) {
+        // Calculate weighted progress from actions
+        const weightedProgress = calculateWeightedProgress(actions);
+        progressElement.textContent = `${weightedProgress}%`;
+        
+        // Update color based on progress
+        if (weightedProgress > 70) {
+            progressElement.style.color = 'var(--green)';
+        } else if (weightedProgress > 30) {
+            progressElement.style.color = 'var(--amber)';
+        } else {
+            progressElement.style.color = 'var(--red)';
+        }
+    } else {
+        // No actions - use timeline progress
+        const data = Object.keys(riskData).length === 0 ? loadSampleData() : riskData;
+        if (data.exposureStartDate && data.exposureEndDate) {
+            const start = new Date(data.exposureStartDate);
+            const end = new Date(data.exposureEndDate);
+            const today = new Date();
+            
+            const totalDuration = end.getTime() - start.getTime();
+            const elapsedDuration = today.getTime() - start.getTime();
+            
+            if (totalDuration > 0) {
+                const timelineProgress = Math.min(Math.max((elapsedDuration / totalDuration) * 100, 0), 100);
+                progressElement.textContent = `${Math.round(timelineProgress)}%`;
+                
+                // Update color
+                if (timelineProgress > 70) {
+                    progressElement.style.color = 'var(--green)';
+                } else if (timelineProgress > 30) {
+                    progressElement.style.color = 'var(--amber)';
+                } else {
+                    progressElement.style.color = 'var(--red)';
+                }
+            }
+        }
+    }
+}
+
+function updateExposureLevelMetrics(actions) {
+    const exposureElement = document.getElementById('exposureLevel');
+    const daysRemainingElement = document.getElementById('daysRemaining');
+    const progressElement = document.getElementById('progressPercentage');
+    
+    if (!exposureElement || !daysRemainingElement || !progressElement) return;
+    
+    const daysRemaining = parseInt(daysRemainingElement.textContent) || 0;
+    const progress = parseInt(progressElement.textContent) || 0;
+    const completionRate = actions && actions.length > 0 ? 
+        actions.filter(a => a.status === 'Completed').length / actions.length : 0;
+    
+    // Calculate exposure score (0-100, higher = more exposed)
+    let exposureScore = 0;
+    
+    // Factor 1: Days remaining (0-40 points)
+    if (daysRemaining < 30) exposureScore += 40;
+    else if (daysRemaining < 90) exposureScore += 25;
+    else if (daysRemaining < 180) exposureScore += 10;
+    
+    // Factor 2: Progress (0-40 points)
+    if (progress < 30) exposureScore += 40;
+    else if (progress < 70) exposureScore += 20;
+    else exposureScore += 5;
+    
+    // Factor 3: Completion rate (0-20 points)
+    if (completionRate < 0.3) exposureScore += 20;
+    else if (completionRate < 0.7) exposureScore += 10;
+    
+    // Determine exposure level
+    if (exposureScore >= 70) {
+        exposureElement.textContent = 'High';
+        exposureElement.style.color = 'var(--red)';
+    } else if (exposureScore >= 40) {
+        exposureElement.textContent = 'Medium';
+        exposureElement.style.color = 'var(--amber)';
+    } else {
+        exposureElement.textContent = 'Low';
+        exposureElement.style.color = 'var(--green)';
+    }
+}
+
+function updateLinkedActionsCount(actions) {
+    const linkedActionsElement = document.getElementById('linkedActionsCount');
+    if (linkedActionsElement) {
+        const count = actions ? actions.length : 0;
+        linkedActionsElement.textContent = count;
+        
+        // Update color based on count
+        if (count === 0) {
+            linkedActionsElement.style.color = 'var(--red)';
+        } else if (count > 5) {
+            linkedActionsElement.style.color = 'var(--green)';
+        } else {
+            linkedActionsElement.style.color = 'var(--primary)';
+        }
+    }
+}
+
+function calculateWeightedProgress(actions) {
+    if (!actions || actions.length === 0) return 0;
+    
+    let totalWeightedProgress = 0;
+    let totalWeight = 0;
+    
+    actions.forEach(action => {
+        let weight = 1; // Base weight
+        
+        // Adjust weight based on status
+        if (action.status === 'Completed') weight = 1.5;
+        else if (action.status === 'In Progress') weight = 1.2;
+        else if (action.status === 'Open') weight = 1;
+        else weight = 0.8; // Proposed
+        
+        // Adjust weight based on priority (if available)
+        if (action.priority === 'High') weight *= 1.5;
+        else if (action.priority === 'Medium') weight *= 1.2;
+        
+        const progress = parseInt(action.progress) || 0;
+        totalWeightedProgress += progress * weight;
+        totalWeight += weight;
+    });
+    
+    const weightedAverage = totalWeight > 0 ? totalWeightedProgress / totalWeight : 0;
+    return Math.round(Math.min(weightedAverage, 100));
+}
+
+// ==================== HELPER FUNCTIONS ====================
+
+// Helper function to validate MongoDB ObjectId
+function isValidObjectId(id) {
+    if (!id || id === '—' || id === '') return false;
+    // MongoDB ObjectId is 24 hex characters
+    return /^[0-9a-fA-F]{24}$/.test(id);
+}
+
+// Utility function to escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ==================== FALLBACK CALCULATIONS ====================
+
+function calculateFallbackAuditLogs() {
+    // Calculate audit logs based on risk age and activity
+    const data = Object.keys(riskData).length === 0 ? loadSampleData() : riskData;
+    
+    let auditLogs = 14; // Base number
+    
+    // Increase based on days since creation
+    if (data.createdAt) {
+        const created = new Date(data.createdAt);
+        const today = new Date();
+        const daysSinceCreation = Math.ceil((today - created) / (1000 * 60 * 60 * 24));
+        
+        // Approximately 1 audit log per week of existence
+        auditLogs = Math.max(14, Math.floor(daysSinceCreation / 7));
+    }
+    
+    // Increase if risk has been updated recently
+    if (data.updatedAt && data.createdAt && data.updatedAt !== data.createdAt) {
+        auditLogs += 5; // Add extra logs for updates
+    }
+    
+    return Math.min(auditLogs, 100); // Cap at 100
+}
+
+// ==================== ACTION MANAGEMENT ====================
+
+function setupActionClickHandlers() {
+    document.addEventListener('click', (e) => {
+        const actionItem = e.target.closest('.action-item');
+        if (actionItem) {
+            const actionId = actionItem.dataset.actionId;
+            viewActionDetails(actionId);
+        }
+    });
+}
+
+function viewActionDetails(actionId) {
+    showNotification(`Opening action ${actionId ? actionId.substring(0, 8) : 'unknown'}...`, 'info');
+}
+
+// ==================== UI UTILITIES ====================
+
+function setupTabs() {
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = {
+        overview: document.getElementById('overviewTab'),
+        actions: document.getElementById('actionsTab'),
+        history: document.getElementById('historyTab'),
+        documents: document.getElementById('documentsTab'),
+        settings: document.getElementById('settingsTab')
+    };
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabName = tab.textContent.toLowerCase().replace(/ \(\d+\)/, '');
+            
+            // Update active tab
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Show selected tab content
+            Object.values(tabContents).forEach(content => {
+                if (content) content.style.display = 'none';
+            });
+            
+            if (tabContents[tabName]) {
+                tabContents[tabName].style.display = 'block';
+            }
+            
+            // If switching to actions tab, refresh actions
+            if (tabName === 'actions') {
+                populateActions();
+            }
+        });
+    });
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+    `;
+    
+    // Set color based on type
+    if (type === 'success') {
+        notification.style.background = 'var(--green)';
+    } else if (type === 'error') {
+        notification.style.background = 'var(--red)';
+    } else {
+        notification.style.background = 'var(--primary)';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Add CSS animations for notifications
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// ==================== POLLING FUNCTIONS ====================
+
+function startAuditLogsPolling() {
+    // Fetch immediately
+    fetchAuditLogs();
+    
+    // Set up polling
+    auditLogsPollInterval = setInterval(fetchAuditLogs, AUDIT_LOGS_POLL_INTERVAL);
+}
+
+function stopAuditLogsPolling() {
+    if (auditLogsPollInterval) {
+        clearInterval(auditLogsPollInterval);
+        auditLogsPollInterval = null;
+    }
+}
+
+// ==================== NAVIGATION FUNCTIONS ====================
+
+function goBack() {
+    window.history.back();
+}
+
+function editRisk() {
+    showNotification('Edit functionality would open the risk edit form', 'info');
+}
+
+function shareRisk() {
+    showNotification('Share functionality would generate a shareable link or email', 'info');
+}
+
+function printRisk() {
+    window.print();
+}
+
+// ==================== BOWTIE FUNCTION (FIXED) ====================
+
+function viewBowtie() {
+    try {
+        // Get the current risk data
+        const risk = riskData || loadSampleData();
+        
+        if (!risk || (!risk._id && !risk.id)) {
+            showNotification('No risk data available to view bowtie diagram', 'error');
+            console.error('No risk ID found:', risk);
+            return;
+        }
+        
+        console.log('Opening bowtie diagram for risk:', {
+            id: risk._id || risk.id,
+            riskId: risk.riskId,
+            title: risk.title
+        });
+        
+        // Store risk data in localStorage for the bowtie page to access
+        localStorage.setItem('viewingRisk', JSON.stringify(risk));
+        
+        // Create URL parameters
+        const params = new URLSearchParams({
+            riskId: risk._id || risk.id,
+            riskIdHuman: risk.riskId || '',
+            riskTitle: risk.title || ''
+        });
+        
+        // FIX: Use correct case - Bowtie.html (capital B)
+        // Try multiple variations
+        const baseUrl = window.location.origin;
+        const paths = [
+            '/dashboards/executive/global-risk-register/Bowtie.html',
+            '/dashboards/admin/global-risk-register/Bowtie.html',
+            '/dashboards/analyst/pages/Bowtie.html',
+            '/Bowtie.html'
+        ];
+        
+        // Try each path
+        for (const path of paths) {
+            const testUrl = `${baseUrl}${path}`;
+            console.log('Testing URL:', testUrl);
+            
+            // You could do a HEAD request to check if it exists
+            // For now, we'll just try the most likely one
+        }
+        
+        // Use the most likely path for executive dashboard
+        const bowtieUrl = `/dashboards/executive/global-risk-register/Bowtie.html?${params.toString()}`;
+        console.log('Opening bowtie URL:', bowtieUrl);
+        window.open(bowtieUrl, '_blank');
+        
+        // Show notification
+        showNotification('Opening Bowtie Diagram in new tab...', 'info');
+        
+    } catch (error) {
+        console.error('Error opening bowtie diagram:', error);
+        showNotification('Failed to open bowtie diagram', 'error');
+    }
+}
+
+// Add tab switching function
+function switchTab(tabName) {
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = {
+        overview: document.getElementById('overviewTab'),
+        actions: document.getElementById('actionsTab'),
+        history: document.getElementById('historyTab'),
+        documents: document.getElementById('documentsTab'),
+        settings: document.getElementById('settingsTab')
+    };
+    
+    // Update active tab
+    tabs.forEach(tab => {
+        if (tab.textContent.toLowerCase().replace(/ \(\d+\)/, '') === tabName) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+    
+    // Show selected tab content
+    Object.values(tabContents).forEach(content => {
+        if (content) content.style.display = 'none';
+    });
+    
+    if (tabContents[tabName]) {
+        tabContents[tabName].style.display = 'block';
+    }
+    
+    // If switching to actions tab, refresh actions
+    if (tabName === 'actions') {
+        populateActions();
+    }
+}
+
+// ==================== DEBUG FUNCTIONS ====================
+
+function debugRiskData() {
+    console.log('=== RISK DATA DEBUG ===');
+    console.log('Full riskData:', riskData);
+    console.log('Risk ID fields:');
+    console.log('  _id:', riskData._id);
+    console.log('  id:', riskData.id);
+    console.log('  riskId:', riskData.riskId);
+    console.log('LocalStorage key "viewingRisk":', localStorage.getItem('viewingRisk'));
+    console.log('=== END DEBUG ===');
+}
+</script>
+</body>
+
+</html>
+
