@@ -1,0 +1,2306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Risk Register • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        /* Shimmer Skeleton */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 1.2s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* Top Nav */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 10;
+        }
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 40px;
+            background: rgba(93,161,161,0.08);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary);
+        }
+        .nav-tab:hover:not(.active) { background: rgba(93,161,161,0.15); }
+        .nav-tab.disabled {
+            cursor: default;
+            opacity: 0.5;
+        }
+        .nav-tab.disabled:hover {
+            background: rgba(93,161,161,0.08);
+        }
+        .nav-tab .favicon {
+            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+        }
+        .actions-group { display: flex; align-items: center; gap: 19.2px; }
+        .search-box input {
+            padding: 8px 12.8px; border: 1px solid var(--border); border-radius: 9.6px;
+            width: 320px; font-size: 12px; background: #f9f9f9;
+        }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
+        .btn-primary {
+            padding: 8px 16px; background: var(--primary); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* Main Layout */
+        .main { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+        .content-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .page-content { display: none; height: 100%; overflow: auto; }
+
+        /* Table View */
+        .table-view { display: block; height: 100%; padding: 24px; }
+        .table-container {
+            width: 100%; height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        table { min-width: 4000px; width: 100%; border-collapse: collapse; }
+        thead { position: sticky; top: 0; background: var(--card-bg); z-index: 8; }
+        th { padding: 12.8px 16px; font-size: 11.2px; font-weight: 600; color: var(--text-secondary);
+             border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+        td { padding: 12.8px 16px; font-size: 12.8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+
+        /* Skeleton */
+        .skeleton-row td { padding: 16px; }
+        .skeleton-cell { height: 20px; width: 80%; border-radius: 4px; }
+        .skeleton-cell.short { width: 50%; }
+        .skeleton-pill { height: 24px; width: 90px; border-radius: 999px; }
+
+        /* Mobile Cards */
+        .card-view { display: none; padding: 16px; overflow-y: auto; height: 100%; }
+        .risk-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+        }
+        .risk-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .risk-card-title { font-size: 16px; font-weight: 600; cursor: pointer; }
+        .risk-card-title:hover { color: var(--primary); }
+        .risk-card-grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: 13px; }
+        .risk-card-label { color: var(--text-secondary); font-weight: 500; }
+
+        /* Pills & Arrows */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; }
+        .pill-downside { background: rgba(239,68,68,0.1); color: var(--red); }
+        .pill-upside { background: rgba(16,185,129,0.1); color: var(--green); }
+        .status-open { background: rgba(93,161,161,0.1); color: var(--primary); }
+
+        .arrow-wrapper { position: relative; display: inline-block; cursor: help; }
+        .arrow { display: block; width: 0; height: 0; }
+        .arrow-high { border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid var(--red); }
+        .arrow-medium { border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid var(--amber); }
+        .arrow-low { border-left: 8px solid transparent; border-right: 8px transparent; border-top: 10px solid var(--green); }
+        .tooltip {
+            visibility: hidden; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;
+            white-space: nowrap; opacity: 0; transition: opacity 0.2s; z-index: 10;
+        }
+        .tooltip::after {
+            content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #333;
+        }
+        .arrow-wrapper:hover .tooltip { visibility: visible; opacity: 1; }
+
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+        }
+        .icon-btn:hover { background: rgba(93,161,161,0.1); color: var(--primary); }
+
+        /* RAM Pill Styles */
+        .ram-pill { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+        .ram-low { background: rgba(16,185,129,0.1); color: var(--green); }
+        .ram-medium { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .ram-high { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .manageability-pill { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+        .can-control { background: rgba(16,185,129,0.1); color: var(--green); }
+        .can-influence { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .cannot-influence { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .threshold-badge {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+            margin-left: 6px; vertical-align: middle;
+        }
+        .threshold-changing { background: var(--red); }
+        .threshold-stable { background: var(--green); }
+
+        /* Full Page Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-overlay.open {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            box-shadow: none;
+            animation: fadeIn 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-secondary);
+            line-height: 1;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        
+        .modal-close:hover {
+            background: rgba(93,161,161,0.1);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 32px;
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg);
+        }
+        
+        .modal-footer {
+            padding: 20px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        
+        .btn-secondary, .btn-success {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 120px;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .btn-success {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: var(--primary-hover);
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .required::after {
+            content: ' *';
+            color: var(--red);
+        }
+        
+        /* Form Container */
+        .form-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .form-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        /* Asset Selector Styles */
+        .asset-selector {
+            position: relative;
+            width: 100%;
+        }
+        
+        .asset-selector-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .asset-selector-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        
+        .asset-selector-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .asset-selector-dropdown.open {
+            display: block;
+        }
+        
+        .asset-search {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .asset-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .asset-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .asset-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .asset-item:hover {
+            background: rgba(93,161,161,0.05);
+        }
+        
+        .asset-item.selected {
+            background: rgba(93,161,161,0.1);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .asset-info {
+            flex: 1;
+        }
+        
+        .asset-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .asset-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        
+        .asset-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 12px;
+        }
+        
+        .asset-checkbox.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .asset-checkbox.selected::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .selected-assets {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .selected-asset-tag {
+            background: rgba(93,161,161,0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .remove-asset {
+            background: none;
+            border: none;
+            color: var(--neutral);
+            cursor: pointer;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .remove-asset:hover {
+            background: rgba(0,0,0,0.1);
+            color: var(--red);
+        }
+        
+        .no-assets {
+            padding: 24px 16px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .loading-assets {
+            padding: 24px 16px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Asset Browser Modal */
+        .asset-browser-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+            padding: 20px;
+        }
+        
+        .asset-browser-modal.open {
+            display: flex;
+        }
+        
+        .asset-browser {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 800px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .asset-browser-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .asset-browser-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .asset-browser-body {
+            padding: 0;
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .asset-browser-search {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: #f9f9f9;
+        }
+        
+        .asset-browser-search input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        
+        .asset-browser-grid {
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        
+        .asset-browser-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .asset-browser-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .asset-browser-card.selected {
+            border-color: var(--primary);
+            background: rgba(93,161,161,0.05);
+        }
+        
+        .asset-browser-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .selected-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-right: auto;
+        }
+        
+        .btn-outline {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        
+        .btn-outline:hover {
+            background: #f3f4f6;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--primary);
+        }
+        
+        .toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .toast.error { border-left-color: var(--red); }
+        .toast.error .toast-icon { color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+        .toast.success .toast-icon { color: var(--green); }
+
+        /* View Mode Back Button */
+        .view-back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .view-back-btn:hover {
+            background: rgba(93,161,161,0.06);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) { 
+            table { min-width: 3200px; } 
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .form-row .form-group {
+                margin-bottom: 24px;
+            }
+            .form-row .form-group:last-child {
+                margin-bottom: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-content { padding: 16px; }
+            .top-nav { padding: 0 16px; }
+            .search-box input { width: 100%; }
+            .actions-group { flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+            .table-view { display: none; }
+            .card-view { display: block; }
+            .modal-body {
+                padding: 20px;
+            }
+            .modal-header,
+            .modal-footer {
+                padding: 16px 20px;
+            }
+            .form-section {
+                padding: 16px;
+            }
+            .btn-secondary,
+            .btn-success {
+                padding: 10px 16px;
+                min-width: 100px;
+            }
+            .asset-browser-grid {
+                grid-template-columns: 1fr;
+            }
+            .view-back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-height: 800px) {
+            .modal-body {
+                padding: 24px;
+            }
+            .form-group {
+                margin-bottom: 20px;
+            }
+            .form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" data-content="risks-content">
+                <div class="favicon">R</div>
+                <span>Risks</span>
+            </div>
+            <div class="nav-tab disabled" title="Open a risk to view details">
+                <div class="favicon">V</div>
+                <span>View</span>
+            </div>
+            <div class="nav-tab disabled" title="Open a risk to view history">
+                <div class="favicon">H</div>
+                <span>History</span>
+            </div>
+        </div>
+        <div class="actions-group">
+            <div class="search-box">
+                <input type="text" placeholder="Search risks..." id="searchInput">
+            </div>
+            <button class="btn-icon"><i class="fas fa-filter"></i></button>
+            <button class="btn-primary" onclick="openCreateRiskModal()">
+                <i class="fas fa-plus"></i> Create Risk
+            </button>
+            <button class="btn-primary"><i class="fas fa-file-export"></i> Export</button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="content-wrapper">
+            <div id="risks-content" class="page-content" style="display:block;">
+                <!-- Desktop Table -->
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="risksTable">
+                            <thead>
+                                <tr>
+                                    <th>Risk ID</th>
+                                    <th>Risk Type</th>
+                                    <th>Title</th>
+                                    <th>Causes</th>
+                                    <th>Event</th>
+                                    <th>Consequences</th>
+                                    <th>Status</th>
+                                    <th>Risk Owner</th>
+                                    <th>Sub Project</th>
+                                    <th>Next Review Date</th>
+                                    <th>Exposure Start</th>
+                                    <th>Exposure End</th>
+                                    <th>Occurrence Level</th>
+                                    <th>Audit Trail</th>
+                                    <th>Linked Actions</th>
+                                    <th>Linked Assets</th>
+                                    <th>Project RAM Current</th>
+                                    <th>Project RAM Target</th>
+                                    <th>Risk Visual RAM Current</th>
+                                    <th>Risk Visual RAM Target</th>
+                                    <th>HSSE RAM Current</th>
+                                    <th>HSSE RAM Target</th>
+                                    <th>Manageability</th>
+                                    <th>Functional Area TECOP</th>
+                                    <th>Threshold Changing</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="risksTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="card-view" id="mobileRisks"></div>
+            </div>
+
+            <!-- View content will be loaded dynamically when viewing a risk -->
+            <div id="view-content" class="page-content" style="display:none;">
+                <!-- This will be populated when viewing a risk -->
+            </div>
+
+            <!-- History content will be loaded dynamically when viewing risk history -->
+            <div id="history-content" class="page-content" style="display:none;">
+                <!-- This will be populated when viewing risk history -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Risk Modal (Full Page) -->
+    <div class="modal-overlay" id="createRiskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Create New Risk</div>
+                <div class="modal-close" onclick="closeCreateRiskModal()">×</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-container">
+                    <form id="createRiskForm">
+                        <!-- Basic Information Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Basic Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="riskTitle_create" class="required">Risk Title</label>
+                                    <input type="text" id="riskTitle_create" placeholder="Enter risk title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="riskType_create" class="required">Risk Type</label>
+                                    <select id="riskType_create" required>
+                                        <option value="">Select type</option>
+                                        <option value="Downside">Downside</option>
+                                        <option value="Upside">Upside</option>
+                                        <option value="Opportunity">Opportunity</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="riskOwner_create" class="required">Risk Owner</label>
+                                    <input type="text" id="riskOwner_create" placeholder="Enter risk owner" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="riskStatus_create" class="required">Status</label>
+                                    <select id="riskStatus_create" required>
+                                        <option value="">Select status</option>
+                                        <option value="Open">Open</option>
+                                        <option value="Mitigated">Mitigated</option>
+                                        <option value="Accepted">Accepted</option>
+                                        <option value="Closed">Closed</option>
+                                        <option value="Transferred">Transferred</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="subProject_create">Sub Project</label>
+                                    <input type="text" id="subProject_create" placeholder="Enter sub project">
+                                </div>
+                                <div class="form-group">
+                                    <label for="occurenceLevel_create" class="required">Occurrence Level</label>
+                                    <select id="occurenceLevel_create" required>
+                                        <option value="">Select level</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dates Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Dates & Timeline</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="exposureStart_create">Exposure Start Date</label>
+                                    <input type="date" id="exposureStart_create">
+                                </div>
+                                <div class="form-group">
+                                    <label for="exposureEnd_create">Exposure End Date</label>
+                                    <input type="date" id="exposureEnd_create">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nextReviewDate_create">Next Review Date</label>
+                                    <input type="date" id="nextReviewDate_create">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Details Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Risk Details</h3>
+                            <div class="form-group">
+                                <label for="causes_create">Causes (comma separated)</label>
+                                <textarea id="causes_create" placeholder="Enter causes separated by commas"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="event_create">Event Description</label>
+                                <textarea id="event_create" placeholder="Describe the risk event"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="consequences_create">Consequences (comma separated)</label>
+                                <textarea id="consequences_create" placeholder="Enter consequences separated by commas"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- RAM & Additional Fields Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">RAM & Additional Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="projectRamCurrent_create">Project RAM Current</label>
+                                    <select id="projectRamCurrent_create">
+                                        <option value="">Select RAM level</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="projectRamTarget_create">Project RAM Target</label>
+                                    <select id="projectRamTarget_create">
+                                        <option value="">Select RAM level</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="riskVisualRamCurrent_create">Risk Visual RAM Current</label>
+                                    <select id="riskVisualRamCurrent_create">
+                                        <option value="">Select RAM level</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="riskVisualRamTarget_create">Risk Visual RAM Target</label>
+                                    <select id="riskVisualRamTarget_create">
+                                        <option value="">Select RAM level</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="hsseRamCurrent_create">HSSE RAM Current</label>
+                                    <select id="hsseRamCurrent_create">
+                                        <option value="">Select RAM level</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hsseRamTarget_create">HSSE RAM Target</label>
+                                    <select id="hsseRamTarget_create">
+                                        <option value="">Select RAM level</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="manageability_create">Manageability</label>
+                                    <select id="manageability_create">
+                                        <option value="">Select manageability</option>
+                                        <option value="Can Control">Can Control</option>
+                                        <option value="Can Influence">Can Influence</option>
+                                        <option value="Cannot Influence">Cannot Influence</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="functionalAreaTECOP_create">Functional Area TECOP</label>
+                                    <input type="text" id="functionalAreaTECOP_create" placeholder="Enter functional area">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="thresholdChanging_create">Threshold Changing</label>
+                                    <select id="thresholdChanging_create">
+                                        <option value="false">No</option>
+                                        <option value="true">Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Links & Additional Information -->
+                        <div class="form-section">
+                            <h3 class="section-title">Links & Additional Information</h3>
+                            <div class="form-group">
+                                <label>Linked Assets</label>
+                                <div class="asset-selector">
+                                    <div class="asset-selector-input" onclick="toggleAssetDropdown()">
+                                        <span id="assetSelectorText">Select assets...</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="asset-selector-dropdown" id="assetDropdown">
+                                        <div class="asset-search">
+                                            <input type="text" placeholder="Search assets..." id="assetSearch" oninput="searchAssets()">
+                                        </div>
+                                        <div class="asset-list" id="assetList">
+                                            <div class="loading-assets">
+                                                <div class="loading-spinner"></div>
+                                                Loading assets...
+                                            </div>
+                                        </div>
+                                        <div class="asset-browser-footer" style="padding: 12px 16px; border-top: 1px solid var(--border);">
+                                            <button type="button" class="btn-outline" onclick="openAssetBrowser()" style="width: 100%;">
+                                                <i class="fas fa-external-link-alt"></i>
+                                                Browse All Assets
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="selected-assets" id="selectedAssets"></div>
+                                <input type="hidden" id="linkedAssets_create" name="linkedAssets">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="description_create">Additional Description</label>
+                                <textarea id="description_create" placeholder="Enter any additional details, notes, or comments"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCreateRiskModal()">Cancel</button>
+                <button class="btn-success" onclick="createNewRisk()">Create Risk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asset Browser Modal -->
+    <div class="asset-browser-modal" id="assetBrowserModal">
+        <div class="asset-browser">
+            <div class="asset-browser-header">
+                <div class="asset-browser-title">Select Assets</div>
+                <div class="modal-close" onclick="closeAssetBrowser()">×</div>
+            </div>
+            <div class="asset-browser-body">
+                <div class="asset-browser-search">
+                    <input type="text" placeholder="Search assets by name, category, or location..." id="browserSearch" oninput="searchBrowserAssets()">
+                </div>
+                <div class="asset-browser-grid" id="assetBrowserGrid">
+                    <!-- Assets will be loaded here -->
+                </div>
+            </div>
+            <div class="asset-browser-footer">
+                <div class="selected-count">Selected: <span id="selectedCount">0</span> assets</div>
+                <button class="btn-outline" onclick="closeAssetBrowser()">Cancel</button>
+                <button class="btn-success" onclick="applySelectedAssets()">Apply Selection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+<script>
+// Global variables
+let allAssets = [];
+let selectedAssetIds = new Set();
+let assetBrowserSelectedIds = new Set();
+let fetchRisksFromAPI = null;
+
+// Global utility functions
+function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Helper function to get RAM pill class
+function getRamClass(ramLevel) {
+    if (!ramLevel) return '';
+    ramLevel = ramLevel.toLowerCase();
+    if (ramLevel === 'low') return 'ram-pill ram-low';
+    if (ramLevel === 'medium') return 'ram-pill ram-medium';
+    if (ramLevel === 'high') return 'ram-pill ram-high';
+    return 'ram-pill';
+}
+
+// Helper function to get manageability pill class
+function getManageabilityClass(manageability) {
+    if (!manageability) return '';
+    if (manageability === 'Can Control') return 'manageability-pill can-control';
+    if (manageability === 'Can Influence') return 'manageability-pill can-influence';
+    if (manageability === 'Cannot Influence') return 'manageability-pill cannot-influence';
+    return 'manageability-pill';
+}
+
+// Helper function to convert asset IDs to asset names
+function getAssetNamesFromIds(assetIds) {
+    if (!assetIds || !Array.isArray(assetIds) || assetIds.length === 0) {
+        return '';
+    }
+    
+    try {
+        // Convert asset IDs to names
+        const assetNames = assetIds.map(assetId => {
+            // Try to find the asset in the loaded assets array
+            const asset = allAssets.find(a => a._id === assetId || a.id === assetId);
+            return asset ? asset.name : `Unknown Asset (${assetId})`;
+        });
+        
+        return assetNames.join(', ');
+    } catch (error) {
+        console.error('Error converting asset IDs to names:', error);
+        return assetIds.join(', ');
+    }
+}
+
+// Asset Management Functions
+async function loadAssets() {
+    try {
+        console.log('Loading assets...');
+        const token = localStorage.getItem('token') || '';
+        const response = await fetch('/api/assets', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Assets API response:', data);
+        
+        // Handle different response formats
+        if (Array.isArray(data)) {
+            allAssets = data;
+        } else if (data.data && Array.isArray(data.data)) {
+            // Response has data property containing array
+            allAssets = data.data;
+        } else if (data.assets && Array.isArray(data.assets)) {
+            // Response has assets property containing array
+            allAssets = data.assets;
+        } else if (typeof data === 'object' && data !== null) {
+            // Single asset object - wrap in array
+            allAssets = [data];
+        } else {
+            console.warn('Unexpected assets response format:', data);
+            allAssets = [];
+        }
+        
+        console.log('Assets processed:', allAssets.length);
+        console.log('Sample asset:', allAssets[0]);
+        
+        renderAssetDropdown();
+        renderAssetBrowser();
+    } catch (error) {
+        console.error('Error loading assets:', error);
+        // Load sample assets for demo
+        loadSampleAssets();
+    }
+}
+
+function loadSampleAssets() {
+    console.log('Loading sample assets for demo');
+    allAssets = [
+        { _id: 'AST-001', name: 'Main Database Server', category: 'IT Infrastructure', location: 'Data Center A', owner: 'IT Department' },
+        { _id: 'AST-002', name: 'Customer Data Warehouse', category: 'Data Storage', location: 'Cloud - AWS', owner: 'Analytics Team' },
+        { _id: 'AST-003', name: 'Production Line Machine A', category: 'Manufacturing', location: 'Factory Floor 1', owner: 'Operations' },
+        { _id: 'AST-004', name: 'Corporate Website', category: 'Web Applications', location: 'Cloud - Azure', owner: 'Marketing' },
+        { _id: 'AST-005', name: 'Employee Laptops', category: 'Hardware', location: 'Various', owner: 'IT Department' },
+        { _id: 'AST-006', name: 'Payment Processing System', category: 'Financial Systems', location: 'Data Center B', owner: 'Finance' },
+        { _id: 'AST-007', name: 'Customer Support Portal', category: 'Web Applications', location: 'Cloud - GCP', owner: 'Customer Service' }
+    ];
+    console.log('Sample assets loaded:', allAssets);
+    renderAssetDropdown();
+    renderAssetBrowser();
+}
+
+function renderAssetDropdown() {
+    const assetList = document.getElementById('assetList');
+    if (!assetList) {
+        console.error('Asset list element not found!');
+        return;
+    }
+    
+    if (!allAssets || allAssets.length === 0) {
+        assetList.innerHTML = '<div class="no-assets">No assets found in your organization</div>';
+        return;
+    }
+    
+    // Filter out invalid assets and ensure they have IDs
+    const validAssets = allAssets.filter(asset => {
+        if (!asset) return false;
+        if (!asset._id && !asset.id) {
+            console.warn('Asset missing ID:', asset);
+            return false;
+        }
+        return true;
+    });
+    
+    if (validAssets.length === 0) {
+        assetList.innerHTML = '<div class="no-assets">No valid assets found</div>';
+        return;
+    }
+    
+    const html = validAssets.map(asset => {
+        // Use either _id or id field
+        const assetId = asset._id || asset.id;
+        return `
+        <div class="asset-item ${selectedAssetIds.has(assetId) ? 'selected' : ''}" 
+             data-asset-id="${assetId}">
+            <div class="asset-info">
+                <div class="asset-name">${escapeHtml(asset.name || 'Unnamed Asset')}</div>
+                <div class="asset-meta">
+                    ${escapeHtml(asset.category || 'Uncategorized')} • ${escapeHtml(asset.location || 'No location')}
+                    ${asset.owner ? ' • ' + escapeHtml(asset.owner) : ''}
+                </div>
+            </div>
+            <div class="asset-checkbox ${selectedAssetIds.has(assetId) ? 'selected' : ''}"></div>
+        </div>
+    `}).join('');
+    
+    assetList.innerHTML = html;
+    
+    // FIXED: Use event delegation for dynamic elements
+    assetList.addEventListener('click', function(e) {
+        // Try to find the asset-item from the click target
+        let assetItem = e.target.closest('.asset-item');
+        if (!assetItem) {
+            return;
+        }
+        
+        const assetId = assetItem.getAttribute('data-asset-id');
+        if (!assetId) {
+            console.error('Asset item found but data-asset-id is empty');
+            return;
+        }
+        
+        toggleAssetSelection(assetId);
+    });
+}
+
+function renderAssetBrowser() {
+    const assetBrowserGrid = document.getElementById('assetBrowserGrid');
+    if (!assetBrowserGrid) {
+        console.error('Asset browser grid element not found!');
+        return;
+    }
+    
+    if (!allAssets || allAssets.length === 0) {
+        assetBrowserGrid.innerHTML = '<div class="no-assets">No assets found in your organization</div>';
+        return;
+    }
+    
+    const html = allAssets.map(asset => `
+        <div class="asset-browser-card ${assetBrowserSelectedIds.has(asset._id) ? 'selected' : ''}" 
+             data-asset-id="${asset._id}">
+            <div style="font-weight: 500; margin-bottom: 8px;">${escapeHtml(asset.name)}</div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">
+                <i class="fas fa-tag" style="margin-right: 6px;"></i>${escapeHtml(asset.category)}
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">
+                <i class="fas fa-map-marker-alt" style="margin-right: 6px;"></i>${escapeHtml(asset.location || 'No location')}
+            </div>
+            ${asset.owner ? `
+                <div style="font-size: 13px; color: var(--text-secondary);">
+                    <i class="fas fa-user" style="margin-right: 6px;"></i>${escapeHtml(asset.owner)}
+                </div>
+            ` : ''}
+            ${assetBrowserSelectedIds.has(asset._id) ? 
+                '<div style="margin-top: 8px; color: var(--primary); font-size: 12px;"><i class="fas fa-check"></i> Selected</div>' : 
+                ''}
+        </div>
+    `).join('');
+    
+    assetBrowserGrid.innerHTML = html;
+    
+    // FIXED: Use event delegation for dynamic elements
+    assetBrowserGrid.addEventListener('click', function(e) {
+        const browserCard = e.target.closest('.asset-browser-card');
+        if (browserCard) {
+            const assetId = browserCard.getAttribute('data-asset-id');
+            toggleBrowserSelection(assetId);
+        }
+    });
+    
+    updateSelectedCount();
+}
+
+function searchAssets() {
+    const searchTerm = document.getElementById('assetSearch').value.toLowerCase();
+    const assetItems = document.querySelectorAll('.asset-item');
+    
+    assetItems.forEach(item => {
+        const assetName = item.querySelector('.asset-name').textContent.toLowerCase();
+        const assetMeta = item.querySelector('.asset-meta').textContent.toLowerCase();
+        const isVisible = assetName.includes(searchTerm) || assetMeta.includes(searchTerm);
+        item.style.display = isVisible ? 'flex' : 'none';
+    });
+}
+
+function searchBrowserAssets() {
+    const searchTerm = document.getElementById('browserSearch').value.toLowerCase();
+    const assetCards = document.querySelectorAll('.asset-browser-card');
+    
+    assetCards.forEach(card => {
+        const cardText = card.textContent.toLowerCase();
+        const isVisible = cardText.includes(searchTerm);
+        card.style.display = isVisible ? 'block' : 'none';
+    });
+}
+
+function toggleAssetSelection(assetId) {
+    console.log('Toggling asset selection with ID:', assetId);
+    console.log('Current selectedAssetIds:', Array.from(selectedAssetIds));
+    
+    if (!assetId) {
+        console.error('Cannot toggle selection: assetId is undefined or empty');
+        return;
+    }
+    
+    if (selectedAssetIds.has(assetId)) {
+        selectedAssetIds.delete(assetId);
+        console.log('Removed asset:', assetId);
+    } else {
+        selectedAssetIds.add(assetId);
+        console.log('Added asset:', assetId);
+    }
+    console.log('Selected assets after toggle:', Array.from(selectedAssetIds));
+    renderAssetDropdown();
+    renderSelectedAssets();
+    updateLinkedAssetsField();
+}
+
+function toggleBrowserSelection(assetId) {
+    console.log('Toggling browser selection:', assetId);
+    if (assetBrowserSelectedIds.has(assetId)) {
+        assetBrowserSelectedIds.delete(assetId);
+    } else {
+        assetBrowserSelectedIds.add(assetId);
+    }
+    renderAssetBrowser();
+}
+
+function toggleAssetDropdown() {
+    const dropdown = document.getElementById('assetDropdown');
+    if (!dropdown) return;
+    
+    const isOpen = dropdown.classList.contains('open');
+    dropdown.classList.toggle('open');
+    
+    if (!isOpen) {
+        // Load assets if not already loaded
+        if (allAssets.length === 0) {
+            loadAssets();
+        }
+        // Focus on search input
+        setTimeout(() => {
+            const searchInput = document.getElementById('assetSearch');
+            if (searchInput) searchInput.focus();
+        }, 100);
+    }
+}
+
+function renderSelectedAssets() {
+    const selectedAssetsContainer = document.getElementById('selectedAssets');
+    if (!selectedAssetsContainer) return;
+    
+    // Get selected assets with their full data
+    const selectedAssets = allAssets.filter(asset => {
+        const assetId = asset._id || asset.id;
+        return assetId && selectedAssetIds.has(assetId);
+    });
+    
+    if (selectedAssets.length === 0) {
+        selectedAssetsContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 13px;">No assets selected</div>';
+        const selectorText = document.getElementById('assetSelectorText');
+        if (selectorText) selectorText.textContent = 'Select assets...';
+        return;
+    }
+    
+    const html = selectedAssets.map(asset => {
+        const assetId = asset._id || asset.id;
+        return `
+        <div class="selected-asset-tag" data-asset-id="${assetId}">
+            ${escapeHtml(asset.name || 'Unnamed Asset')}
+            <button type="button" class="remove-asset" data-asset-id="${assetId}">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `}).join('');
+    
+    selectedAssetsContainer.innerHTML = html;
+    
+    // Add click event listeners using event delegation
+    selectedAssetsContainer.addEventListener('click', function(e) {
+        const removeBtn = e.target.closest('.remove-asset');
+        if (removeBtn) {
+            e.stopPropagation();
+            const assetId = removeBtn.getAttribute('data-asset-id');
+            removeAsset(assetId);
+        }
+    });
+    
+    // Update selector text
+    const selectorText = document.getElementById('assetSelectorText');
+    if (selectorText) {
+        selectorText.textContent = `${selectedAssets.length} asset${selectedAssets.length !== 1 ? 's' : ''} selected`;
+    }
+}
+
+function removeAsset(assetId) {
+    selectedAssetIds.delete(assetId);
+    renderAssetDropdown();
+    renderSelectedAssets();
+    updateLinkedAssetsField();
+}
+
+function updateLinkedAssetsField() {
+    const linkedAssetsInput = document.getElementById('linkedAssets_create');
+    if (linkedAssetsInput) {
+        const assetIds = Array.from(selectedAssetIds).filter(id => id); // Filter out any undefined/null
+        linkedAssetsInput.value = assetIds.join(',');
+        console.log('Updated linked assets field to:', linkedAssetsInput.value);
+        console.log('Selected asset IDs:', assetIds);
+    }
+}
+
+function openAssetBrowser() {
+    // Copy current selections to browser
+    assetBrowserSelectedIds = new Set(selectedAssetIds);
+    renderAssetBrowser();
+    
+    const modal = document.getElementById('assetBrowserModal');
+    if (!modal) return;
+    
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus on search
+    setTimeout(() => {
+        const searchInput = document.getElementById('browserSearch');
+        if (searchInput) searchInput.focus();
+    }, 100);
+}
+
+function closeAssetBrowser() {
+    const modal = document.getElementById('assetBrowserModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+    document.body.style.overflow = 'auto';
+}
+
+function applySelectedAssets() {
+    selectedAssetIds = new Set(assetBrowserSelectedIds);
+    renderAssetDropdown();
+    renderSelectedAssets();
+    updateLinkedAssetsField();
+    closeAssetBrowser();
+}
+
+function updateSelectedCount() {
+    const countElement = document.getElementById('selectedCount');
+    if (countElement) {
+        countElement.textContent = assetBrowserSelectedIds.size;
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (event) => {
+    const dropdown = document.getElementById('assetDropdown');
+    const selector = document.querySelector('.asset-selector-input');
+    
+    if (dropdown && dropdown.classList.contains('open') && 
+        !dropdown.contains(event.target) && 
+        selector && !selector.contains(event.target)) {
+        dropdown.classList.remove('open');
+    }
+});
+
+// Risk Management
+let risks = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing...');
+    
+    // Load assets immediately
+    loadAssets();
+    
+    const tbody = document.getElementById('risksTableBody');
+    const mobileContainer = document.getElementById('mobileRisks');
+
+    if (!tbody || !mobileContainer) return;
+
+    showSkeleton();
+
+    // Define fetchRisksFromAPI function globally
+    fetchRisksFromAPI = async function() {
+        try {
+            const token = localStorage.getItem('token') || '';
+            const response = await fetch('/api/risks', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            
+            const risks = await response.json();
+            renderRisks(risks);
+            
+        } catch (error) {
+            console.error('Error fetching risks:', error);
+            showToast(`Failed to fetch risks: ${error.message}`, 'error');
+            loadRisksFromStorage();
+        }
+    };
+
+    // Fetch risks from API
+    fetchRisksFromAPI();
+
+    // Listen for data from parent / API
+    window.addEventListener('message', e => {
+        if (e.data?.type === 'RISKS_DATA') {
+            renderRisks(e.data.data ?? []);
+        }
+    });
+
+    // Fallback: timeout → empty state
+    setTimeout(() => {
+        if (tbody.children.length === 0 || tbody.querySelector('.skeleton-row')) {
+            showEmptyState();
+        }
+    }, 2200);
+
+    function showSkeleton() {
+        tbody.innerHTML = '';
+        mobileContainer.innerHTML = '';
+
+        for (let i = 0; i < 6; i++) {
+            const row = document.createElement('tr');
+            row.className = 'skeleton-row';
+            row.innerHTML = `
+                <td><div class="skeleton skeleton-cell short"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-cell long"></div></td>
+                <td><div class="skeleton skeleton-cell medium"></div></td>
+                <td><div class="skeleton skeleton-cell medium"></div></td>
+                <td><div class="skeleton skeleton-cell medium"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-cell medium"></div></td>
+                <td><div class="skeleton skeleton-cell medium"></div></td>
+                <td><div class="skeleton skeleton-cell short"></div></td>
+                <td><div class="skeleton skeleton-cell short"></div></td>
+                <td><div class="skeleton skeleton-cell short"></div></td>
+                <td><div class="skeleton" style="width:40px;height:24px;border-radius:8px;"></div></td>
+                <td><div class="skeleton skeleton-cell short"></div></td>
+                <td><div class="skeleton skeleton-cell medium"></div></td>
+                <td><div class="skeleton skeleton-cell medium"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-pill"></div></td>
+                <td><div class="skeleton skeleton-cell medium"></div></td>
+                <td><div class="skeleton" style="width:20px;height:20px;border-radius:50%;"></div></td>
+                <td><div class="skeleton skeleton-cell short"></div></td>
+                <td><div class="skeleton skeleton-cell short"></div></td>
+                <td><div class="skeleton" style="width:32px;height:32px;border-radius:8px;"></div></td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        for (let i = 0; i < 3; i++) {
+            const card = document.createElement('div');
+            card.className = 'risk-card skeleton';
+            card.innerHTML = `
+                <div class="risk-card-header">
+                    <div class="skeleton" style="height:24px;width:70%;"></div>
+                    <div class="skeleton" style="width:32px;height:32px;border-radius:8px;"></div>
+                </div>
+                <div class="risk-card-grid">
+                    <div class="skeleton" style="height:16px;width:60%;"></div><div class="skeleton" style="height:20px;width:85%;"></div>
+                    <div class="skeleton" style="height:16px;width:60%;"></div><div class="skeleton" style="height:20px;width:85%;"></div>
+                    <div class="skeleton" style="height:16px;width:60%;"></div><div class="skeleton" style="height:20px;width:85%;"></div>
+                    <div class="skeleton" style="height:16px;width:60%;"></div><div class="skeleton" style="height:20px;width:85%;"></div>
+                </div>
+            `;
+            mobileContainer.appendChild(card);
+        }
+    }
+
+    function showEmptyState() {
+        const msg = `
+            <div style="text-align:center;padding:120px 20px;color:var(--text-secondary);">
+                <i class="fas fa-exclamation-triangle" style="font-size:64px;opacity:0.4;margin-bottom:24px;"></i><br>
+                <div style="font-size:18px;font-weight:500;margin-bottom:12px;">No risks found</div>
+                <div style="font-size:14px;">Create your first risk to get started</div>
+            </div>`;
+
+        tbody.innerHTML = `<tr><td colspan="28">${msg}</td></tr>`;
+        mobileContainer.innerHTML = msg;
+    }
+
+    function renderRisks(risks) {
+        tbody.innerHTML = '';
+        mobileContainer.innerHTML = '';
+
+        if (!Array.isArray(risks) || risks.length === 0) {
+            showEmptyState();
+            return;
+        }
+
+        risks.forEach(risk => {
+            const typeClass = risk.type?.toLowerCase() === 'upside' ? 'pill-upside' : 'pill-downside';
+            const statusClass = risk.status?.toLowerCase() === 'open' ? 'status-open' : '';
+
+            // Desktop row
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${escapeHtml(risk.riskId || '—')}</td>
+                <td><span class="pill ${typeClass}">${escapeHtml(risk.type || 'Downside')}</span></td>
+                <td>${escapeHtml(risk.title || '—')}</td>
+                <td>${escapeHtml(risk.causes?.join(', ') || '—')}</td>
+                <td>${escapeHtml(risk.event || '—')}</td>
+                <td>${escapeHtml(risk.consequences?.join(', ') || '—')}</td>
+                <td><span class="pill ${statusClass}">${escapeHtml(risk.status || 'Open')}</span></td>
+                <td>${escapeHtml(risk.riskOwnerName || '—')}</td>
+                <td>${escapeHtml(risk.subProject || '—')}</td>
+                <td>${risk.nextReviewDate ? new Date(risk.nextReviewDate).toISOString().split('T')[0] : '—'}</td>
+                <td>${risk.exposureStartDate ? new Date(risk.exposureStartDate).toISOString().split('T')[0] : '—'}</td>
+                <td>${risk.exposureEndDate ? new Date(risk.exposureEndDate).toISOString().split('T')[0] : '—'}</td>
+                <td><div class="arrow-wrapper"><div class="arrow arrow-${risk.occurenceLevel?.toLowerCase() || 'medium'}"></div><div class="tooltip">${capitalize(risk.occurenceLevel || 'Medium')}</div></div></td>
+                <td>${Number(risk.auditTrailCount || 0)} updates</td>
+                <td>${escapeHtml(risk.linkedActions?.join(', ') || '—')}</td>
+                <!-- FIXED: Use asset names instead of IDs -->
+                <td>${escapeHtml(getAssetNamesFromIds(risk.linkedAssets) || '—')}</td>
+                <td><span class="${getRamClass(risk.projectRamCurrent)}">${escapeHtml(risk.projectRamCurrent || '—')}</span></td>
+                <td><span class="${getRamClass(risk.projectRamTarget)}">${escapeHtml(risk.projectRamTarget || '—')}</span></td>
+                <td><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></td>
+                <td><span class="${getRamClass(risk.riskVisualRamTarget)}">${escapeHtml(risk.riskVisualRamTarget || '—')}</span></td>
+                <td><span class="${getRamClass(risk.hsseRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || '—')}</span></td>
+                <td><span class="${getRamClass(risk.hsseRamTarget)}">${escapeHtml(risk.hsseRamTarget || '—')}</span></td>
+                <td><span class="${getManageabilityClass(risk.manageability)}">${escapeHtml(risk.manageability || '—')}</span></td>
+                <td>${escapeHtml(risk.functionalAreaTECOP || '—')}</td>
+                <td><span class="threshold-badge ${risk.thresholdChanging ? 'threshold-changing' : 'threshold-stable'}"></span> ${risk.thresholdChanging ? 'Yes' : 'No'}</td>
+                <td>${risk.createdAt ? new Date(risk.createdAt).toLocaleString() : '—'}</td>
+                <td>${risk.updatedAt ? new Date(risk.updatedAt).toLocaleString() : '—'}</td>
+                <td>
+                    <button class="icon-btn" onclick="viewRiskDetail('${risk.id}')"><i class="fas fa-eye"></i></button>
+                    <button class="icon-btn" onclick="editRisk('${risk.id}')"><i class="fas fa-edit"></i></button>
+                </td>
+            `;
+            tbody.appendChild(row);
+
+            // Mobile card
+            const card = document.createElement('div');
+            card.className = 'risk-card';
+            card.innerHTML = `
+                <div class="risk-card-header">
+                    <div class="risk-card-title" onclick="viewRiskDetail('${risk.id}')">${escapeHtml(risk.riskId || '—')}: ${escapeHtml(risk.title || '—')}</div>
+                    <button class="icon-btn" onclick="viewRiskDetail('${risk.id}')"><i class="fas fa-eye"></i></button>
+                </div>
+                <div class="risk-card-grid">
+                    <div class="risk-card-label">Type</div>
+                    <div><span class="pill ${typeClass}">${escapeHtml(risk.type || 'Downside')}</span></div>
+                    <div class="risk-card-label">Status</div>
+                    <div><span class="pill ${statusClass}">${escapeHtml(risk.status || 'Open')}</span></div>
+                    <div class="risk-card-label">Owner</div>
+                    <div>${escapeHtml(risk.riskOwnerName || '—')}</div>
+                    <div class="risk-card-label">Occurrence</div>
+                    <div><div class="arrow-wrapper"><div class="arrow arrow-${risk.occurenceLevel?.toLowerCase() || 'medium'}"></div><div class="tooltip">${capitalize(risk.occurenceLevel || 'Medium')}</div></div></div>
+                    <!-- FIXED: Use asset names instead of IDs -->
+                    <div class="risk-card-label">Linked Assets</div>
+                    <div>${escapeHtml(getAssetNamesFromIds(risk.linkedAssets) || '—')}</div>
+                    <div class="risk-card-label">Project RAM</div>
+                    <div><span class="${getRamClass(risk.projectRamCurrent)}">${escapeHtml(risk.projectRamCurrent || '—')}</span> → <span class="${getRamClass(risk.projectRamTarget)}">${escapeHtml(risk.projectRamTarget || '—')}</span></div>
+                    <div class="risk-card-label">Manageability</div>
+                    <div><span class="${getManageabilityClass(risk.manageability)}">${escapeHtml(risk.manageability || '—')}</span></div>
+                    <div class="risk-card-label">Created</div>
+                    <div>${risk.createdAt ? new Date(risk.createdAt).toLocaleDateString() : '—'}</div>
+                </div>
+            `;
+            mobileContainer.appendChild(card);
+        });
+    }
+});
+
+function loadRisksFromStorage() {
+    try {
+        const storedRisks = localStorage.getItem('riskmgt_risks');
+        if (storedRisks) {
+            risks = JSON.parse(storedRisks);
+            renderRisksFromStorage();
+        }
+    } catch (err) {
+        console.error('Error loading risks from storage:', err);
+    }
+}
+
+function renderRisksFromStorage() {
+    const tbody = document.getElementById('risksTableBody');
+    const mobileContainer = document.getElementById('mobileRisks');
+    
+    if (!tbody || !mobileContainer) return;
+    
+    if (risks.length === 0) {
+        showEmptyState();
+        return;
+    }
+    
+    tbody.innerHTML = '';
+    mobileContainer.innerHTML = '';
+    
+    risks.forEach((risk, index) => {
+        const typeClass = risk.type?.toLowerCase() === 'upside' ? 'pill-upside' : 'pill-downside';
+        const statusClass = risk.status?.toLowerCase() === 'open' ? 'status-open' : '';
+
+        // Desktop row
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${escapeHtml(risk.riskId || `RISK-${index + 1}`)}</td>
+            <td><span class="pill ${typeClass}">${escapeHtml(risk.type || 'Downside')}</span></td>
+            <td>${escapeHtml(risk.title || '—')}</td>
+            <td>${escapeHtml(risk.causes?.join(', ') || '—')}</td>
+            <td>${escapeHtml(risk.event || '—')}</td>
+            <td>${escapeHtml(risk.consequences?.join(', ') || '—')}</td>
+            <td><span class="pill ${statusClass}">${escapeHtml(risk.status || 'Open')}</span></td>
+            <td>${escapeHtml(risk.riskOwnerName || '—')}</td>
+            <td>${escapeHtml(risk.subProject || '—')}</td>
+            <td>${risk.nextReviewDate ? new Date(risk.nextReviewDate).toISOString().split('T')[0] : '—'}</td>
+            <td>${risk.exposureStartDate ? new Date(risk.exposureStartDate).toISOString().split('T')[0] : '—'}</td>
+            <td>${risk.exposureEndDate ? new Date(risk.exposureEndDate).toISOString().split('T')[0] : '—'}</td>
+            <td><div class="arrow-wrapper"><div class="arrow arrow-${risk.occurenceLevel?.toLowerCase() || 'medium'}"></div><div class="tooltip">${capitalize(risk.occurenceLevel || 'Medium')}</div></div></td>
+            <td>${Number(risk.auditTrailCount || 0)} updates</td>
+            <td>${escapeHtml(risk.linkedActions?.join(', ') || '—')}</td>
+            <!-- FIXED: Use asset names instead of IDs -->
+            <td>${escapeHtml(getAssetNamesFromIds(risk.linkedAssets) || '—')}</td>
+            <td><span class="${getRamClass(risk.projectRamCurrent)}">${escapeHtml(risk.projectRamCurrent || '—')}</span></td>
+            <td><span class="${getRamClass(risk.projectRamTarget)}">${escapeHtml(risk.projectRamTarget || '—')}</span></td>
+            <td><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></td>
+            <td><span class="${getRamClass(risk.riskVisualRamTarget)}">${escapeHtml(risk.riskVisualRamTarget || '—')}</span></td>
+            <td><span class="${getRamClass(risk.hsseRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || '—')}</span></td>
+            <td><span class="${getRamClass(risk.hsseRamTarget)}">${escapeHtml(risk.hsseRamTarget || '—')}</span></td>
+            <td><span class="${getManageabilityClass(risk.manageability)}">${escapeHtml(risk.manageability || '—')}</span></td>
+            <td>${escapeHtml(risk.functionalAreaTECOP || '—')}</td>
+            <td><span class="threshold-badge ${risk.thresholdChanging ? 'threshold-changing' : 'threshold-stable'}"></span> ${risk.thresholdChanging ? 'Yes' : 'No'}</td>
+            <td>${risk.createdAt ? new Date(risk.createdAt).toLocaleString() : '—'}</td>
+            <td>${risk.updatedAt ? new Date(risk.updatedAt).toLocaleString() : '—'}</td>
+            <td>
+                <button class="icon-btn" onclick="viewRiskDetail('${risk.id || index}')"><i class="fas fa-eye"></i></button>
+                <button class="icon-btn" onclick="editRisk('${risk.id || index}')"><i class="fas fa-edit"></i></button>
+            </td>
+        `;
+        tbody.appendChild(row);
+
+        // Mobile card
+        const card = document.createElement('div');
+        card.className = 'risk-card';
+        card.innerHTML = `
+            <div class="risk-card-header">
+                <div class="risk-card-title" onclick="viewRiskDetail('${risk.id || index}')">${escapeHtml(risk.riskId || `RISK-${index + 1}`)}: ${escapeHtml(risk.title || '—')}</div>
+                <button class="icon-btn" onclick="viewRiskDetail('${risk.id || index}')"><i class="fas fa-eye"></i></button>
+            </div>
+            <div class="risk-card-grid">
+                <div class="risk-card-label">Type</div>
+                <div><span class="pill ${typeClass}">${escapeHtml(risk.type || 'Downside')}</span></div>
+                <div class="risk-card-label">Status</div>
+                <div><span class="pill ${statusClass}">${escapeHtml(risk.status || 'Open')}</span></div>
+                <div class="risk-card-label">Owner</div>
+                <div>${escapeHtml(risk.riskOwnerName || '—')}</div>
+                <div class="risk-card-label">Occurrence</div>
+                <div><div class="arrow-wrapper"><div class="arrow arrow-${risk.occurenceLevel?.toLowerCase() || 'medium'}"></div><div class="tooltip">${capitalize(risk.occurenceLevel || 'Medium')}</div></div></div>
+                <!-- FIXED: Use asset names instead of IDs -->
+                <div class="risk-card-label">Linked Assets</div>
+                <div>${escapeHtml(getAssetNamesFromIds(risk.linkedAssets) || '—')}</div>
+                <div class="risk-card-label">Project RAM</div>
+                <div><span class="${getRamClass(risk.projectRamCurrent)}">${escapeHtml(risk.projectRamCurrent || '—')}</span> → <span class="${getRamClass(risk.projectRamTarget)}">${escapeHtml(risk.projectRamTarget || '—')}</span></div>
+                <div class="risk-card-label">Manageability</div>
+                <div><span class="${getManageabilityClass(risk.manageability)}">${escapeHtml(risk.manageability || '—')}</span></div>
+                <div class="risk-card-label">Created</div>
+                <div>${risk.createdAt ? new Date(risk.createdAt).toLocaleDateString() : '—'}</div>
+            </div>
+        `;
+        mobileContainer.appendChild(card);
+    });
+}
+
+// Modal Functions
+function openCreateRiskModal() {
+    console.log('Opening create risk modal');
+    document.getElementById('createRiskModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    
+    // Clear form
+    document.getElementById('createRiskForm').reset();
+    
+    // Set default dates
+    const today = new Date().toISOString().split('T')[0];
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const nextMonthStr = nextMonth.toISOString().split('T')[0];
+    
+    document.getElementById('exposureStart_create').value = today;
+    document.getElementById('exposureEnd_create').value = nextMonthStr;
+    document.getElementById('nextReviewDate_create').value = nextMonthStr;
+    
+    // Reset asset selections
+    selectedAssetIds.clear();
+    renderSelectedAssets();
+    updateLinkedAssetsField();
+    
+    // Load assets if not already loaded
+    if (allAssets.length === 0) {
+        loadAssets();
+    }
+    
+    // Focus on first field
+    setTimeout(() => {
+        const titleInput = document.getElementById('riskTitle_create');
+        if (titleInput) titleInput.focus();
+    }, 100);
+}
+
+function closeCreateRiskModal() {
+    document.getElementById('createRiskModal').classList.remove('open');
+    document.body.style.overflow = 'auto';
+    
+    // Close asset dropdown if open
+    const dropdown = document.getElementById('assetDropdown');
+    if (dropdown) {
+        dropdown.classList.remove('open');
+    }
+}
+
+async function createNewRisk() {
+    const form = document.getElementById('createRiskForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    // Collect form data
+    const riskTitle = document.getElementById('riskTitle_create').value.trim();
+    const description = document.getElementById('description_create').value.trim();
+    const riskType = document.getElementById('riskType_create').value;
+    const riskOwner = document.getElementById('riskOwner_create').value.trim();
+    const riskStatus = document.getElementById('riskStatus_create').value;
+    const subProject = document.getElementById('subProject_create').value.trim();
+    const occurenceLevel = document.getElementById('occurenceLevel_create').value;
+    
+    // Check required fields
+    if (!riskTitle) {
+        showToast('Risk Title is required', 'error');
+        return;
+    }
+    if (!description) {
+        showToast('Description is required', 'error');
+        return;
+    }
+    if (!riskType) {
+        showToast('Risk Type is required', 'error');
+        return;
+    }
+    if (!riskOwner) {
+        showToast('Risk Owner is required', 'error');
+        return;
+    }
+    if (!riskStatus) {
+        showToast('Status is required', 'error');
+        return;
+    }
+    if (!occurenceLevel) {
+        showToast('Occurrence Level is required', 'error');
+        return;
+    }
+
+    // Convert selected asset IDs to array
+    const linkedAssets = Array.from(selectedAssetIds);
+
+    const newRisk = {
+        title: riskTitle,
+        description: description,
+        type: riskType,
+        riskOwnerName: riskOwner,
+        status: riskStatus,
+        subProject: subProject,
+        occurenceLevel: occurenceLevel,
+        exposureStartDate: document.getElementById('exposureStart_create').value || null,
+        exposureEndDate: document.getElementById('exposureEnd_create').value || null,
+        nextReviewDate: document.getElementById('nextReviewDate_create').value || null,
+        causes: document.getElementById('causes_create').value.split(',').map(s => s.trim()).filter(s => s),
+        event: document.getElementById('event_create').value.trim(),
+        consequences: document.getElementById('consequences_create').value.split(',').map(s => s.trim()).filter(s => s),
+        projectRamCurrent: document.getElementById('projectRamCurrent_create').value || "",
+        projectRamTarget: document.getElementById('projectRamTarget_create').value || "",
+        riskVisualRamCurrent: document.getElementById('riskVisualRamCurrent_create').value || "",
+        riskVisualRamTarget: document.getElementById('riskVisualRamTarget_create').value || "",
+        hsseRamCurrent: document.getElementById('hsseRamCurrent_create').value || "",
+        hsseRamTarget: document.getElementById('hsseRamTarget_create').value || "",
+        manageability: document.getElementById('manageability_create').value || "",
+        functionalAreaTECOP: document.getElementById('functionalAreaTECOP_create').value.trim(),
+        thresholdChanging: document.getElementById('thresholdChanging_create').value === 'true',
+        linkedAssets: linkedAssets,
+    };
+
+    console.log('Creating risk with data:', newRisk);
+    console.log('Linked assets:', linkedAssets);
+
+    try {
+        // Save to API
+        const token = localStorage.getItem('token') || '';
+        console.log('Token present:', !!token);
+        
+        const response = await fetch('/api/risks', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newRisk)
+        });
+
+        // First check if response is OK
+        if (!response.ok) {
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            let errorData = null;
+            try {
+                errorData = await response.json();
+                errorMessage = errorData.message || errorMessage;
+                console.error('Error response from server:', errorData);
+            } catch (e) {
+                console.error('Could not parse error response:', e);
+            }
+            
+            // Check for specific error types
+            if (response.status === 401) {
+                errorMessage = 'Authentication failed. Please login again.';
+            } else if (response.status === 403) {
+                errorMessage = 'You do not have permission to create risks.';
+            } else if (response.status === 400) {
+                errorMessage = errorData?.message || 'Invalid request data. Please check all required fields.';
+            }
+            
+            throw new Error(errorMessage);
+        }
+
+        const createdRisk = await response.json();
+        console.log('Risk created successfully:', createdRisk);
+        
+        // Close modal
+        closeCreateRiskModal();
+        
+        // Show success toast
+        showToast('Risk created successfully!', 'success');
+        
+        // Refresh the display
+        if (typeof fetchRisksFromAPI === 'function') {
+            fetchRisksFromAPI();
+        } else {
+            console.error('fetchRisksFromAPI is not defined');
+            window.location.reload();
+        }
+        
+    } catch (err) {
+        console.error('Error creating risk:', err);
+        console.error('Error details:', {
+            message: err.message,
+            stack: err.stack
+        });
+        showToast(`Failed to create risk: ${err.message}`, 'error');
+    }
+}
+
+// UPDATED: viewRiskDetail function - hides navigation when viewing a risk
+async function viewRiskDetail(riskId) {
+    try {
+        const token = localStorage.getItem('token') || '';
+        const response = await fetch(`/api/risks/${riskId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const risk = await response.json();
+        
+        // Store the risk data in localStorage to pass to view.html
+        localStorage.setItem('viewingRisk', JSON.stringify(risk));
+        
+        // HIDE the main navigation and content
+        document.querySelector('.top-nav').style.display = 'none';
+        document.querySelector('.main').style.display = 'none';
+        
+        // Hide modals if open
+        document.getElementById('createRiskModal').classList.remove('open');
+        document.getElementById('assetBrowserModal').classList.remove('open');
+        
+        // Create back button
+        const backButton = document.createElement('button');
+        backButton.className = 'view-back-btn';
+        backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Risks';
+        backButton.onclick = exitViewMode;
+        document.body.appendChild(backButton);
+        
+        // Load view.html in full screen iframe
+        const viewIframe = document.createElement('iframe');
+        viewIframe.style.cssText = 'width:100%;height:100%;border:none;position:fixed;top:0;left:0;z-index:5;';
+        viewIframe.src = 'view.html';
+        viewIframe.id = 'riskViewIframe';
+        document.body.appendChild(viewIframe);
+        
+    } catch (err) {
+        console.error('Error fetching risk details:', err);
+        showToast(`Failed to fetch risk details: ${err.message}`, 'error');
+    }
+}
+
+// Function to exit view mode and go back to risks list
+function exitViewMode() {
+    // Remove iframe
+    const iframe = document.getElementById('riskViewIframe');
+    if (iframe) {
+        iframe.remove();
+    }
+    
+    // Remove back button
+    const backButton = document.querySelector('.view-back-btn');
+    if (backButton) {
+        backButton.remove();
+    }
+    
+    // Show original navigation and content
+    document.querySelector('.top-nav').style.display = 'flex';
+    document.querySelector('.main').style.display = 'block';
+    
+    // Switch back to risks tab
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-tab')[0].classList.add('active');
+    
+    document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+    document.getElementById('risks-content').style.display = 'block';
+}
+
+function editRisk(riskId) {
+    // You can implement edit functionality here
+    showToast(`Edit functionality for risk ${riskId} would open an edit modal`, 'info');
+}
+
+function viewRiskHistory(riskId) {
+    // Load history.html for the selected risk
+    localStorage.setItem('viewingRiskId', riskId);
+    
+    const historyContent = document.getElementById('history-content');
+    historyContent.innerHTML = `<iframe style="width:100%;height:100%;border:none;" src="history.html"></iframe>`;
+    
+    // Switch to history tab
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-tab')[2].classList.add('active');
+    
+    document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+    historyContent.style.display = 'block';
+}
+
+// Tab switching - only for enabled tabs
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Only switch if tab is not disabled
+            if (!tab.classList.contains('disabled')) {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+                document.getElementById(tab.dataset.content).style.display = 'block';
+            }
+        });
+    });
+});
+
+function debugAssetList() {
+    console.log('=== DEBUG ASSET LIST ===');
+    const assetList = document.getElementById('assetList');
+    if (!assetList) {
+        console.error('No asset list element found');
+        return;
+    }
+    
+    const assetItems = assetList.querySelectorAll('.asset-item');
+    console.log('Number of asset items in DOM:', assetItems.length);
+    
+    assetItems.forEach((item, index) => {
+        const assetId = item.getAttribute('data-asset-id');
+        console.log(`Item ${index}: data-asset-id="${assetId}"`, item);
+    });
+    console.log('=== END DEBUG ===');
+}
+
+// Toast Notification System
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} toast-icon"></i>
+        <div class="toast-message">${message}</div>
+    `;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
+// Close modal on overlay click
+document.getElementById('createRiskModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCreateRiskModal();
+    }
+});
+
+// Close asset browser on overlay click
+document.getElementById('assetBrowserModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAssetBrowser();
+    }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeCreateRiskModal();
+        closeAssetBrowser();
+    }
+});
+
+// Make asset functions globally accessible
+window.toggleAssetSelection = toggleAssetSelection;
+window.toggleBrowserSelection = toggleBrowserSelection;
+window.toggleAssetDropdown = toggleAssetDropdown;
+window.removeAsset = removeAsset;
+window.openAssetBrowser = openAssetBrowser;
+window.closeAssetBrowser = closeAssetBrowser;
+window.applySelectedAssets = applySelectedAssets;
+window.searchAssets = searchAssets;
+window.searchBrowserAssets = searchBrowserAssets;
+window.exitViewMode = exitViewMode;
+</script>
+</body>
+</html>
