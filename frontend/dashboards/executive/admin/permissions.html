@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permissions • RiskMGT Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --primary-light: rgba(93,161,161,0.1);
+            --green: #10b981;
+            --red: #ef4444;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            padding: 32px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+
+        .matrix-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .matrix-table th {
+            background: rgba(93,161,161,0.05);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--neutral);
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        .matrix-table th:last-child {
+            border-right: none;
+        }
+
+        .role-cell {
+            font-weight: 600;
+            padding: 20px 16px;
+            border-right: 1px solid var(--border);
+            width: 200px;
+            position: relative;
+        }
+
+        .role-cell.admin::after {
+            content: "⚠️ Admin Access";
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 11px;
+            color: var(--red);
+            background: rgba(239,68,68,0.1);
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .matrix-table td {
+            padding: 20px 16px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        .matrix-table td:last-child {
+            border-right: none;
+        }
+
+        .checkbox-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .permission-header {
+            position: relative;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #333;
+        }
+
+        .permission-header:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .save-bar {
+            text-align: right;
+            padding: 24px 0;
+        }
+
+        .btn-primary {
+            padding: 10px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        @media (max-width: 1024px) {
+            .matrix-table th, .matrix-table td {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+            .role-cell { width: 160px; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .matrix-container { overflow-x: auto; }
+            .matrix-table { min-width: 800px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2 class="section-title">Permissions Matrix</h2>
+
+    <div class="matrix-container">
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th class="permission-header">
+                        View
+                        <div class="tooltip">Can view records and reports</div>
+                    </th>
+                    <th class="permission-header">
+                        Create
+                        <div class="tooltip">Can add new risks/actions</div>
+                    </th>
+                    <th class="permission-header">
+                        Edit
+                        <div class="tooltip">Can modify existing records</div>
+                    </th>
+                    <th class="permission-header">
+                        Delete
+                        <div class="tooltip">Can request or perform deletion</div>
+                    </th>
+                    <th class="permission-header">
+                        Approve
+                        <div class="tooltip">Can approve/reject in workflows</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="role-cell admin">Administrator</td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                </tr>
+                <tr>
+                    <td class="role-cell">Risk Manager</td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                </tr>
+                <tr>
+                    <td class="role-cell">Compliance Officer</td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                </tr>
+                <tr>
+                    <td class="role-cell">Risk Owner</td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                </tr>
+                <tr>
+                    <td class="role-cell">Executive</td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox" checked></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                    <td><div class="checkbox-wrapper"><input type="checkbox"></div></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="save-bar">
+        <button class="btn-primary">Save Permissions</button>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals • RiskMGT • Super Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* [Keep all the existing CSS from the previous version] */
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        /* Shimmer Skeleton Animation */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 0.5s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer {
+            0%   { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        /* Top Nav */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 40px;
+            background: rgba(93,161,161,0.08);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary);
+        }
+        .nav-tab:hover:not(.active) { background: rgba(93,161,161,0.15); }
+        .nav-tab .favicon {
+            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+        }
+        .actions-group { display: flex; align-items: center; gap: 19.2px; }
+        .search-box input {
+            padding: 8px 12.8px; border: 1px solid var(--border); border-radius: 9.6px;
+            width: 320px; font-size: 12px; background: #f9f9f9;
+        }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
+        .btn-primary {
+            padding: 8px 16px; background: var(--primary); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success {
+            padding: 8px 16px; background: var(--green); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-success:hover { background: #0ca678; }
+        .btn-danger {
+            padding: 8px 16px; background: var(--red); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-outline {
+            padding: 8px 16px; background: white; color: var(--text-secondary); border: 1px solid var(--border);
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-outline:hover { background: #f9f9f9; }
+
+        /* Filter Bar */
+        .filter-bar {
+            padding: 16px 32px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .filter-select {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            min-width: 140px;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            background: #f0f0f0;
+        }
+        .badge.risk-link {
+            background: rgba(93,161,161,0.1);
+            color: var(--primary);
+            cursor: pointer;
+        }
+        .badge.risk-link:hover {
+            background: rgba(93,161,161,0.2);
+        }
+
+        /* Main */
+        .main { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+        .content-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .page-content { display: none; height: 100%; overflow: auto; }
+
+        /* Table View */
+        .table-view { display: block; height: 100%; padding: 24px; }
+        .table-container {
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        table { 
+            min-width: 2000px; 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        thead { 
+            position: sticky; 
+            top: 0; 
+            background: var(--card-bg); 
+            z-index: 8; 
+        }
+        th { 
+            padding: 12.8px 16px; 
+            font-size: 11.2px; 
+            font-weight: 600; 
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); 
+            text-align: left; 
+            white-space: nowrap; 
+        }
+        td { 
+            padding: 12.8px 16px; 
+            font-size: 12.8px; 
+            border-bottom: 1px solid var(--border); 
+            white-space: nowrap; 
+        }
+        td:nth-child(4) { /* Change column */
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 280px;
+            min-width: 250px;
+        }
+        td:nth-child(13) { /* Comments column */
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 200px;
+            min-width: 150px;
+        }
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+
+        /* Skeleton Rows */
+        .skeleton-row td { padding: 16px; }
+        .skeleton-cell { height: 20px; width: 80%; border-radius: 4px; }
+        .skeleton-cell.short { width: 50%; }
+        .skeleton-pill { height: 24px; width: 90px; border-radius: 999px; }
+
+        /* Mobile Cards */
+        .card-view { display: none; padding: 16px; overflow-y: auto; height: 100%; }
+        .approval-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .approval-card-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .approval-card-title { 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            color: var(--primary);
+        }
+        .approval-card-grid { 
+            display: grid; 
+            grid-template-columns: 100px 1fr; 
+            gap: 8px 16px; 
+            font-size: 13px; 
+        }
+        .approval-card-label { 
+            color: var(--text-secondary); 
+            font-weight: 500; 
+        }
+
+        /* Pills */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; display: inline-block; }
+        .pill-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-pending { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-rejected { background: rgba(239,68,68,0.1); color: var(--red); }
+        
+        .pill-risk { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .pill-action { background: rgba(59,130,246,0.1); color: var(--blue); }
+        .pill-delete { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .sla {
+            font-size: 10.4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+        }
+        .sla-warning { background: #fef3c7; color: #92400e; }
+        .sla-breach { background: #fee2e2; color: #b91c1c; }
+
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .icon-btn.small { width: 28px; height: 28px; font-size: 12px; }
+        .icon-btn:hover { background: rgba(93,161,161,0.1); color: var(--primary); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-secondary);
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px;
+        }
+        .modal-close:hover { background: rgba(93,161,161,0.1); }
+        .modal-body { padding: 24px; }
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: white;
+            position: sticky;
+            bottom: 0;
+        }
+
+        /* Form elements */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea,
+        .form-group .readonly-value {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f9f9f9;
+        }
+        .form-group .readonly-value {
+            background: #f5f5f5;
+            cursor: default;
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+        .toast.warning { border-left-color: var(--amber); }
+
+        /* Diff Table */
+        .diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .diff-table th {
+            background: #f8fafc;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .diff-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .old-value {
+            color: var(--red);
+            text-decoration: line-through;
+        }
+        .new-value {
+            color: var(--green);
+            font-weight: 500;
+        }
+
+        /* Stats Cards */
+        .stats-bar {
+            padding: 16px 32px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 24px;
+        }
+        .stat-card {
+            background: #f8fafc;
+            padding: 12px 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .stat-value.warning { color: var(--amber); }
+        .stat-value.danger { color: var(--red); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            table { min-width: 2000px; }
+        }
+        @media (max-width: 768px) {
+            .page-content { padding: 16px; }
+            .top-nav { 
+                padding: 0 16px; 
+                flex-direction: column;
+                height: auto;
+                padding: 12px 16px;
+                gap: 12px;
+            }
+            .tabs-group { width: 100%; overflow-x: auto; }
+            .actions-group { width: 100%; flex-wrap: wrap; }
+            .search-box input { width: 100%; }
+            .filter-bar { padding: 16px; flex-direction: column; align-items: stretch; }
+            .stats-bar { flex-direction: column; gap: 12px; }
+            .filter-group { flex-direction: column; align-items: stretch; }
+            .table-view { display: none; }
+            .card-view { display: block; }
+            .modal { width: 95%; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" onclick="showContent('all-approvals')" data-content="all-approvals">
+                <div class="favicon"><i class="fas fa-list"></i></div>
+                <span>All Approvals</span>
+            </div>
+            <div class="nav-tab" onclick="showContent('pending')" data-content="pending">
+                <div class="favicon"><i class="fas fa-clock"></i></div>
+                <span>Pending</span>
+                <span class="badge" id="pendingCount">0</span>
+            </div>
+            <div class="nav-tab" onclick="showContent('delete-requests')" data-content="delete-requests">
+                <div class="favicon"><i class="fas fa-trash"></i></div>
+                <span>Delete Requests</span>
+                <span class="badge" id="deleteCount">0</span>
+            </div>
+        </div>
+        <div class="actions-group">
+            <div class="search-box">
+                <input type="text" placeholder="Search approvals..." id="searchInput">
+            </div>
+            <button class="btn-icon" onclick="refreshApprovals()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-success" onclick="exportApprovals()">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+        </div>
+    </nav>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <span class="stat-label">Total Pending</span>
+            <span class="stat-value" id="totalPendingStat">0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">SLA Warning</span>
+            <span class="stat-value warning" id="slaWarningStat">0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">SLA Breach</span>
+            <span class="stat-value danger" id="slaBreachStat">0</span>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">Type:</span>
+            <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                <option value="all">All Types</option>
+                <option value="risk">Risk Change</option>
+                <option value="action">Action Change</option>
+                <option value="delete">Delete Request</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Date Range:</span>
+            <select class="filter-select" id="dateFilter" onchange="applyFilters()">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+            </select>
+        </div>
+    </div>
+
+    <main class="main">
+        <div class="content-wrapper">
+            <!-- All Approvals View -->
+            <div id="all-approvals" class="page-content" style="display:block;">
+                <!-- Desktop Table -->
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="approvalsTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Type</th>
+                                    <th>Item ID</th>
+                                    <th>Change Requested</th>
+                                    <th>Submitted Date</th>
+                                    <th>Status</th>
+                                    <th>Requester</th>
+                                    <th>Owner</th>
+                                    <th>Sub Project</th>
+                                    <th>SLA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvalsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="card-view" id="mobileApprovals"></div>
+            </div>
+
+            <!-- Pending View -->
+            <div id="pending" class="page-content">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="pendingTable">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Item ID</th>
+                                    <th>Change Requested</th>
+                                    <th>Submitted Date</th>
+                                    <th>Requester</th>
+                                    <th>Owner</th>
+                                    <th>SLA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Requests View -->
+            <div id="delete-requests" class="page-content">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="deleteTable">
+                            <thead>
+                                <tr>
+                                    <th>Item Type</th>
+                                    <th>Item ID</th>
+                                    <th>Description</th>
+                                    <th>Submitted Date</th>
+                                    <th>Status</th>
+                                    <th>Requester</th>
+                                    <th>Reason</th>
+                                    <th>SLA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deleteTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Approval Modal (with Approve/Reject) -->
+    <div class="modal-overlay" id="approvalModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Review Approval Request</div>
+                <div class="modal-close" onclick="closeModal('approvalModal')">×</div>
+            </div>
+            <div class="modal-body" id="approvalModalBody">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="modal-footer" id="approvalModalFooter">
+                <button class="btn-outline" onclick="closeModal('approvalModal')">Cancel</button>
+                <button class="btn-danger" onclick="submitRejection()" id="rejectBtn">
+                    <i class="fas fa-times"></i> Reject
+                </button>
+                <button class="btn-success" onclick="submitApproval()" id="approveBtn">
+                    <i class="fas fa-check"></i> Approve
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+<script>
+// API Base URL
+const API_BASE = '/api';
+
+// Global state
+let allApprovals = [];
+let filteredApprovals = [];
+let currentApproval = null;
+let currentUser = null;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login.html';
+        return;
+    }
+
+    // Get current user info from token
+    try {
+        const tokenData = parseJwt(token);
+        currentUser = {
+            id: tokenData.userId || tokenData.sub || tokenData.id,
+            name: tokenData.name || tokenData.username || 'Super Admin',
+            email: tokenData.email,
+            role: tokenData.role || 'superadmin'
+        };
+        console.log('Current user:', currentUser);
+    } catch (e) {
+        console.error('Failed to parse token', e);
+    }
+
+    await loadAllData();
+    setupEventListeners();
+});
+
+// Parse JWT token
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return {};
+    }
+}
+
+// Load all data
+async function loadAllData() {
+    const token = localStorage.getItem('token');
+    showSkeletonLoading();
+
+    try {
+        // Load regular approvals
+        console.log('Fetching approvals from:', `${API_BASE}/approvals`);
+        const approvalsResponse = await fetch(`${API_BASE}/approvals`, {
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // Load delete requests
+        console.log('Fetching delete requests from:', `${API_BASE}/delete-requests`);
+        const deleteResponse = await fetch(`${API_BASE}/delete-requests`, {
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        let approvals = [];
+        let deleteReqs = [];
+
+        if (approvalsResponse.ok) {
+            const data = await approvalsResponse.json();
+            // Handle both array response and {approvals: [...]} response
+            approvals = Array.isArray(data) ? data : (data.approvals || []);
+            console.log(`Loaded ${approvals.length} approvals`);
+        } else {
+            console.error('Approvals response not OK:', approvalsResponse.status);
+        }
+
+        if (deleteResponse.ok) {
+            const data = await deleteResponse.json();
+            // Handle different response formats from ListDeleteRequests
+            if (Array.isArray(data)) {
+                deleteReqs = data;
+            } else if (data.requests) {
+                deleteReqs = data.requests;
+            } else {
+                deleteReqs = [];
+            }
+            console.log(`Loaded ${deleteReqs.length} delete requests`);
+        } else {
+            console.error('Delete requests response not OK:', deleteResponse.status);
+        }
+
+        // Transform approvals to consistent format
+        const transformedApprovals = approvals.map(approval => transformApproval(approval));
+        
+        // Transform delete requests
+        const transformedDeleteReqs = deleteReqs.map(req => transformDeleteRequest(req));
+
+        // Combine both sources
+        allApprovals = [...transformedApprovals, ...transformedDeleteReqs];
+        console.log(`Total combined items: ${allApprovals.length}`);
+
+        // Enrich approvals with additional data if needed
+        await enrichApprovals();
+        
+        filteredApprovals = [...allApprovals];
+        renderApprovals(filteredApprovals);
+        updateStats();
+
+    } catch (error) {
+        console.error('Error loading data:', error);
+        showErrorState(error.message);
+    }
+}
+
+// Transform approval to consistent format
+function transformApproval(approval) {
+    return {
+        _id: approval._id || approval.id,
+        id: approval._id || approval.id,
+        type: approval.type || 'risk',
+        requestType: approval.type || 'risk',
+        title: approval.title || approval.description || 'Change Request',
+        description: approval.description || approval.title || '',
+        changeDescription: approval.description || approval.title || '',
+        status: approval.status || 'pending',
+        submittedAt: approval.submittedAt || approval.createdAt,
+        createdAt: approval.createdAt || approval.submittedAt,
+        requester: approval.submittedBy || approval.requester || 'Unknown',
+        submittedBy: approval.submittedBy || approval.requester,
+        owner: approval.owner || approval.riskTitle || '—',
+        subProject: approval.subProject || approval.department || '—',
+        approver: approval.approver || approval.processedBy,
+        processedBy: approval.processedBy,
+        decisionDate: approval.processedAt || approval.decisionDate,
+        processedAt: approval.processedAt,
+        comment: approval.comment || approval.approvalComment,
+        approvalComment: approval.approvalComment,
+        rejectionReason: approval.rejectionReason,
+        riskId: approval.riskId,
+        riskTitle: approval.riskTitle,
+        entityId: approval.entityId,
+        changes: approval.changes || {},
+        history: approval.history || [],
+        slaHours: calculateSLAHours(approval.submittedAt || approval.createdAt)
+    };
+}
+
+// Transform delete request to consistent format
+function transformDeleteRequest(req) {
+    return {
+        _id: req.id || req._id,
+        id: req.id || req._id,
+        type: 'delete',
+        requestType: 'delete',
+        itemType: 'Action',
+        itemId: req.actionId,
+        actionId: req.actionId,
+        actionTitle: req.actionTitle,
+        description: req.description || `Delete request for action: ${req.actionTitle}`,
+        changeDescription: req.description || `Delete request for action: ${req.actionTitle}`,
+        status: req.status || 'pending',
+        submittedAt: req.requestDate || req.createdAt,
+        createdAt: req.createdAt || req.requestDate,
+        requester: req.requestedByName,
+        submittedBy: req.requestedByName,
+        owner: req.actionTitle,
+        approver: req.reviewedByName,
+        processedBy: req.reviewedByName,
+        decisionDate: req.reviewDate,
+        processedAt: req.reviewDate,
+        comment: req.reviewComments || req.comments,
+        approvalComment: req.reviewComments || req.comments,
+        rejectionReason: req.rejectionReason,
+        reason: req.reason || req.description,
+        history: req.reviewDate ? [{
+            action: req.status,
+            by: req.reviewedByName,
+            at: req.reviewDate,
+            comment: req.reviewComments
+        }] : [],
+        slaHours: calculateSLAHours(req.requestDate || req.createdAt)
+    };
+}
+
+// Calculate SLA hours
+function calculateSLAHours(submittedAt) {
+    if (!submittedAt) return 0;
+    try {
+        const submitted = new Date(submittedAt);
+        const now = new Date();
+        return Math.round((now - submitted) / (1000 * 60 * 60));
+    } catch {
+        return 0;
+    }
+}
+
+// Enrich approvals with related data
+async function enrichApprovals() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/analyst/risks`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const risks = Array.isArray(data) ? data : (data.risks || []);
+            const riskMap = new Map();
+            risks.forEach(risk => {
+                riskMap.set(risk._id || risk.id, risk);
+                if (risk.riskId) riskMap.set(risk.riskId, risk);
+            });
+            
+            allApprovals = allApprovals.map(approval => {
+                if (approval.riskId) {
+                    const risk = riskMap.get(approval.riskId) || riskMap.get(approval.riskId.toString());
+                    if (risk) {
+                        approval.riskTitle = risk.title || risk.Title;
+                        approval.assetName = risk.assetName;
+                        approval.owner = approval.owner || risk.owner;
+                        approval.subProject = approval.subProject || risk.subProject;
+                    }
+                }
+                return approval;
+            });
+        }
+    } catch (error) {
+        console.error('Failed to enrich with risk data:', error);
+    }
+}
+
+// Update statistics
+function updateStats() {
+    const pendingApprovals = allApprovals.filter(a => (a.status || 'pending').toLowerCase() === 'pending');
+    const slaWarning = pendingApprovals.filter(a => {
+        const hours = a.slaHours || calculateSLAHours(a.submittedAt || a.createdAt);
+        return hours > 48 && hours <= 72;
+    });
+    const slaBreach = pendingApprovals.filter(a => {
+        const hours = a.slaHours || calculateSLAHours(a.submittedAt || a.createdAt);
+        return hours > 72;
+    });
+    const deleteReqs = allApprovals.filter(a => 
+        (a.type || a.requestType || '').toLowerCase().includes('delete')
+    );
+
+    document.getElementById('totalPendingStat').textContent = pendingApprovals.length;
+    document.getElementById('slaWarningStat').textContent = slaWarning.length;
+    document.getElementById('slaBreachStat').textContent = slaBreach.length;
+    document.getElementById('pendingCount').textContent = pendingApprovals.length;
+    document.getElementById('deleteCount').textContent = deleteReqs.length;
+}
+
+// Show skeleton loading
+function showSkeletonLoading() {
+    const tbody = document.getElementById('approvalsTableBody');
+    const mobileContainer = document.getElementById('mobileApprovals');
+    
+    if (!tbody || !mobileContainer) return;
+
+    tbody.innerHTML = '';
+    mobileContainer.innerHTML = '';
+
+    for (let i = 0; i < 5; i++) {
+        const row = document.createElement('tr');
+        row.className = 'skeleton-row';
+        row.innerHTML = `
+            <td><div class="skeleton" style="width:24px;height:24px;border-radius:8px;"></div></td>
+            <td><div class="skeleton skeleton-pill"></div></td>
+            <td><div class="skeleton skeleton-cell short"></div></td>
+            <td><div class="skeleton skeleton-cell long"></div></td>
+            <td><div class="skeleton skeleton-cell medium"></div></td>
+            <td><div class="skeleton skeleton-pill"></div></td>
+            <td><div class="skeleton skeleton-cell medium"></div></td>
+            <td><div class="skeleton skeleton-cell medium"></div></td>
+            <td><div class="skeleton skeleton-cell medium"></div></td>
+            <td><div class="skeleton skeleton-cell short"></div></td>
+            <td><div style="width:120px;height:32px;" class="skeleton"></div></td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    for (let i = 0; i < 3; i++) {
+        const card = document.createElement('div');
+        card.className = 'approval-card skeleton';
+        card.innerHTML = `
+            <div class="approval-card-header">
+                <div class="skeleton" style="height:24px;width:70%;"></div>
+                <div class="skeleton" style="width:32px;height:32px;border-radius:8px;"></div>
+            </div>
+            <div class="approval-card-grid">
+                <div class="skeleton" style="height:16px;width:60%;"></div><div class="skeleton" style="height:20px;width:85%;"></div>
+                <div class="skeleton" style="height:16px;width:60%;"></div><div class="skeleton" style="height:20px;width:85%;"></div>
+                <div class="skeleton" style="height:16px;width:60%;"></div><div class="skeleton" style="height:20px;width:85%;"></div>
+            </div>
+        `;
+        mobileContainer.appendChild(card);
+    }
+}
+
+// Show error state
+function showErrorState(errorMessage) {
+    const tbody = document.getElementById('approvalsTableBody');
+    const mobileContainer = document.getElementById('mobileApprovals');
+    
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="11" style="text-align:center;padding:80px 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:48px;color:var(--red);margin-bottom:16px;"></i>
+                    <div style="font-size:16px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">
+                        Failed to load approvals
+                    </div>
+                    <div style="font-size:13px;color:var(--neutral);margin-bottom:24px;">
+                        ${errorMessage}
+                    </div>
+                    <button class="btn-primary" onclick="refreshApprovals()">
+                        <i class="fas fa-sync-alt"></i> Try Again
+                    </button>
+                </td>
+            </tr>`;
+    }
+    
+    if (mobileContainer) {
+        mobileContainer.innerHTML = `
+            <div style="text-align:center;padding:80px 20px;">
+                <i class="fas fa-exclamation-triangle" style="font-size:48px;color:var(--red);margin-bottom:16px;"></i>
+                <div style="font-size:16px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">
+                    Failed to load approvals
+                </div>
+                <div style="font-size:13px;color:var(--neutral);margin-bottom:24px;">
+                    ${errorMessage}
+                </div>
+                <button class="btn-primary" onclick="refreshApprovals()">
+                    <i class="fas fa-sync-alt"></i> Try Again
+                </button>
+            </div>`;
+    }
+}
+
+// Format date
+function formatDate(dateString) {
+    if (!dateString) return '—';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    } catch {
+        return '—';
+    }
+}
+
+// Format datetime
+function formatDateTime(dateString) {
+    if (!dateString) return '—';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        return date.toLocaleString('en-GB', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch {
+        return '—';
+    }
+}
+
+// Get type pill class
+function getTypeClass(type) {
+    if (!type) return 'pill-risk';
+    const typeLower = type.toLowerCase();
+    if (typeLower.includes('delete') || typeLower.includes('remov')) return 'pill-delete';
+    if (typeLower.includes('action')) return 'pill-action';
+    return 'pill-risk';
+}
+
+// Get status pill class
+function getStatusClass(status) {
+    if (!status) return 'pill-pending';
+    switch(status.toLowerCase()) {
+        case 'pending': return 'pill-pending';
+        case 'approved': return 'pill-approved';
+        case 'rejected': return 'pill-rejected';
+        default: return 'pill-pending';
+    }
+}
+
+// Calculate SLA status
+function getSLAStatus(submittedAt) {
+    if (!submittedAt) return '';
+    
+    try {
+        const submitted = new Date(submittedAt);
+        const now = new Date();
+        const hoursDiff = (now - submitted) / (1000 * 60 * 60);
+        
+        if (hoursDiff > 72) return 'sla-breach';
+        if (hoursDiff > 48) return 'sla-warning';
+        return '';
+    } catch {
+        return '';
+    }
+}
+
+// Escape HTML
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Format change description
+function formatChangeDescription(approval) {
+    if (approval.changeDescription) return approval.changeDescription;
+    
+    if (approval.type === 'delete' || approval.requestType === 'delete') {
+        return approval.description || `Delete request for ${approval.itemType || 'item'}`;
+    }
+    
+    if (approval.changes && Object.keys(approval.changes).length > 0) {
+        const changeFields = Object.keys(approval.changes);
+        return `${changeFields.length} field(s) changed`;
+    }
+    
+    return approval.description || 'Change request';
+}
+
+// Get item ID
+function getItemId(approval) {
+    return approval.itemId || approval.riskId || approval.entityId || approval.actionId || approval._id || approval.id || approval.requestId || '—';
+}
+
+// Render approvals
+function renderApprovals(approvals) {
+    const tbody = document.getElementById('approvalsTableBody');
+    const mobileContainer = document.getElementById('mobileApprovals');
+    const pendingTbody = document.getElementById('pendingTableBody');
+    const deleteTbody = document.getElementById('deleteTableBody');
+    
+    if (!tbody || !mobileContainer) return;
+    
+    tbody.innerHTML = '';
+    mobileContainer.innerHTML = '';
+
+    if (!approvals || approvals.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="11" style="text-align:center;padding:80px 20px;">
+                    <i class="fas fa-inbox" style="font-size:48px;opacity:0.3;margin-bottom:16px;"></i>
+                    <div style="font-size:16px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">
+                        No approvals found
+                    </div>
+                    <div style="font-size:13px;color:var(--neutral);margin-bottom:24px;">
+                        No approval requests match your criteria
+                    </div>
+                </td>
+            </tr>`;
+        
+        mobileContainer.innerHTML = `
+            <div style="text-align:center;padding:80px 20px;">
+                <i class="fas fa-inbox" style="font-size:48px;opacity:0.3;margin-bottom:16px;"></i>
+                <div style="font-size:16px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">
+                    No approvals found
+                </div>
+                <div style="font-size:13px;color:var(--neutral);margin-bottom:24px;">
+                    No approval requests match your criteria
+                </div>
+            </div>`;
+        return;
+    }
+
+    // Desktop table
+    approvals.forEach(approval => {
+        const id = approval._id || approval.id || approval.requestId;
+        const itemId = getItemId(approval);
+        const type = approval.type || approval.requestType || 'risk';
+        const typeClass = getTypeClass(type);
+        const status = approval.status || 'pending';
+        const statusClass = getStatusClass(status);
+        const slaClass = getSLAStatus(approval.submittedAt || approval.createdAt);
+        const isPending = status.toLowerCase() === 'pending';
+        
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+            <td>
+                <button class="icon-btn" onclick="openApprovalModal('${id}')" title="Review">
+                    <i class="fas fa-gavel"></i>
+                </button>
+            </td>
+            <td><span class="pill ${typeClass}">${escapeHtml(type)}</span></td>
+            <td><span style="font-family: monospace;">${escapeHtml(itemId.substring(0, 8))}</span></td>
+            <td>${escapeHtml(formatChangeDescription(approval))}</td>
+            <td>${formatDate(approval.submittedAt || approval.createdAt)}</td>
+            <td><span class="pill ${statusClass}">${escapeHtml(status)}</span></td>
+            <td>${escapeHtml(approval.requester || approval.submittedBy || approval.requestedByName || '—')}</td>
+            <td>${escapeHtml(approval.owner || approval.actionTitle || '—')}</td>
+            <td>${escapeHtml(approval.subProject || approval.department || '—')}</td>
+            <td><span class="sla ${slaClass}">${slaClass ? (slaClass === 'sla-breach' ? 'Breach' : 'Warning') : 'OK'}</span></td>
+            <td>
+                ${isPending ? `
+                    <button class="btn-success" style="padding:4px 8px; font-size:11px;" onclick="openApprovalModal('${id}')">
+                        <i class="fas fa-check"></i> Review
+                    </button>
+                ` : `
+                    <button class="btn-primary" style="padding:4px 8px; font-size:11px;" onclick="viewOnlyApproval('${id}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                `}
+            </td>
+        `;
+        tbody.appendChild(row);
+
+        // Mobile card
+        const card = document.createElement('div');
+        card.className = 'approval-card';
+        card.innerHTML = `
+            <div class="approval-card-header">
+                <div>
+                    <div style="display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap;">
+                        <span class="pill ${typeClass}">${escapeHtml(type)}</span>
+                        <span class="pill ${statusClass}">${escapeHtml(status)}</span>
+                        <span class="sla ${slaClass}">${slaClass ? (slaClass === 'sla-breach' ? 'SLA Breach' : 'SLA Warning') : 'SLA OK'}</span>
+                    </div>
+                    <div class="approval-card-title" onclick="${isPending ? `openApprovalModal('${id}')` : `viewOnlyApproval('${id}')`}">
+                        Item: ${escapeHtml(itemId.substring(0, 8))}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="approval-card-grid">
+                <div class="approval-card-label">Change</div>
+                <div>${escapeHtml(formatChangeDescription(approval).substring(0, 60))}${formatChangeDescription(approval).length > 60 ? '...' : ''}</div>
+                
+                <div class="approval-card-label">Submitted</div>
+                <div>${formatDateTime(approval.submittedAt || approval.createdAt)}</div>
+                
+                <div class="approval-card-label">Requester</div>
+                <div>${escapeHtml(approval.requester || approval.submittedBy || approval.requestedByName || '—')}</div>
+                
+                <div class="approval-card-label">Owner</div>
+                <div>${escapeHtml(approval.owner || approval.actionTitle || '—')}</div>
+                
+                ${approval.reason ? `
+                <div class="approval-card-label">Reason</div>
+                <div>${escapeHtml(approval.reason)}</div>
+                ` : ''}
+            </div>
+            
+            <div style="margin-top:16px; display:flex; gap:8px;">
+                ${isPending ? `
+                    <button class="btn-success" style="flex:1; padding:8px;" onclick="openApprovalModal('${id}')">
+                        <i class="fas fa-check"></i> Review
+                    </button>
+                ` : `
+                    <button class="btn-primary" style="flex:1; padding:8px;" onclick="viewOnlyApproval('${id}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                `}
+            </div>
+        `;
+        mobileContainer.appendChild(card);
+    });
+
+    // Render pending table
+    if (pendingTbody) {
+        const pendingApprovals = approvals.filter(a => (a.status || 'pending').toLowerCase() === 'pending');
+        
+        if (pendingApprovals.length === 0) {
+            pendingTbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;">No pending approvals</td></tr>`;
+        } else {
+            pendingTbody.innerHTML = pendingApprovals.map(approval => {
+                const id = approval._id || approval.id || approval.requestId;
+                const itemId = getItemId(approval);
+                const type = approval.type || approval.requestType || 'risk';
+                const typeClass = getTypeClass(type);
+                const slaClass = getSLAStatus(approval.submittedAt || approval.createdAt);
+                
+                return `
+                    <tr>
+                        <td><span class="pill ${typeClass}">${escapeHtml(type)}</span></td>
+                        <td>${escapeHtml(itemId.substring(0, 8))}</td>
+                        <td>${escapeHtml(formatChangeDescription(approval).substring(0, 50))}</td>
+                        <td>${formatDate(approval.submittedAt || approval.createdAt)}</td>
+                        <td>${escapeHtml(approval.requester || approval.submittedBy || approval.requestedByName || '—')}</td>
+                        <td>${escapeHtml(approval.owner || approval.actionTitle || '—')}</td>
+                        <td><span class="sla ${slaClass}">${slaClass ? (slaClass === 'sla-breach' ? 'Breach' : 'Warning') : 'OK'}</span></td>
+                        <td>
+                            <button class="btn-success" style="padding:4px 8px;" onclick="openApprovalModal('${id}')">
+                                Review
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+
+    // Render delete requests table
+    if (deleteTbody) {
+        const deleteApprovals = approvals.filter(a => 
+            (a.type || a.requestType || '').toLowerCase().includes('delete')
+        );
+        
+        if (deleteApprovals.length === 0) {
+            deleteTbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;">No delete requests</td></tr>`;
+        } else {
+            deleteTbody.innerHTML = deleteApprovals.map(approval => {
+                const id = approval._id || approval.id || approval.requestId;
+                const itemId = getItemId(approval);
+                const status = approval.status || 'pending';
+                const statusClass = getStatusClass(status);
+                const slaClass = getSLAStatus(approval.submittedAt || approval.createdAt);
+                const isPending = status.toLowerCase() === 'pending';
+                
+                return `
+                    <tr>
+                        <td>Action</td>
+                        <td>${escapeHtml(itemId.substring(0, 8))}</td>
+                        <td>${escapeHtml(approval.description || approval.changeDescription || `Delete: ${approval.actionTitle || 'Unknown'}`)}</td>
+                        <td>${formatDate(approval.submittedAt || approval.createdAt)}</td>
+                        <td><span class="pill ${statusClass}">${escapeHtml(status)}</span></td>
+                        <td>${escapeHtml(approval.requester || approval.submittedBy || approval.requestedByName || '—')}</td>
+                        <td>${escapeHtml(approval.reason || approval.description || '—')}</td>
+                        <td><span class="sla ${slaClass}">${slaClass ? (slaClass === 'sla-breach' ? 'Breach' : 'Warning') : 'OK'}</span></td>
+                        <td>
+                            ${isPending ? `
+                                <button class="btn-success" style="padding:4px 8px;" onclick="openApprovalModal('${id}')">
+                                    Review
+                                </button>
+                            ` : `
+                                <button class="btn-primary" style="padding:4px 8px;" onclick="viewOnlyApproval('${id}')">
+                                    View
+                                </button>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+}
+
+// Open approval modal for review
+async function openApprovalModal(approvalId) {
+    // Find approval in loaded data
+    let approval = allApprovals.find(a => (a._id || a.id) === approvalId);
+    
+    if (!approval) {
+        showToast('Approval not found', 'error');
+        return;
+    }
+    
+    currentApproval = approval;
+    
+    // Build modal content
+    const modalBody = document.getElementById('approvalModalBody');
+    const itemId = getItemId(approval);
+    const slaClass = getSLAStatus(approval.submittedAt || approval.createdAt);
+    const slaText = slaClass ? (slaClass === 'sla-breach' ? 'SLA Breach' : 'SLA Warning') : 'Within SLA';
+    
+    // Format changes
+    let changesHtml = '';
+    if (approval.changes && Object.keys(approval.changes).length > 0) {
+        changesHtml = '<table class="diff-table"><thead><tr><th>Field</th><th>Old Value</th><th>New Value</th></tr></thead><tbody>';
+        
+        for (const [field, change] of Object.entries(approval.changes)) {
+            const oldVal = change.old || change.previous || change.from || '—';
+            const newVal = change.new || change.current || change.to || '—';
+            
+            changesHtml += `
+                <tr>
+                    <td><strong>${escapeHtml(field)}</strong></td>
+                    <td><span class="old-value">${escapeHtml(oldVal)}</span></td>
+                    <td><span class="new-value">${escapeHtml(newVal)}</span></td>
+                </tr>
+            `;
+        }
+        
+        changesHtml += '</tbody></table>';
+    } else if (approval.type === 'delete') {
+        changesHtml = `
+            <div style="padding:16px; background:#fef2f2; border-radius:8px;">
+                <div style="display:flex; gap:8px; align-items:center; margin-bottom:12px;">
+                    <i class="fas fa-exclamation-triangle" style="color:var(--red);"></i>
+                    <strong style="color:var(--red);">Delete Request</strong>
+                </div>
+                <div style="margin-top:8px; padding:8px; background:white; border-radius:4px;">
+                    <strong>Reason:</strong> ${escapeHtml(approval.reason || approval.description || 'No reason provided')}
+                </div>
+            </div>
+        `;
+    } else {
+        changesHtml = '<p style="color:var(--text-muted);">No field-level changes available</p>';
+    }
+    
+    modalBody.innerHTML = `
+        <div style="margin-bottom:20px;">
+            <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+                <span class="pill ${getTypeClass(approval.type)}">${escapeHtml(approval.type || approval.requestType || 'Request')}</span>
+                <span class="sla ${slaClass}" style="font-size:11px;">${slaText}</span>
+            </div>
+            
+            <div style="background:#f8fafc; padding:16px; border-radius:8px; margin-bottom:16px;">
+                <div style="display:grid; grid-template-columns:120px 1fr; gap:8px; font-size:14px;">
+                    <div style="color:var(--text-secondary);">Request ID:</div>
+                    <div><code>${escapeHtml(approval._id || approval.id || approval.requestId)}</code></div>
+                    
+                    <div style="color:var(--text-secondary);">Item ID:</div>
+                    <div><code>${escapeHtml(itemId)}</code></div>
+                    
+                    <div style="color:var(--text-secondary);">Requester:</div>
+                    <div>${escapeHtml(approval.requester || approval.submittedBy || approval.requestedByName || '—')}</div>
+                    
+                    <div style="color:var(--text-secondary);">Owner:</div>
+                    <div>${escapeHtml(approval.owner || approval.actionTitle || '—')}</div>
+                    
+                    <div style="color:var(--text-secondary);">Submitted:</div>
+                    <div>${formatDateTime(approval.submittedAt || approval.createdAt)}</div>
+                    
+                    ${approval.subProject ? `
+                    <div style="color:var(--text-secondary);">Sub Project:</div>
+                    <div>${escapeHtml(approval.subProject)}</div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            ${approval.description || approval.changeDescription ? `
+            <div style="margin-bottom:16px;">
+                <div style="font-weight:600; margin-bottom:4px;">Description</div>
+                <div style="padding:12px; background:#f8fafc; border-radius:6px;">
+                    ${escapeHtml(approval.description || approval.changeDescription)}
+                </div>
+            </div>
+            ` : ''}
+        </div>
+        
+        <h4 style="margin-bottom:12px;">Change Details</h4>
+        ${changesHtml}
+        
+        <div style="margin-top:20px;">
+            <div class="form-group">
+                <label for="approvalComment">Review Comment ${approval.type === 'delete' ? '(required for rejection)' : '(optional)'}</label>
+                <textarea id="approvalComment" placeholder="Add a comment about your decision..."></textarea>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('approvalModal').classList.add('open');
+}
+
+// View only approval (already processed)
+async function viewOnlyApproval(approvalId) {
+    let approval = allApprovals.find(a => (a._id || a.id) === approvalId);
+    
+    if (!approval) {
+        showToast('Approval not found', 'error');
+        return;
+    }
+    
+    // Build modal content
+    const modalBody = document.getElementById('approvalModalBody');
+    const itemId = getItemId(approval);
+    
+    // Format changes
+    let changesHtml = '';
+    if (approval.changes && Object.keys(approval.changes).length > 0) {
+        changesHtml = '<table class="diff-table"><thead><tr><th>Field</th><th>Old Value</th><th>New Value</th></tr></thead><tbody>';
+        
+        for (const [field, change] of Object.entries(approval.changes)) {
+            const oldVal = change.old || change.previous || change.from || '—';
+            const newVal = change.new || change.current || change.to || '—';
+            
+            changesHtml += `
+                <tr>
+                    <td><strong>${escapeHtml(field)}</strong></td>
+                    <td><span class="old-value">${escapeHtml(oldVal)}</span></td>
+                    <td><span class="new-value">${escapeHtml(newVal)}</span></td>
+                </tr>
+            `;
+        }
+        
+        changesHtml += '</tbody></table>';
+    } else if (approval.type === 'delete') {
+        changesHtml = `
+            <div style="padding:16px; background:#fef2f2; border-radius:8px;">
+                <i class="fas fa-exclamation-triangle" style="color:var(--red);"></i> 
+                Delete request for: <strong>${escapeHtml(approval.actionTitle || approval.owner || 'Unknown')}</strong>
+            </div>
+        `;
+    } else {
+        changesHtml = '<p style="color:var(--text-muted);">No field-level changes available</p>';
+    }
+    
+    // Format history
+    let historyHtml = '';
+    if (approval.history && approval.history.length > 0) {
+        historyHtml = '<div style="margin-top:20px;"><h4 style="margin-bottom:12px;">Approval History</h4>';
+        
+        approval.history.forEach(entry => {
+            const action = entry.action || entry.status || 'updated';
+            const by = entry.by || entry.user || entry.approver || 'System';
+            const at = entry.at || entry.timestamp || entry.date;
+            
+            historyHtml += `
+                <div style="margin-bottom:12px; padding:8px; background:#f8fafc; border-radius:6px;">
+                    <div style="font-weight:600; color:${action === 'approved' ? 'var(--green)' : (action === 'rejected' ? 'var(--red)' : 'var(--primary)')}">
+                        ${escapeHtml(action)}
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted);">By: ${escapeHtml(by)}</div>
+                    ${at ? `<div style="font-size:12px; color:var(--text-muted);">${formatDateTime(at)}</div>` : ''}
+                    ${entry.comment ? `<div style="margin-top:4px; font-style:italic;">"${escapeHtml(entry.comment)}"</div>` : ''}
+                </div>
+            `;
+        });
+        
+        historyHtml += '</div>';
+    } else if (approval.status !== 'pending' && approval.processedAt) {
+        historyHtml = `
+            <div style="margin-top:20px;">
+                <h4 style="margin-bottom:12px;">Decision</h4>
+                <div style="padding:8px; background:#f8fafc; border-radius:6px;">
+                    <div style="font-weight:600; color:${approval.status === 'approved' ? 'var(--green)' : 'var(--red)'}">
+                        ${escapeHtml(approval.status)}
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted);">By: ${escapeHtml(approval.processedBy || approval.approver || approval.reviewedByName || 'System')}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">${formatDateTime(approval.processedAt || approval.reviewDate)}</div>
+                    ${approval.comment ? `<div style="margin-top:4px; font-style:italic;">"${escapeHtml(approval.comment)}"</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    modalBody.innerHTML = `
+        <div style="margin-bottom:20px;">
+            <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+                <span class="pill ${getTypeClass(approval.type)}">${escapeHtml(approval.type || approval.requestType || 'Request')}</span>
+                <span class="pill ${getStatusClass(approval.status)}">${escapeHtml(approval.status || 'pending')}</span>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:120px 1fr; gap:8px; font-size:14px;">
+                <div style="color:var(--text-secondary);">Request ID:</div>
+                <div><code>${escapeHtml(approval._id || approval.id || approval.requestId)}</code></div>
+                
+                <div style="color:var(--text-secondary);">Item ID:</div>
+                <div><code>${escapeHtml(itemId)}</code></div>
+                
+                <div style="color:var(--text-secondary);">Requester:</div>
+                <div>${escapeHtml(approval.requester || approval.submittedBy || approval.requestedByName || '—')}</div>
+                
+                <div style="color:var(--text-secondary);">Owner:</div>
+                <div>${escapeHtml(approval.owner || approval.actionTitle || '—')}</div>
+                
+                <div style="color:var(--text-secondary);">Submitted:</div>
+                <div>${formatDateTime(approval.submittedAt || approval.createdAt)}</div>
+                
+                ${approval.subProject ? `
+                <div style="color:var(--text-secondary);">Sub Project:</div>
+                <div>${escapeHtml(approval.subProject)}</div>
+                ` : ''}
+            </div>
+            
+            ${approval.description || approval.changeDescription ? `
+            <div style="margin-top:16px;">
+                <div style="font-weight:600; margin-bottom:4px;">Description</div>
+                <div style="padding:12px; background:#f8fafc; border-radius:6px;">
+                    ${escapeHtml(approval.description || approval.changeDescription)}
+                </div>
+            </div>
+            ` : ''}
+        </div>
+        
+        <h4 style="margin-bottom:12px;">Change Details</h4>
+        ${changesHtml}
+        
+        ${historyHtml}
+    `;
+    
+    // Update modal footer for view-only
+    const footer = document.getElementById('approvalModalFooter');
+    footer.innerHTML = `
+        <button class="btn-primary" onclick="closeModal('approvalModal')">Close</button>
+    `;
+    
+    document.getElementById('approvalModal').classList.add('open');
+}
+
+// Submit approval - MATCHES YOUR BACKEND API
+async function submitApproval() {
+    if (!currentApproval) {
+        showToast('No approval selected', 'error');
+        return;
+    }
+    
+    const comment = document.getElementById('approvalComment')?.value || '';
+    const id = currentApproval._id || currentApproval.id;
+    const isDelete = (currentApproval.type || currentApproval.requestType || '').toLowerCase().includes('delete');
+    
+    try {
+        const token = localStorage.getItem('token');
+        
+        let endpoint, payload;
+        
+        if (isDelete) {
+            // Delete request approval - matches ReviewDeleteRequest handler
+            endpoint = `${API_BASE}/delete-requests/${id}`;
+            payload = {
+                decision: "approved",
+                comments: comment
+            };
+        } else {
+            // Regular approval - matches UpdateApprovalStatus handler
+            endpoint = `${API_BASE}/approvals/${id}`;
+            payload = {
+                status: "approved",
+                comment: comment,
+                actionTaken: "approved"
+            };
+        }
+        
+        console.log(`Approving with endpoint: ${endpoint}`, payload);
+        showToast('Processing approval...', 'info');
+        
+        const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            showToast('Request approved successfully', 'success');
+            closeModal('approvalModal');
+            await loadAllData(); // Refresh data
+        } else {
+            const error = await response.text();
+            console.error('Approval failed:', response.status, error);
+            showToast(`Failed to approve: ${response.status} - ${error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Approval error:', error);
+        showToast('Failed to process approval: ' + error.message, 'error');
+    }
+}
+
+// Submit rejection - MATCHES YOUR BACKEND API
+async function submitRejection() {
+    if (!currentApproval) {
+        showToast('No approval selected', 'error');
+        return;
+    }
+    
+    const comment = document.getElementById('approvalComment')?.value;
+    const id = currentApproval._id || currentApproval.id;
+    const isDelete = (currentApproval.type || currentApproval.requestType || '').toLowerCase().includes('delete');
+    
+    // For delete requests, comment is required
+    if (isDelete && !comment) {
+        showToast('Please provide a reason for rejection', 'warning');
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        
+        let endpoint, payload;
+        
+        if (isDelete) {
+            // Delete request rejection - matches ReviewDeleteRequest handler
+            endpoint = `${API_BASE}/delete-requests/${id}`;
+            payload = {
+                decision: "rejected",
+                rejectionReason: comment,
+                comments: comment
+            };
+        } else {
+            // Regular approval rejection - matches UpdateApprovalStatus handler
+            endpoint = `${API_BASE}/approvals/${id}`;
+            payload = {
+                status: "rejected",
+                comment: comment || 'Rejected',
+                actionTaken: "rejected"
+            };
+        }
+        
+        console.log(`Rejecting with endpoint: ${endpoint}`, payload);
+        showToast('Processing rejection...', 'info');
+        
+        const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            showToast('Request rejected', 'success');
+            closeModal('approvalModal');
+            await loadAllData(); // Refresh data
+        } else {
+            const error = await response.text();
+            console.error('Rejection failed:', response.status, error);
+            showToast(`Failed to reject: ${response.status} - ${error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Rejection error:', error);
+        showToast('Failed to process rejection: ' + error.message, 'error');
+    }
+}
+
+// Apply filters
+function applyFilters() {
+    const typeFilter = document.getElementById('typeFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+
+    filteredApprovals = allApprovals.filter(approval => {
+        // Type filter
+        if (typeFilter !== 'all') {
+            const approvalType = (approval.type || approval.requestType || '').toLowerCase();
+            if (typeFilter === 'delete' && !approvalType.includes('delete')) return false;
+            if (typeFilter !== 'delete' && !approvalType.includes(typeFilter)) return false;
+        }
+        
+        // Status filter
+        if (statusFilter !== 'all') {
+            const approvalStatus = (approval.status || 'pending').toLowerCase();
+            if (approvalStatus !== statusFilter.toLowerCase()) return false;
+        }
+        
+        // Date filter
+        if (dateFilter !== 'all') {
+            const date = new Date(approval.submittedAt || approval.createdAt);
+            const now = new Date();
+            
+            if (dateFilter === 'today') {
+                if (date.toDateString() !== now.toDateString()) return false;
+            } else if (dateFilter === 'week') {
+                const weekAgo = new Date(now.setDate(now.getDate() - 7));
+                if (date < weekAgo) return false;
+            } else if (dateFilter === 'month') {
+                const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
+                if (date < monthAgo) return false;
+            }
+        }
+        
+        // Search
+        if (search) {
+            const searchable = `${approval.type} ${approval.description} ${approval.requester} ${approval.owner} ${approval.comment}`.toLowerCase();
+            if (!searchable.includes(search)) return false;
+        }
+        
+        return true;
+    });
+
+    renderApprovals(filteredApprovals);
+}
+
+// Search handler
+let searchTimeout;
+document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => applyFilters(), 300);
+});
+
+// Show content based on tab
+function showContent(contentId) {
+    document.querySelectorAll('.page-content').forEach(el => el.style.display = 'none');
+    document.getElementById(contentId).style.display = 'block';
+    
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('data-content') === contentId) {
+            tab.classList.add('active');
+        }
+    });
+}
+
+// Refresh approvals
+function refreshApprovals() {
+    loadAllData();
+    showToast('Refreshing approvals...', 'success');
+}
+
+// Export to CSV
+function exportApprovals() {
+    const data = filteredApprovals.map(approval => ({
+        'Request ID': approval._id || approval.id || approval.requestId,
+        'Item ID': getItemId(approval),
+        'Type': approval.type || approval.requestType,
+        'Description': formatChangeDescription(approval),
+        'Requester': approval.requester || approval.submittedBy || approval.requestedByName,
+        'Owner': approval.owner || approval.actionTitle,
+        'Sub Project': approval.subProject,
+        'Status': approval.status,
+        'Submitted Date': approval.submittedAt || approval.createdAt,
+        'Decision Date': approval.decisionDate || approval.processedAt || approval.reviewDate,
+        'Comment': approval.comment || approval.approvalComment || approval.reviewComments || approval.comments
+    }));
+
+    const csv = convertToCSV(data);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `approvals-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showToast('Approvals exported successfully', 'success');
+}
+
+// Convert to CSV
+function convertToCSV(data) {
+    if (data.length === 0) return '';
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(header => JSON.stringify(obj[header] || '')).join(','));
+    return [headers.join(','), ...rows].join('\n');
+}
+
+// Close modal
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('open');
+    currentApproval = null;
+    
+    // Reset footer for next time
+    if (modalId === 'approvalModal') {
+        const footer = document.getElementById('approvalModalFooter');
+        footer.innerHTML = `
+            <button class="btn-outline" onclick="closeModal('approvalModal')">Cancel</button>
+            <button class="btn-danger" onclick="submitRejection()" id="rejectBtn">
+                <i class="fas fa-times"></i> Reject
+            </button>
+            <button class="btn-success" onclick="submitApproval()" id="approveBtn">
+                <i class="fas fa-check"></i> Approve
+            </button>
+        `;
+    }
+}
+
+// Show toast
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+        <div>${message}</div>
+    `;
+    container.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal(this.id);
+            }
+        });
+    });
+    
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+                closeModal(modal.id);
+            });
+        }
+    });
+}
+
+// Make functions globally available
+window.showContent = showContent;
+window.openApprovalModal = openApprovalModal;
+window.viewOnlyApproval = viewOnlyApproval;
+window.refreshApprovals = refreshApprovals;
+window.exportApprovals = exportApprovals;
+window.applyFilters = applyFilters;
+window.closeModal = closeModal;
+window.submitApproval = submitApproval;
+window.submitRejection = submitRejection;
+</script>
+</body>
+</html>

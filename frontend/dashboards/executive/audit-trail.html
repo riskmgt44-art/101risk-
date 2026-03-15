@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Trail • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+        body::-webkit-scrollbar, ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
+        html, body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .main { height: 100%; display: flex; flex-direction: column; }
+
+        /* Header Bar */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .header-subtitle {
+            font-size: 13px;
+            color: var(--neutral);
+        }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            width: 280px;
+        }
+        .nav-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .nav-btn.active { 
+            background: var(--primary); 
+            color: white; 
+            border-color: var(--primary); 
+        }
+
+        /* Professional Advanced Filters Panel */
+        .filters-panel {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: max-height 0.4s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .filters-panel.active {
+            max-height: 600px; /* Adjust based on content */
+        }
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 32px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .filters-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .filters-summary {
+            font-size: 13px;
+            color: var(--neutral);
+        }
+        .filters-content {
+            padding: 24px 32px;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .filter-control {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+            transition: var(--transition);
+        }
+        .filter-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.15);
+        }
+        select.filter-control[multiple] {
+            min-height: 120px;
+        }
+        .filter-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border)
+        }
+        .btn-clear {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--neutral);
+        }
+        .btn-apply {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        /* KPI Row */
+        .kpi-row {
+            display: flex;
+            gap: 16px;
+            padding: 24px 32px;
+            overflow-x: auto;
+            background: var(--bg);
+        }
+        .kpi-card {
+            flex: 1;
+            min-width: 180px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .kpi-card:hover { border-color: var(--primary); }
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .kpi-label {
+            font-size: 13px;
+            color: var(--neutral);
+        }
+
+        /* Table */
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 32px 32px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 8;
+        }
+        th {
+            text-align: left;
+            padding: 12px;
+            font-weight: 600;
+            color: var(--neutral);
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        .pill {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .pill-risk { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .pill-action { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .pill-approval { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-ram { background: rgba(107,114,128,0.1); color: var(--neutral); }
+        .pill-system { background: rgba(16,185,129,0.1); color: var(--green); }
+        .id-link { color: var(--primary); text-decoration: none; }
+        .id-link:hover { text-decoration: underline; }
+        .integrity-verified { color: var(--green); }
+        .integrity-flagged { color: var(--red); }
+        .btn-view { background: transparent; border: none; color: var(--primary); cursor: pointer; font-size: 13px; }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .header-bar { padding: 16px; flex-direction: column; align-items: stretch; gap: 12px; }
+            .search-input { width: 100%; }
+            .header-actions { justify-content: center; }
+            .filters-content { padding: 16px; }
+            .filter-grid { grid-template-columns: 1fr; gap: 16px; }
+            .kpi-row { flex-direction: column; padding: 16px; }
+            .table-container { display: none; }
+            .cards-container { padding: 16px; flex: 1; overflow-y: auto; }
+            .audit-card {
+                background: var(--card-bg);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow-sm);
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+        }
+        @media (min-width: 769px) {
+            .cards-container { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <!-- Header Bar -->
+        <div class="header-bar">
+            <div>
+                <div class="header-title">Audit Trail</div>
+                <div class="header-subtitle">System-wide immutable activity log</div>
+            </div>
+            <div class="header-actions">
+                <input class="search-input" id="searchInput" placeholder="Search logs…">
+                <button class="nav-btn active" id="filterToggle"><i class="fas fa-sliders-h"></i> Advanced Filters</button>
+                <button class="nav-btn"><i class="fas fa-calendar-alt"></i> Time Range</button>
+                <button class="nav-btn"><i class="fas fa-file-export"></i> Export</button>
+            </div>
+        </div>
+
+        <!-- Professional Advanced Filters Panel -->
+        <div class="filters-panel" id="filtersPanel">
+            <div class="filters-header">
+                <div class="filters-title">Advanced Filters</div>
+                <div class="filters-summary" id="filtersSummary">No filters applied</div>
+            </div>
+            <div class="filters-content">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Entity Type</label>
+                        <select class="filter-control" multiple id="filterEntityType">
+                            <option>Risk</option>
+                            <option>Action</option>
+                            <option>Approval</option>
+                            <option>RAM Change</option>
+                            <option>Deletion</option>
+                            <option>User</option>
+                            <option>System Event</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Entity ID</label>
+                        <input type="text" class="filter-control" id="filterEntityId" placeholder="e.g. RISK-001, ACTION-101">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Event Type</label>
+                        <select class="filter-control" multiple id="filterEventType">
+                            <option>Create</option>
+                            <option>Update</option>
+                            <option>Status Change</option>
+                            <option>Approval</option>
+                            <option>Rejection</option>
+                            <option>Delete Request</option>
+                            <option>Delete Approved</option>
+                            <option>Login</option>
+                            <option>Export</option>
+                            <option>Configuration Change</option>
+                        </select>
+                    </div>
+                    <!-- other filters omitted for brevity - add IDs if you want client-side filtering -->
+                </div>
+                <div class="filter-buttons">
+                    <button class="nav-btn btn-clear" id="btnClear">Clear All</button>
+                    <button class="nav-btn btn-apply" id="btnApply">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="kpi-row" id="kpiRow">
+            <div class="kpi-card" data-kpi="total">
+                <div class="kpi-value" id="totalEvents">0</div>
+                <div class="kpi-label">Total Events</div>
+            </div>
+            <div class="kpi-card" data-kpi="highRisk">
+                <div class="kpi-value" id="highRiskEvents" style="color:var(--red);">0</div>
+                <div class="kpi-label">High-Risk Events</div>
+            </div>
+            <div class="kpi-card" data-kpi="overrides">
+                <div class="kpi-value" id="manualOverrides">0</div>
+                <div class="kpi-label">Manual Overrides</div>
+            </div>
+            <div class="kpi-card" data-kpi="deletes">
+                <div class="kpi-value" id="deletesRestores" style="color:var(--red);">0</div>
+                <div class="kpi-label">Deletes / Restores</div>
+            </div>
+            <div class="kpi-card" data-kpi="sla">
+                <div class="kpi-value" id="slaBreaches" style="color:var(--amber);">0</div>
+                <div class="kpi-label">Approval SLA Breaches</div>
+            </div>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="table-container">
+            <table id="auditTable">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Entity Type</th>
+                        <th>Entity ID</th>
+                        <th>Event Type</th>
+                        <th>Change Summary</th>
+                        <th>Changed By</th>
+                        <th>Role</th>
+                        <th>Source</th>
+                        <th>Reference ID</th>
+                        <th>Integrity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="cards-container" id="cardsContainer"></div>
+    </div>
+
+    <script>
+    const filterToggle = document.getElementById('filterToggle');
+    const filtersPanel = document.getElementById('filtersPanel');
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('tableBody');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const totalEventsEl = document.getElementById('totalEvents');
+
+    let allLogs = []; // store all fetched + live logs
+    let ws = null;
+
+    filterToggle.addEventListener('click', () => {
+        filtersPanel.classList.toggle('active');
+        filterToggle.classList.toggle('active');
+    });
+
+    // Get token from localStorage (adjust key if different)
+    function getAuthToken() {
+        return localStorage.getItem('token') || localStorage.getItem('authToken') || '';
+    }
+
+    // Connect WebSocket with JWT token in query parameter
+    function connectWebSocket() {
+        const token = getAuthToken();
+        if (!token) {
+            console.error('No authentication token found. Please login first.');
+            return;
+        }
+
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/api/ws/audit?token=${encodeURIComponent(token)}`;
+
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+            console.log('✅ WebSocket connected for real-time audit logs');
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('WebSocket message received:', data);
+                
+                // Check if it's a welcome message (from our backend)
+                if (data.type === 'welcome') {
+                    console.log('✅ WebSocket welcome:', data.message);
+                    return;
+                }
+                
+                // Check if it's a real audit log (has createdAt field)
+                if (data.createdAt) {
+                    console.log('📨 New audit log received:', data);
+                    allLogs.unshift(data); // prepend newest
+                    renderLogs(allLogs);
+                    updateKPIs();
+                } else {
+                    console.log('⚠️ Unknown message type:', data);
+                }
+            } catch (e) {
+                console.error('❌ Invalid WebSocket message:', e, event.data);
+            }
+        };
+
+        ws.onclose = (event) => {
+            console.log('🔌 WebSocket closed:', event.code, event.reason);
+            // Reconnect after delay
+            setTimeout(connectWebSocket, 3000);
+        };
+
+        ws.onerror = (err) => {
+            console.error('❌ WebSocket error:', err);
+        };
+    }
+
+    // Fetch initial logs
+    async function fetchInitialLogs() {
+        try {
+            const token = getAuthToken();
+            if (!token) {
+                console.error('Cannot fetch audit logs: No authentication token');
+                // Redirect to login or show message
+                return;
+            }
+
+            const res = await fetch('/api/audit?limit=50', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (res.status === 401) {
+                console.error('Authentication failed. Redirecting to login...');
+                // Redirect to login page
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            if (!res.ok) {
+                throw new Error(`Failed to fetch logs: ${res.status} ${res.statusText}`);
+            }
+            
+            const logs = await res.json();
+            console.log('📊 Fetched audit logs:', logs.length);
+            allLogs = logs;
+            renderLogs(allLogs);
+            updateKPIs();
+        } catch (err) {
+            console.error('Initial fetch error:', err);
+            // Show error to user
+            showError('Failed to load audit logs. Please check your connection and login.');
+        }
+    }
+
+    function renderLogs(logs) {
+        tableBody.innerHTML = '';
+        cardsContainer.innerHTML = '';
+
+        const searchTerm = searchInput.value.toLowerCase();
+
+        logs.forEach(log => {
+            // Skip welcome messages or any logs without createdAt
+            if (!log.createdAt) {
+                return;
+            }
+            
+            // Simple client-side search (expand as needed)
+            const matchesSearch = !searchTerm || 
+                JSON.stringify(log).toLowerCase().includes(searchTerm);
+
+            if (!matchesSearch) return;
+
+            // Safely format timestamp
+            let timestamp = '-';
+            try {
+                if (log.createdAt) {
+                    timestamp = new Date(log.createdAt).toISOString()
+                        .replace('T', ' ')
+                        .split('.')[0] + ' UTC';
+                }
+            } catch (e) {
+                console.warn('Invalid date format:', log.createdAt);
+                timestamp = 'Invalid date';
+            }
+            
+            const entityType = log.entityType || 'Unknown';
+            const entityId = log.entityId ? (log.entityId.$oid || log.entityId) : '-';
+            const action = log.action || 'Unknown';
+            const summary = extractSummary(log);
+            const actor = extractActor(log);
+            const role = log.userRole || log.details?.role || '-';
+            const source = log.details?.source || 'Manual';
+            const refId = log.details?.referenceId || '-';
+
+            let pillClass = 'pill-system';
+            if (entityType.toLowerCase().includes('risk')) pillClass = 'pill-risk';
+            else if (entityType.toLowerCase().includes('action')) pillClass = 'pill-action';
+            else if (entityType.toLowerCase().includes('approval')) pillClass = 'pill-approval';
+            else if (entityType.toLowerCase().includes('user')) pillClass = 'pill-ram';
+
+            const integrity = log.details?.integrityVerified ? 
+                '<i class="fas fa-check integrity-verified"></i> Verified' : 
+                '<i class="fas fa-exclamation-triangle integrity-flagged"></i> Flagged';
+
+            // Desktop row
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${timestamp}</td>
+                <td><span class="pill ${pillClass}">${entityType}</span></td>
+                <td><a class="id-link" href="#" data-id="${entityId}" data-type="${entityType}">${entityId}</a></td>
+                <td>${action}</td>
+                <td>${summary}</td>
+                <td>${actor}</td>
+                <td>${role}</td>
+                <td>${source}</td>
+                <td>${refId}</td>
+                <td>${integrity}</td>
+                <td><button class="btn-view" data-log='${JSON.stringify(log).replace(/'/g, "&apos;")}'>View Details</button></td>
+            `;
+            tableBody.appendChild(row);
+
+            // Mobile card
+            const card = document.createElement('div');
+            card.className = 'audit-card';
+            card.innerHTML = `
+                <div><strong>${timestamp}</strong></div>
+                <div><span class="pill ${pillClass}">${entityType}</span> ${entityId}</div>
+                <div><strong>Event:</strong> ${action}</div>
+                <div><strong>Summary:</strong> ${summary}</div>
+                <div><strong>By:</strong> ${actor} (${role})</div>
+                <div><strong>Source:</strong> ${source}</div>
+                <div>${integrity}</div>
+                <button class="btn-view" data-log='${JSON.stringify(log).replace(/'/g, "&apos;")}'>View Details</button>
+            `;
+            cardsContainer.appendChild(card);
+        });
+
+        // Add event listeners for view buttons
+        document.querySelectorAll('.btn-view').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const logData = JSON.parse(e.target.getAttribute('data-log'));
+                showLogDetails(logData);
+            });
+        });
+
+        // Add event listeners for ID links
+        document.querySelectorAll('.id-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const entityId = e.target.getAttribute('data-id');
+                const entityType = e.target.getAttribute('data-type');
+                navigateToEntity(entityId, entityType);
+            });
+        });
+    }
+
+    // Helper functions
+    function extractSummary(log) {
+        if (log.details?.summary) return log.details.summary;
+        if (log.details?.name) return `Created/Updated: ${log.details.name}`;
+        if (log.details?.title) return `Risk: ${log.details.title}`;
+        if (log.action === 'login_success') return 'User logged in';
+        if (log.action === 'password_reset') return 'Password reset';
+        if (log.action === 'asset_create') return `Asset created: ${log.details?.name || ''}`;
+        if (log.action === 'risk_create') return `Risk created: ${log.details?.title || ''}`;
+        return 'No summary available';
+    }
+
+    function extractActor(log) {
+        if (log.details?.actorName) return log.details.actorName;
+        if (log.details?.email) return log.details.email;
+        if (log.userName) return log.userName;
+        return 'System';
+    }
+
+    function showLogDetails(log) {
+        // Create a modal or alert with log details
+        const details = `
+            Timestamp: ${new Date(log.createdAt).toLocaleString()}
+            Action: ${log.action}
+            Entity Type: ${log.entityType}
+            Entity ID: ${log.entityId}
+            User: ${log.userName || 'Unknown'}
+            Role: ${log.userRole || 'Unknown'}
+            Details: ${JSON.stringify(log.details || {}, null, 2)}
+        `;
+        alert('Audit Log Details:\n\n' + details);
+    }
+
+    function navigateToEntity(entityId, entityType) {
+        // Navigate to the appropriate page based on entity type
+        switch(entityType.toLowerCase()) {
+            case 'risk':
+                window.location.href = `/risk-details.html?id=${entityId}`;
+                break;
+            case 'asset':
+                window.location.href = `/asset-details.html?id=${entityId}`;
+                break;
+            case 'user':
+                window.location.href = `/user-profile.html?id=${entityId}`;
+                break;
+            default:
+                alert(`View ${entityType} ${entityId}`);
+        }
+    }
+
+    function updateKPIs() {
+        totalEventsEl.textContent = allLogs.length;
+        
+        // Calculate other KPIs based on your criteria
+        const highRiskEvents = allLogs.filter(log => 
+            log.action.includes('delete') || 
+            log.action.includes('override') ||
+            (log.details && log.details.riskLevel === 'high')
+        ).length;
+        
+        const manualOverrides = allLogs.filter(log => 
+            log.action.includes('override') || 
+            log.details?.source === 'manual_override'
+        ).length;
+        
+        const deletesRestores = allLogs.filter(log => 
+            log.action.includes('delete') || 
+            log.action.includes('restore')
+        ).length;
+        
+        const slaBreaches = allLogs.filter(log => 
+            log.action.includes('approval') && 
+            log.details?.slaBreach === true
+        ).length;
+
+        document.getElementById('highRiskEvents').textContent = highRiskEvents;
+        document.getElementById('manualOverrides').textContent = manualOverrides;
+        document.getElementById('deletesRestores').textContent = deletesRestores;
+        document.getElementById('slaBreaches').textContent = slaBreaches;
+    }
+
+    function showError(message) {
+        // Simple error display - you can implement a better UI
+        alert('Error: ' + message);
+    }
+
+    // Basic search
+    searchInput.addEventListener('input', () => {
+        renderLogs(allLogs);
+    });
+
+    // Check if user is authenticated before loading data
+    function initializeApp() {
+        const token = getAuthToken();
+        if (!token) {
+            showError('Please login first to view audit logs.');
+            // Redirect to login after 2 seconds
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 2000);
+            return;
+        }
+        
+        fetchInitialLogs();
+        connectWebSocket();
+    }
+
+    // Initialize the app
+    initializeApp();
+</script>
+</body>
+</html>

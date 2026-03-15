@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --shadow-lg: 0 19.2px 38.4px rgba(0,0,0,0.12);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+        html, body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .main { height: 100vh; display: flex; flex-direction: column; }
+        .view-toggle { padding: 20px 24px 0; text-align: right; }
+        .toggle-btn {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .toggle-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .toggle-btn:hover:not(.active) { background: rgba(93,161,161,0.1); }
+        .content-wrapper { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        .view { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 24px 32px; }
+        .view::-webkit-scrollbar { display: none; }
+        .view { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Shimmer */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 0.5s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* Timeline View - NO CENTRAL LINE */
+        .timeline-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 20px;
+        }
+        .timeline-item {
+            position: relative;
+            margin: 40px 0;
+            display: flex;
+            align-items: center;
+        }
+        .timeline-item:nth-child(odd) { flex-direction: row-reverse; }
+        .timeline-content {
+            width: 45%;
+            background: var(--card-bg);
+            padding: 20px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+        .timeline-item:nth-child(odd) .timeline-content { text-align: right; }
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border: 4px solid var(--card-bg);
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            box-shadow: 0 0 0 4px var(--border);
+        }
+        .timeline-date { font-size: 14px; font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+        .timeline-type { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--neutral); margin-bottom: 8px; }
+        .timeline-desc { font-size: 14px; color: var(--text-primary); margin-bottom: 12px; line-height: 1.5; }
+        .timeline-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12.8px; color: var(--text-secondary); }
+        .timeline-item:nth-child(odd) .timeline-meta { justify-content: flex-end; }
+        .meta-item { display: flex; align-items: center; gap: 6px; }
+        .meta-item i { color: var(--neutral); width: 14px; text-align: center; }
+
+        /* Table View */
+        .table-container {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead { position: sticky; top: 0; background: var(--card-bg); z-index: 8; }
+        th { text-align: left; padding: 12.8px 16px; font-size: 11.2px; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+        tbody tr { transition: var(--transition); }
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+        td { padding: 12.8px 16px; font-size: 12.8px; border-bottom: 1px solid var(--border); }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 40px;
+        }
+        .empty-state img { width: 80px; height: 80px; opacity: 0.7; margin-bottom: 16px; }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .timeline-item { flex-direction: row !important; padding-left: 60px; }
+            .timeline-content { width: 100%; text-align: left !important; }
+            .timeline-dot { left: 30px; transform: none; }
+            .timeline-meta { justify-content: flex-start !important; }
+        }
+        @media (max-width: 768px) {
+            .view { padding: 0 16px 24px; }
+            .view-toggle { padding: 16px 16px 0; }
+            .table-container { overflow-x: auto; }
+            table { min-width: 1000px; }
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <main class="main">
+        <div class="view-toggle">
+            <button class="toggle-btn active" data-view="timeline">Timeline View</button>
+            <button class="toggle-btn" data-view="table">Table View</button>
+        </div>
+        <div class="content-wrapper">
+            <div id="timeline-view" class="view">
+                <div class="timeline-container" id="timelineContainer"></div>
+            </div>
+            <div id="table-view" class="view hidden">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>Event Type</th>
+                                <th>Description</th>
+                                <th>Changed By</th>
+                                <th>Role</th>
+                                <th>Source</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const timelineContainer = document.getElementById('timelineContainer');
+        const tableBody = document.getElementById('tableBody');
+
+        showSkeletonLoading();
+
+        window.addEventListener('message', function(event) {
+            if (event.data?.type === 'HISTORY_DATA') {
+                const events = event.data.data ?? [];
+                const safeEvents = Array.isArray(events) ? events : [];
+                renderHistory(safeEvents);
+            }
+        });
+
+        setTimeout(() => {
+            if (timelineContainer.children.length > 0 && timelineContainer.querySelector('.timeline-skeleton-item')) {
+                showEmptyStateBoth();
+            }
+        }, 3000);
+
+        function showSkeletonLoading() {
+            timelineContainer.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            for (let i = 0; i < 6; i++) {
+                const isOdd = i % 2 === 1;
+                const item = document.createElement('div');
+                item.className = 'timeline-skeleton-item';
+                item.style.flexDirection = isOdd ? 'row-reverse' : 'row';
+                item.innerHTML = `
+                    <div class="timeline-skeleton-content">
+                        <div class="skeleton" style="height:16px;width:120px;margin-bottom:8px;"></div>
+                        <div class="skeleton" style="height:14px;width:80px;margin-bottom:12px;"></div>
+                        <div class="skeleton" style="height:14px;width:100%;margin-bottom:12px;"></div>
+                        <div class="skeleton" style="height:14px;width:90%;"></div>
+                    </div>
+                    <div class="timeline-skeleton-dot skeleton"></div>
+                `;
+                timelineContainer.appendChild(item);
+            }
+
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><div class="skeleton" style="height:16px;width:130px;"></div></td>
+                    <td><div class="skeleton" style="height:16px;width:100px;"></div></td>
+                    <td><div class="skeleton" style="height:16px;width:100%;"></div></td>
+                    <td><div class="skeleton" style="height:16px;width:100px;"></div></td>
+                    <td><div class="skeleton" style="height:16px;width:120px;"></div></td>
+                    <td><div class="skeleton" style="height:16px;width:80px;"></div></td>
+                    <td><div class="skeleton" style="height:16px;width:100px;"></div></td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+
+        function showEmptyStateBoth(message = 'No history entries yet') {
+            const emptyBox = `
+                <img src="https://www.clipartmax.com/png/middle/217-2174009_empty-box-comments-box-vector-icon-png.png" 
+                     alt="Empty box" style="width:80px;height:80px;opacity:0.7;margin-bottom:16px;">
+            `;
+
+            const emptyHTML = `
+                <div class="empty-state">
+                    ${emptyBox}
+                    <div style="font-size:16px;font-weight:500;">${message}</div>
+                </div>
+            `;
+
+            timelineContainer.innerHTML = emptyHTML;
+            tableBody.innerHTML = `<tr><td colspan="7">${emptyHTML}</td></tr>`;
+        }
+
+        function renderHistory(events) {
+            timelineContainer.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (events.length === 0) {
+                showEmptyStateBoth();
+                return;
+            }
+
+            events.forEach((event, index) => {
+                const isOdd = index % 2 === 1;
+
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.style.flexDirection = isOdd ? 'row-reverse' : 'row';
+
+                const userIcon = event.changedBy === 'System' ? 'fa-robot' : 'fa-user';
+                const sourceIcon = event.source === 'Manual' ? 'fa-mouse-pointer' : 
+                                 event.source === 'Workflow' ? 'fa-cogs' : 
+                                 event.source === 'Approval' ? 'fa-check-circle' : 'fa-cogs';
+
+                timelineItem.innerHTML = `
+                    <div class="timeline-content">
+                        <div class="timeline-date">${escapeHtml(event.date || 'Unknown')}</div>
+                        <div class="timeline-type">${escapeHtml(event.type || 'Unknown')}</div>
+                        <div class="timeline-desc">${escapeHtml(event.desc || '')}</div>
+                        <div class="timeline-meta">
+                            <div class="meta-item"><i class="fas ${userIcon}"></i> ${escapeHtml(event.changedBy || 'Unknown')}</div>
+                            <div class="meta-item"><i class="fas fa-briefcase"></i> ${escapeHtml(event.role || 'Unknown')}</div>
+                            <div class="meta-item"><i class="fas ${sourceIcon}"></i> ${escapeHtml(event.source || 'Unknown')}</div>
+                            <div class="meta-item"><i class="fas fa-link"></i> ${escapeHtml(event.reference || '-')}</div>
+                        </div>
+                    </div>
+                    <div class="timeline-dot"></div>
+                `;
+                timelineContainer.appendChild(timelineItem);
+
+                const tableRow = document.createElement('tr');
+                tableRow.innerHTML = `
+                    <td>${escapeHtml(event.date || 'Unknown')}</td>
+                    <td>${escapeHtml(event.type || 'Unknown')}</td>
+                    <td>${escapeHtml(event.desc || '')}</td>
+                    <td>${escapeHtml(event.changedBy || 'Unknown')}</td>
+                    <td>${escapeHtml(event.role || 'Unknown')}</td>
+                    <td>${escapeHtml(event.source || 'Unknown')}</td>
+                    <td>${escapeHtml(event.reference || '-')}</td>
+                `;
+                tableBody.appendChild(tableRow);
+            });
+        }
+
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') return '';
+            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const view = btn.dataset.view;
+                document.getElementById('timeline-view').classList.toggle('hidden', view !== 'timeline');
+                document.getElementById('table-view').classList.toggle('hidden', view !== 'table');
+            });
+        });
+    });
+</script>
+</body>
+</html>
