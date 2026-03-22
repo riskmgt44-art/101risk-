@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risk Visual · compact cells + vibrant colors</title>
+    <title>Risk Visual · Super Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -43,206 +43,150 @@
             color: var(--text-primary);
         }
 
-        .top-nav {
+        .risk-visual-container {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .risk-visual-header {
             background: var(--card-bg);
             border-bottom: 1px solid var(--border);
             padding: 0 32px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            height: 64px;
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 10;
+            justify-content: flex-end;
+            height: 48px;
+            flex-shrink: 0;
         }
-        .tabs-group { display: flex; align-items: center; gap: 8px; }
-        .nav-tab {
-            padding: 0 20px;
-            height: 40px;
-            background: rgba(93,161,161,0.08);
-            border-radius: 8px 8px 0 0;
+
+        .risk-visual-actions {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: var(--transition);
-            white-space: nowrap;
-            text-decoration: none;
-            border: none;
-            outline: none;
+            gap: 12px;
         }
-        .nav-tab.active {
-            background: var(--card-bg);
-            color: var(--text-primary);
-            font-weight: 600;
-            border-bottom: 3px solid var(--primary);
-        }
-        .nav-tab:hover:not(.active) { 
-            background: rgba(93,161,161,0.15);
-            transform: translateY(-1px);
-        }
-        .nav-tab:active {
-            transform: translateY(0);
-        }
-        .nav-tab .favicon {
-            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
-            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
-        }
-        .actions-group { display: flex; align-items: center; gap: 19.2px; }
+
         .btn-icon {
-            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
-            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: var(--transition);
-        }
-        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
-        .btn-primary {
-            padding: 8px 16px; background: var(--primary); color: white; border: none;
-            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; gap: 6px; transition: var(--transition);
-        }
-        .btn-primary:hover { background: var(--primary-hover); }
-        
-        .main { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; }
-        .app-container {
-            display: flex;
-            height: 100%;
-            width: 100%;
-        }
-
-        .filter-sidebar {
-            width: 280px;
-            background: white;
-            border-right: 1px solid var(--border);
-            overflow-y: auto;
-            padding: 20px 16px;
-            font-size: 12px;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .filter-sidebar::-webkit-scrollbar { display: none; }
-        .filter-section { margin-bottom: 20px; }
-        .filter-section h3 {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-        }
-        .filter-options { display: flex; flex-direction: column; gap: 6px; }
-        .filter-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            border-radius: var(--radius-md);
-            background: var(--shimmer-bg);
-            border: 1px solid var(--border);
+            justify-content: center;
             cursor: pointer;
-            font-size: 11px;
             transition: var(--transition);
+            color: var(--text-secondary);
+            font-size: 14px;
         }
-        .filter-option.active { 
-            background: rgba(93,161,161,0.1); 
-            border-color: var(--primary); 
-        }
-        .filter-color { width: 10px; height: 10px; border-radius: 4px; flex-shrink: 0; }
-        .filter-color.acceptable { background: #00FF00; }
-        .filter-color.needs-improvement { background: #FFC107; }
-        .filter-color.major-improvement { background: #FF0000; }
-        .filter-color.under-review { background: #9C27B0; }
-        .filter-color.removed { background: #94A3B8; }
-        .filter-count { margin-left: auto; color: var(--neutral); font-size: 10px; }
 
-        .main-content {
+        .btn-icon:hover {
+            background: rgba(93,161,161,0.06);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .main { 
             flex: 1;
             overflow-y: auto;
-            padding: 24px 20px;
+            padding: 16px 24px;
         }
 
-        /* export bar */
-        .export-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
-            align-items: center;
-            justify-content: space-between;
-        }
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
         .matrix-container {
             background: var(--card-bg);
             border-radius: var(--radius);
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
-            padding: 24px 20px;
-            margin-bottom: 24px;
+            padding: 16px 16px;
+            margin-bottom: 16px;
         }
 
         .matrix-header {
-            display: flex; flex-wrap: wrap; gap: 12px;
-            justify-content: space-between; align-items: center; margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
-        .matrix-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .matrix-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
 
-        .matrix-toggle {
-            display: flex; gap: 6px; background: var(--shimmer-bg); padding: 3px; border-radius: var(--radius-md);
+        .view-toggle-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
-        .toggle-btn {
-            padding: 5px 12px; font-size: 12px; font-weight: 500; border: none;
+
+        .matrix-toggle, .size-toggle {
+            display: flex; gap: 4px; background: var(--shimmer-bg); padding: 2px; border-radius: var(--radius-md);
+        }
+        .toggle-btn, .size-btn {
+            padding: 4px 10px; font-size: 11px; font-weight: 500; border: none;
             background: transparent; border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer;
             white-space: nowrap; transition: var(--transition);
         }
-        .toggle-btn.active { background: white; color: var(--text-primary); box-shadow: var(--shadow-sm); }
+        .toggle-btn.active, .size-btn.active { background: white; color: var(--text-primary); box-shadow: var(--shadow-sm); }
 
-        .matrix-wrapper { display: flex; margin-top: 16px; }
+        .matrix-wrapper { display: flex; margin-top: 8px; }
 
-        /* Y-axis labels in correct order (Very Low at top) */
+        /* Y-axis labels in correct order (Very High at top for 5x5) */
         .y-axis-labels {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            margin-right: 12px;
-            padding: 4px 0;
+            margin-right: 8px;
+            padding: 2px 0;
             height: auto;
             gap: 2px;
         }
         .y-axis-label, .x-axis-label { 
-            font-size: 11px; 
+            font-size: 10px; 
             font-weight: 600; 
             color: var(--text-secondary);
             white-space: nowrap;
         }
 
-        /* COMPACT GRID with original aspect ratio */
-        .matrix-grid {
+        /* COMPACT GRID - 5x5 */
+        .matrix-grid-5x5 {
             flex: 1;
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(5, 1fr);
-            gap: 5px;
+            gap: 4px;
             background: #F6F5F7;
-            padding: 5px;
+            padding: 4px;
             border-radius: var(--radius-lg);
             width: 100%;
             aspect-ratio: 5 / 3;
         }
 
+        /* COMPACT GRID - 3x3 */
+        .matrix-grid-3x3 {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 4px;
+            background: #F6F5F7;
+            padding: 4px;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            aspect-ratio: 3 / 2;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+
         .matrix-cell {
             border-radius: var(--radius-md);
             border: 1px solid rgba(255,255,255,0.6);
-            padding: 3px;
+            padding: 2px;
             overflow-y: auto;
             transition: var(--transition);
             display: flex;
@@ -266,11 +210,11 @@
             border-radius: 4px;
         }
 
-        /* VIBRANT CELL COLORS */
-        .matrix-cell[data-risk-level="low"]      { background: #00FF00; }  /* Bright green */
-        .matrix-cell[data-risk-level="medium"]   { background: #FFFF00; }  /* Bright yellow */
-        .matrix-cell[data-risk-level="high"]     { background: #FFC107; }  /* Bright orange/amber */
+        /* VIBRANT CELL COLORS based on risk level */
         .matrix-cell[data-risk-level="veryhigh"] { background: #FF0000; }  /* Bright red */
+        .matrix-cell[data-risk-level="high"]      { background: #FFC107; }  /* Bright orange/amber */
+        .matrix-cell[data-risk-level="medium"]    { background: #FFFF00; }  /* Bright yellow */
+        .matrix-cell[data-risk-level="low"]       { background: #00FF00; }  /* Bright green */
 
         .matrix-cell:hover {
             transform: scale(1.01);
@@ -283,19 +227,19 @@
             background: rgba(255,255,255,0.95);
             border-radius: 20px;
             padding: 1px 4px 1px 3px;
-            font-size: 8px;
+            font-size: 7px;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
             border: 1px solid rgba(0,0,0,0.08);
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             cursor: pointer;
             transition: var(--transition);
             position: relative;
             flex-shrink: 0;
-            line-height: 1.3;
-            height: 18px;
+            line-height: 1.2;
+            height: 16px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -309,8 +253,8 @@
         }
 
         .risk-dot {
-            width: 5px;
-            height: 5px;
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
             flex-shrink: 0;
         }
@@ -324,7 +268,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            font-size: 8px;
+            font-size: 7px;
             font-weight: 500;
             color: var(--text-primary);
             min-width: 0;
@@ -332,13 +276,14 @@
 
         .risk-trend {
             margin-left: auto;
-            font-size: 6px;
+            font-size: 5px;
             display: flex;
             align-items: center;
             flex-shrink: 0;
         }
-        .trend-up { color: #FF0000; }
-        .trend-down { color: #00FF00; }
+        /* FIXED: improving (up) = green, declining (down) = red */
+        .trend-up { color: #00FF00; }
+        .trend-down { color: #FF0000; }
         .trend-stable { color: var(--neutral); }
 
         .risk-change-indicator {
@@ -353,206 +298,284 @@
         }
         .risk-change-indicator.orange { background: #ED6C02; }
 
-        .x-axis-labels {
+        .x-axis-labels-5x5 {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin-top: 8px;
-            margin-left: 58px;
+            gap: 4px;
+            margin-top: 4px;
+            margin-left: 48px;
             text-align: center;
         }
-        .x-axis-labels .x-axis-label { text-align: center; }
+        .x-axis-labels-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-top: 4px;
+            margin-left: 48px;
+            text-align: center;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .x-axis-labels-5x5 .x-axis-label, .x-axis-labels-3x3 .x-axis-label { text-align: center; }
+
+        /* Filter sections moved below matrix */
+        .filters-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            min-width: 180px;
+        }
+        .filter-group h3 {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .filter-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+        }
+        .filter-color { 
+            width: 8px; 
+            height: 8px; 
+            border-radius: 4px; 
+            flex-shrink: 0; 
+        }
+        .filter-color.acceptable { background: #00FF00; }
+        .filter-color.needs-improvement { background: #FFC107; }
+        .filter-color.major-improvement { background: #FF0000; }
+        .filter-color.under-review { background: #9C27B0; }
+        .filter-color.removed { background: #94A3B8; }
+        .filter-label { color: var(--text-primary); }
+        .filter-count { 
+            margin-left: auto; 
+            color: var(--neutral); 
+            font-size: 10px;
+            font-weight: 500;
+            min-width: 20px;
+            text-align: right;
+        }
 
         .legend-container {
             background: var(--card-bg);
             border-radius: var(--radius);
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
-            padding: 16px 20px;
-            display: flex; gap: 32px; flex-wrap: wrap;
+            padding: 12px 16px;
+            display: flex; gap: 24px; flex-wrap: wrap;
         }
         .legend-group h4 { 
-            font-size: 11px; font-weight: 600; color: var(--text-secondary); 
-            text-transform: uppercase; margin-bottom: 8px; 
+            font-size: 10px; font-weight: 600; color: var(--text-secondary); 
+            text-transform: uppercase; margin-bottom: 6px; 
         }
-        .legend-items { display: flex; gap: 16px; flex-wrap: wrap; }
-        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; }
-        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        .legend-items { display: flex; gap: 12px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 4px; }
         .legend-color.veryhigh { background: #FF0000; }
         .legend-color.high     { background: #FFC107; }
         .legend-color.medium   { background: #FFFF00; }
         .legend-color.low      { background: #00FF00; }
 
+        /* Triangular arrow styles - FIXED: up arrow green (improving), down arrow red (declining) */
+        .trend-arrow-up {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 6px solid #00FF00;
+            display: inline-block;
+        }
+        .trend-arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 6px solid #FF0000;
+            display: inline-block;
+        }
+        .trend-circle {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--neutral);
+            display: inline-block;
+        }
+
         .loading-matrix {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 300px;
-            font-size: 14px;
+            height: 200px;
+            font-size: 13px;
             color: var(--neutral);
             background: var(--shimmer-bg);
             border-radius: var(--radius);
         }
 
         #riskTooltip {
-            position: absolute; background: white; border-radius: var(--radius-md); padding: 10px 14px;
+            position: absolute; background: white; border-radius: var(--radius-md); padding: 8px 12px;
             box-shadow: var(--shadow-md); border: 1px solid var(--border); z-index: 9999;
-            pointer-events: none; max-width: 240px; font-size: 11px; transition: opacity 0.15s; opacity: 0;
+            pointer-events: none; max-width: 220px; font-size: 10px; transition: opacity 0.15s; opacity: 0;
         }
         #riskTooltip.show { opacity: 1; }
-        .tooltip-title { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; border-bottom: 1px solid var(--border); padding-bottom: 3px; }
-        .tooltip-row { display: flex; justify-content: space-between; margin-top: 3px; font-size: 10px; }
+        .tooltip-title { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; border-bottom: 1px solid var(--border); padding-bottom: 2px; font-size: 11px; }
+        .tooltip-row { display: flex; justify-content: space-between; margin-top: 2px; font-size: 9px; }
         .tooltip-label { color: var(--neutral); font-weight: 500; }
         .tooltip-value { color: var(--text-primary); font-weight: 600; }
 
         @media (max-width: 1200px) {
-            .filter-sidebar { width: 240px; }
-            .x-axis-labels { margin-left: 48px; }
-        }
-        @media (max-width: 1000px) {
-            .filter-sidebar { width: 200px; }
+            .x-axis-labels-5x5 { margin-left: 40px; }
         }
         @media (max-width: 768px) {
-            .top-nav { 
+            .risk-visual-header { 
                 padding: 0 16px; 
-                flex-direction: column;
-                height: auto;
-                padding: 12px 16px;
-                gap: 12px;
+                height: 44px;
             }
-            .app-container { flex-direction: column; }
-            .filter-sidebar { width: 100%; height: auto; max-height: 200px; border-right: none; border-bottom: 1px solid var(--border); }
+            .main { padding: 12px; }
+            .view-toggle-group { flex-direction: column; align-items: flex-start; }
+            .filters-container { flex-direction: column; gap: 16px; }
         }
     </style>
 </head>
 <body>
-    <nav class="top-nav">
-        <div class="tabs-group">
-            <a href="risks.html" class="nav-tab">
-                <div class="favicon">R</div>
-                <span>My Risks</span>
-            </a>
-            <div class="nav-tab active">
-                <div class="favicon">V</div>
-                <span>Risk Visual</span>
-            </div>
-        </div>
-        <div class="actions-group">
-            <button class="btn-icon" onclick="refreshMatrix()" title="Refresh">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-        </div>
-    </nav>
+    <div class="risk-visual-container">
+        <main class="main">
+            <div class="matrix-container">
+                <div class="matrix-header">
+                    <div class="matrix-title">Risk Matrix</div>
+                    <div class="view-toggle-group">
+                        <div class="size-toggle">
+                            <button class="size-btn active" onclick="switchSize('5x5', this)">5x5</button>
+                            <button class="size-btn" onclick="switchSize('3x3', this)">3x3 RAM</button>
+                        </div>
+                        <div class="matrix-toggle">
+                            <button class="toggle-btn active" onclick="switchView('current', this)">Current</button>
+                            <button class="toggle-btn" onclick="switchView('target', this)">Target</button>
+                            <button class="toggle-btn" onclick="switchView('residual', this)">Residual</button>
+                        </div>
+                    </div>
+                </div>
 
-    <main class="main">
-        <div class="app-container">
-            <!-- FILTER SIDEBAR (unchanged) -->
-            <aside class="filter-sidebar">
-                <div class="filter-section">
+                <div id="matrixLoading" class="loading-matrix">
+                    <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Loading real risk data...
+                </div>
+
+                <div id="matrixContent" style="display: none;">
+                    <div class="matrix-wrapper">
+                        <div class="y-axis-labels" id="yAxisLabels">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div id="matrixGrid" class="matrix-grid-5x5"></div>
+                    </div>
+                    <div id="xAxisLabels" class="x-axis-labels-5x5"></div>
+                </div>
+            </div>
+
+            <!-- FILTERS MOVED BELOW MATRIX -->
+            <div class="filters-container">
+                <div class="filter-group">
                     <h3>ACCEPTABILITY</h3>
-                    <div class="filter-options">
-                        <div class="filter-option"><span class="filter-color acceptable"></span><span class="filter-label">Risk Level Acceptable</span><span class="filter-count" id="count-acceptable">0</span></div>
-                        <div class="filter-option"><span class="filter-color needs-improvement"></span><span class="filter-label">Needs Improvement</span><span class="filter-count" id="count-needs">0</span></div>
-                        <div class="filter-option"><span class="filter-color major-improvement"></span><span class="filter-label">Major Improvement</span><span class="filter-count" id="count-major">0</span></div>
-                        <div class="filter-option"><span class="filter-color under-review"></span><span class="filter-label">Under Review</span><span class="filter-count" id="count-review">0</span></div>
-                        <div class="filter-option"><span class="filter-color removed"></span><span class="filter-label">Removed / Delegated</span><span class="filter-count" id="count-removed">0</span></div>
+                    <div class="filter-items">
+                        <div class="filter-item">
+                            <span class="filter-color acceptable"></span>
+                            <span class="filter-label">Risk Level Acceptable</span>
+                            <span class="filter-count" id="count-acceptable">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="filter-color needs-improvement"></span>
+                            <span class="filter-label">Needs Improvement</span>
+                            <span class="filter-count" id="count-needs">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="filter-color major-improvement"></span>
+                            <span class="filter-label">Major Improvement</span>
+                            <span class="filter-count" id="count-major">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="filter-color under-review"></span>
+                            <span class="filter-label">Under Review</span>
+                            <span class="filter-count" id="count-review">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="filter-color removed"></span>
+                            <span class="filter-label">Removed / Delegated</span>
+                            <span class="filter-count" id="count-removed">0</span>
+                        </div>
                     </div>
                 </div>
-                <div class="filter-section">
-                    <h3>CHANGE LEVEL</h3>
-                    <div class="filter-options">
-                        <div class="filter-option"><span class="filter-color" style="background:#ED6C02;"></span><span class="filter-label">Shows Change</span><span class="filter-count" id="count-change">0</span></div>
-                        <div class="filter-option"><span class="filter-color" style="background:#0288D1;"></span><span class="filter-label">New</span><span class="filter-count" id="count-new">0</span></div>
-                        <div class="filter-option"><span class="filter-color" style="background:#2E7D32;"></span><span class="filter-label">No Change</span><span class="filter-count" id="count-nochange">0</span></div>
-                        <div class="filter-option"><span class="filter-color removed"></span><span class="filter-label">Removed / Delegated</span><span class="filter-count" id="count-removed2">0</span></div>
-                    </div>
-                </div>
-                <div class="filter-section">
+                <div class="filter-group">
                     <h3>TREND</h3>
-                    <div class="filter-options">
-                        <div class="filter-option"><i class="fas fa-arrow-up" style="color:#FF0000;"></i><span class="filter-label">Improving</span><span class="filter-count" id="count-up">0</span></div>
-                        <div class="filter-option"><i class="fas fa-arrow-right" style="color:var(--neutral);"></i><span class="filter-label">Stable</span><span class="filter-count" id="count-stable">0</span></div>
-                        <div class="filter-option"><i class="fas fa-arrow-down" style="color:#00FF00;"></i><span class="filter-label">Declining</span><span class="filter-count" id="count-down">0</span></div>
-                        <div class="filter-option"><i class="fas fa-times-circle" style="color:#94A3B8;"></i><span class="filter-label">Removed</span><span class="filter-count" id="count-removed3">0</span></div>
-                    </div>
-                </div>
-            </aside>
-
-            <div class="main-content">
-                <!-- Export bar updated - removed 3x3 button -->
-                <div class="export-bar">
-                    <span class="matrix-title"><i class="fas fa-download" style="margin-right: 6px;"></i>Export options</span>
-                    <div class="export-buttons">
-                        <button class="btn-primary" onclick="exportMatrixImage()"><i class="fas fa-image"></i> 5x5 RAM as image</button>
-                        <button class="btn-primary" onclick="exportFullPDF()"><i class="fas fa-file-pdf"></i> Full Risk Profile (incl. actions)</button>
-                    </div>
-                </div>
-
-                <div class="matrix-container">
-                    <div class="matrix-header">
-                        <div class="matrix-title">Risk Matrix</div>
-                        <div class="right-actions">
-                            <div class="matrix-toggle">
-                                <button class="toggle-btn active" onclick="switchView('current', this)">Current</button>
-                                <button class="toggle-btn" onclick="switchView('target', this)">Target</button>
-                                <button class="toggle-btn" onclick="switchView('residual', this)">Residual</button>
-                            </div>
+                    <div class="filter-items">
+                        <div class="filter-item">
+                            <span class="trend-arrow-up" style="margin-right: 2px;"></span>
+                            <span class="filter-label">Improving</span>
+                            <span class="filter-count" id="count-up">0</span>
                         </div>
-                    </div>
-
-                    <div id="matrixLoading" class="loading-matrix">
-                        <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Loading real risk data...
-                    </div>
-
-                    <div id="matrixContent" style="display: none;">
-                        <div class="matrix-wrapper">
-                            <div class="y-axis-labels">
-                                <span class="y-axis-label">Very Low</span>
-                                <span class="y-axis-label">Low</span>
-                                <span class="y-axis-label">Medium</span>
-                                <span class="y-axis-label">High</span>
-                                <span class="y-axis-label">Very High</span>
-                            </div>
-                            <div class="matrix-grid" id="riskMatrix"></div>
+                        <div class="filter-item">
+                            <span class="trend-circle" style="margin-right: 2px;"></span>
+                            <span class="filter-label">Stable</span>
+                            <span class="filter-count" id="count-stable">0</span>
                         </div>
-                        <div class="x-axis-labels">
-                            <span class="x-axis-label">Very Low</span>
-                            <span class="x-axis-label">Low</span>
-                            <span class="x-axis-label">Medium</span>
-                            <span class="x-axis-label">High</span>
-                            <span class="x-axis-label">Very High</span>
+                        <div class="filter-item">
+                            <span class="trend-arrow-down" style="margin-right: 2px;"></span>
+                            <span class="filter-label">Declining</span>
+                            <span class="filter-count" id="count-down">0</span>
                         </div>
-                    </div>
-                </div>
-
-                <div class="legend-container">
-                    <div class="legend-group">
-                        <h4>LEGEND</h4>
-                        <div class="legend-items">
-                            <div class="legend-item"><span class="legend-color veryhigh"></span> Critical (17-25)</div>
-                            <div class="legend-item"><span class="legend-color high"></span> High (10-16)</div>
-                            <div class="legend-item"><span class="legend-color medium"></span> Moderate (5-9)</div>
-                            <div class="legend-item"><span class="legend-color low"></span> Low (1-4)</div>
-                        </div>
-                    </div>
-                    <div class="legend-group">
-                        <h4>TREND</h4>
-                        <div class="legend-items">
-                            <div class="legend-item"><i class="fas fa-arrow-up" style="color:#FF0000;"></i> Improving</div>
-                            <div class="legend-item"><i class="fas fa-arrow-right" style="color:var(--neutral);"></i> Stable</div>
-                            <div class="legend-item"><i class="fas fa-arrow-down" style="color:#00FF00;"></i> Declining</div>
+                        <div class="filter-item">
+                            <i class="fas fa-times-circle" style="color:#94A3B8; width: 12px;"></i>
+                            <span class="filter-label">Removed</span>
+                            <span class="filter-count" id="count-removed3">0</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
+
+            <div class="legend-container">
+                <div class="legend-group">
+                    <h4>LEGEND</h4>
+                    <div class="legend-items">
+                        <div class="legend-item"><span class="legend-color veryhigh"></span> Critical</div>
+                        <div class="legend-item"><span class="legend-color high"></span> High</div>
+                        <div class="legend-item"><span class="legend-color medium"></span> Moderate</div>
+                        <div class="legend-item"><span class="legend-color low"></span> Low</div>
+                    </div>
+                </div>
+                <div class="legend-group">
+                    <h4>TREND</h4>
+                    <div class="legend-items">
+                        <div class="legend-item"><span class="trend-arrow-up" style="margin-right: 2px;"></span> Improving</div>
+                        <div class="legend-item"><span class="trend-circle" style="margin-right: 2px;"></span> Stable</div>
+                        <div class="legend-item"><span class="trend-arrow-down" style="margin-right: 2px;"></span> Declining</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <div id="riskTooltip"></div>
 
     <script>
         (function() {
             let currentView = 'current';
+            let currentSize = '5x5'; // '5x5' or '3x3'
             let risks = [];
             const tooltip = document.getElementById('riskTooltip');
 
@@ -573,16 +596,122 @@
                 return 3;
             }
 
+            // Convert 1-5 scale to 1-3 scale for 3x3 view
+            function toThreeScale(value) {
+                if (value <= 2) return 1; // Low
+                if (value <= 4) return 2; // Medium
+                return 3; // High
+            }
+
+            // Map HSSE RAM levels to impact/probability values
+            function getImpactFromHSSE(ramLevel) {
+                if (!ramLevel) return 3;
+                const level = ramLevel.toLowerCase();
+                if (level.includes('very high')) return 5;
+                if (level.includes('high')) return 4;
+                if (level.includes('medium')) return 3;
+                if (level.includes('low')) return 2;
+                if (level.includes('very low')) return 1;
+                return 3;
+            }
+
             function getImpactForView(risk) {
-                if (currentView === 'target')   return toNumber(risk.impactTarget ?? risk.impact);
-                if (currentView === 'residual') return toNumber(risk.impactResidual ?? risk.impact);
-                return toNumber(risk.impactCurrent ?? risk.impact);
+                let value;
+                if (currentView === 'target') {
+                    // For target view, use HSSE RAM Target
+                    value = getImpactFromHSSE(risk.hsseRamTarget);
+                } else if (currentView === 'residual') {
+                    // For residual, use Risk Visual RAM Target (post-mitigation)
+                    value = getImpactFromHSSE(risk.riskVisualRamTarget);
+                } else {
+                    // Current view - use HSSE RAM Current
+                    value = getImpactFromHSSE(risk.hsseRamCurrent);
+                }
+                
+                if (currentSize === '3x3') {
+                    return toThreeScale(value);
+                }
+                return value;
             }
 
             function getProbabilityForView(risk) {
-                if (currentView === 'target')   return toNumber(risk.probabilityTarget ?? risk.probability ?? risk.occurenceLevel);
-                if (currentView === 'residual') return toNumber(risk.probabilityResidual ?? risk.probability ?? risk.occurenceLevel);
-                return toNumber(risk.probabilityCurrent ?? risk.probability ?? risk.occurenceLevel);
+                let value;
+                if (currentView === 'target') {
+                    // For target view, use HSSE RAM Target likelihood
+                    value = getImpactFromHSSE(risk.hsseRamTarget);
+                } else if (currentView === 'residual') {
+                    // For residual, use Risk Visual RAM Target
+                    value = getImpactFromHSSE(risk.riskVisualRamTarget);
+                } else {
+                    // Current view - use HSSE RAM Current
+                    value = getImpactFromHSSE(risk.hsseRamCurrent);
+                }
+                
+                if (currentSize === '3x3') {
+                    return toThreeScale(value);
+                }
+                return value;
+            }
+
+            function getRiskLevel(impact, probability) {
+                let score = impact * probability;
+                if (currentSize === '5x5') {
+                    if (score >= 17) return 'veryhigh';
+                    if (score >= 10) return 'high';
+                    if (score >= 5) return 'medium';
+                    return 'low';
+                } else {
+                    // 3x3 scoring
+                    if (score >= 9) return 'veryhigh';
+                    if (score >= 6) return 'high';
+                    if (score >= 3) return 'medium';
+                    return 'low';
+                }
+            }
+
+            function getAxisLabels() {
+                if (currentSize === '5x5') {
+                    return {
+                        y: ['Very High', 'High', 'Medium', 'Low', 'Very Low'],
+                        x: ['Very Low', 'Low', 'Medium', 'High', 'Very High']
+                    };
+                } else {
+                    return {
+                        y: ['High', 'Medium', 'Low'],
+                        x: ['Low', 'Medium', 'High']
+                    };
+                }
+            }
+
+            function updateAxisLabels() {
+                const labels = getAxisLabels();
+                const yAxis = document.getElementById('yAxisLabels');
+                const xAxis = document.getElementById('xAxisLabels');
+                
+                // Update Y-axis
+                yAxis.innerHTML = '';
+                labels.y.forEach(label => {
+                    const span = document.createElement('span');
+                    span.className = 'y-axis-label';
+                    span.textContent = label;
+                    yAxis.appendChild(span);
+                });
+
+                // Update X-axis
+                xAxis.innerHTML = '';
+                labels.x.forEach(label => {
+                    const span = document.createElement('span');
+                    span.className = 'x-axis-label';
+                    span.textContent = label;
+                    xAxis.appendChild(span);
+                });
+
+                // Update grid class
+                const grid = document.getElementById('matrixGrid');
+                grid.className = currentSize === '5x5' ? 'matrix-grid-5x5' : 'matrix-grid-3x3';
+                
+                // Update x-axis container class
+                xAxis.className = currentSize === '5x5' ? 'x-axis-labels-5x5' : 'x-axis-labels-3x3';
             }
 
             async function loadRisks() {
@@ -591,7 +720,12 @@
                     document.getElementById('matrixContent').style.display = 'none';
                     
                     const token = localStorage.getItem('token');
-                    const response = await fetch('/api/analyst/risks', {
+                    if (!token) {
+                        window.parent.location.href = '/login.html';
+                        return;
+                    }
+
+                    const response = await fetch('/api/risks', {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
@@ -601,7 +735,7 @@
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     
                     const data = await response.json();
-                    risks = data.risks || [];
+                    risks = Array.isArray(data) ? data : (data.risks || []);
                     
                     buildMatrix();
                     updateFilterCounts();
@@ -617,6 +751,7 @@
                         <button class="btn-icon" onclick="refreshMatrix()" style="margin-left: 8px;"><i class="fas fa-sync-alt"></i></button>
                     `;
                     
+                    // Generate mock data for demo
                     risks = generateMockRisks(25);
                     buildMatrix();
                     updateFilterCounts();
@@ -632,68 +767,83 @@
                 const statuses = ['open', 'in-progress', 'monitoring', 'mitigated'];
                 const trends = ['up', 'down', 'stable'];
                 const owners = ['John Smith', 'Sarah Johnson', 'Mike Chen', 'Lisa Wong', 'David Kim'];
-                const actions = ['Review firewall rules', 'Update DR plan', 'Train staff', 'Patch servers', 'Audit logs']; // for summary
+                const ramLevels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
                 
                 for (let i = 1; i <= count; i++) {
+                    const hsseCurrent = ramLevels[Math.floor(Math.random() * ramLevels.length)];
+                    const hsseTarget = ramLevels[Math.floor(Math.random() * ramLevels.length)];
+                    const visualCurrent = ramLevels[Math.floor(Math.random() * ramLevels.length)];
+                    const visualTarget = ramLevels[Math.floor(Math.random() * ramLevels.length)];
+                    
                     mockRisks.push({
-                        id: i,
+                        _id: `risk-${i}`,
                         riskId: `RISK-${1000 + i}`,
                         title: titles[Math.floor(Math.random() * titles.length)] + ' ' + i,
-                        impact: Math.floor(Math.random() * 5) + 1,
-                        probability: Math.floor(Math.random() * 5) + 1,
-                        projectRamCurrent: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
+                        description: 'Sample risk description for demonstration purposes',
+                        hsseRamCurrent: hsseCurrent,
+                        hsseRamTarget: hsseTarget,
+                        riskVisualRamCurrent: visualCurrent,
+                        riskVisualRamTarget: visualTarget,
                         status: statuses[Math.floor(Math.random() * statuses.length)],
                         trend: trends[Math.floor(Math.random() * trends.length)],
                         riskOwnerName: owners[Math.floor(Math.random() * owners.length)],
                         isNew: Math.random() > 0.8,
                         hasChange: Math.random() > 0.7,
                         acceptability: ['acceptable', 'needs-improvement', 'major-improvement', 'under-review'][Math.floor(Math.random() * 4)],
-                        actionSummary: actions[Math.floor(Math.random() * actions.length)] // for profile
+                        actionSummary: 'Review and update risk response plan',
+                        subProject: ['Phase 1', 'Phase 2', 'Operations'][Math.floor(Math.random() * 3)],
+                        functionalAreaTECOP: 'Technical, Operational'
                     });
                 }
                 return mockRisks;
             }
 
-            function getRiskLevel(impact, probability) {
-                let score = impact * probability;
-                if (score >= 17) return 'veryhigh';
-                if (score >= 10) return 'high';
-                if (score >= 5) return 'medium';
-                return 'low';
-            }
-
             function getRamLevel(risk) {
-                if (currentView === 'current') return risk.projectRamCurrent || 'Medium';
-                if (currentView === 'target') return risk.projectRamTarget || 'Medium';
-                return risk.projectRamCurrent || 'Medium';
+                if (currentView === 'current') return risk.hsseRamCurrent || 'Medium';
+                if (currentView === 'target') return risk.hsseRamTarget || 'Medium';
+                return risk.riskVisualRamTarget || 'Medium';
             }
 
             function updateFilterCounts() {
-                const acceptable = risks.filter(r => (r.acceptability || '').toLowerCase().includes('acceptable')).length;
-                const needs      = risks.filter(r => (r.acceptability || '').toLowerCase().includes('needs')).length;
-                const major      = risks.filter(r => (r.acceptability || '').toLowerCase().includes('major')).length;
-                const review     = risks.filter(r => (r.acceptability || '').toLowerCase().includes('review')).length;
-                const removed    = risks.filter(r => (r.status || '').toLowerCase().includes('removed') || r.isRemoved).length;
+                const acceptable = risks.filter(r => {
+                    const level = getRamLevel(r).toLowerCase();
+                    return level.includes('low') || level.includes('very low');
+                }).length;
+                
+                const needs = risks.filter(r => {
+                    const level = getRamLevel(r).toLowerCase();
+                    return level.includes('medium');
+                }).length;
+                
+                const major = risks.filter(r => {
+                    const level = getRamLevel(r).toLowerCase();
+                    return level.includes('high');
+                }).length;
+                
+                const review = risks.filter(r => {
+                    const level = getRamLevel(r).toLowerCase();
+                    return level.includes('very high');
+                }).length;
+                
+                const removed = risks.filter(r => 
+                    r.status?.toLowerCase() === 'closed' || 
+                    r.status?.toLowerCase() === 'rejected'
+                ).length;
 
-                const change     = risks.filter(r => r.hasChange).length;
-                const isNew      = risks.filter(r => r.isNew).length;
-                const noChange   = risks.filter(r => !r.hasChange && !r.isNew).length;
+                const up = risks.filter(r => (r.trend || '').toLowerCase() === 'up').length;
+                const down = risks.filter(r => (r.trend || '').toLowerCase() === 'down').length;
+                const stable = risks.filter(r => !r.trend || (r.trend || '').toLowerCase() === 'stable').length;
 
-                const up         = risks.filter(r => (r.trend || '').toLowerCase() === 'up').length;
-                const down       = risks.filter(r => (r.trend || '').toLowerCase() === 'down').length;
-                const stable     = risks.filter(r => !r.trend || (r.trend || '').toLowerCase() === 'stable').length;
-
-                const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = String(val); };
+                const set = (id, val) => { 
+                    const el = document.getElementById(id); 
+                    if (el) el.innerText = String(val); 
+                };
 
                 set('count-acceptable', acceptable);
                 set('count-needs', needs);
                 set('count-major', major);
                 set('count-review', review);
                 set('count-removed', removed);
-                set('count-change', change);
-                set('count-new', isNew);
-                set('count-nochange', noChange);
-                set('count-removed2', removed);
                 set('count-up', up);
                 set('count-down', down);
                 set('count-stable', stable);
@@ -702,7 +852,11 @@
 
             function showTooltip(event, risk) {
                 const trend = risk.trend || 'stable';
-                const trendIcon = trend === 'up' ? '↑' : (trend === 'down' ? '↓' : '→');
+                let trendIcon = '';
+                if (trend === 'up') trendIcon = '<span class="trend-arrow-up"></span>';
+                else if (trend === 'down') trendIcon = '<span class="trend-arrow-down"></span>';
+                else trendIcon = '<span class="trend-circle"></span>';
+                
                 const isNew = risk.isNew || false;
                 const hasChange = risk.hasChange || false;
                 const changeText = isNew ? 'New' : (hasChange ? 'Shows change' : 'No change');
@@ -712,13 +866,20 @@
                 const score = imp * prob;
                 const level = getRiskLevel(imp, prob);
                 
+                // Get the appropriate RAM value based on view
+                let ramDisplay = '—';
+                if (currentView === 'current') ramDisplay = risk.hsseRamCurrent || '—';
+                else if (currentView === 'target') ramDisplay = risk.hsseRamTarget || '—';
+                else ramDisplay = risk.riskVisualRamTarget || '—';
+                
                 tooltip.innerHTML = `
                     <div class="tooltip-title">${escapeHtml(risk.riskId || 'N/A')} · ${escapeHtml(risk.title || '').substring(0,40)}</div>
-                    <div class="tooltip-row"><span class="tooltip-label">Impact/Prob</span><span class="tooltip-value">${escapeHtml(risk.impact)} / ${escapeHtml(risk.probability)}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Impact/Prob (${currentSize})</span><span class="tooltip-value">${imp} / ${prob}</span></div>
                     <div class="tooltip-row"><span class="tooltip-label">Score / Level</span><span class="tooltip-value">${score} · ${level}</span></div>
-                    <div class="tooltip-row"><span class="tooltip-label">Project RAM</span><span class="tooltip-value">${escapeHtml(risk.projectRamCurrent || '—')}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">RAM ${currentView}</span><span class="tooltip-value">${escapeHtml(ramDisplay)}</span></div>
                     <div class="tooltip-row"><span class="tooltip-label">Owner</span><span class="tooltip-value">${escapeHtml(risk.riskOwnerName || '—')}</span></div>
                     <div class="tooltip-row"><span class="tooltip-label">Status</span><span class="tooltip-value">${escapeHtml(risk.status || '—')}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Sub Project</span><span class="tooltip-value">${escapeHtml(risk.subProject || '—')}</span></div>
                     <div class="tooltip-row"><span class="tooltip-label">Trend</span><span class="tooltip-value">${trendIcon} ${trend}</span></div>
                     <div class="tooltip-row"><span class="tooltip-label">Change</span><span class="tooltip-value">${changeText}</span></div>
                 `;
@@ -727,8 +888,16 @@
             }
 
             function positionTooltip(event) {
-                tooltip.style.left = (event.clientX + 15) + 'px';
-                tooltip.style.top = (event.clientY + 10) + 'px';
+                const x = event.clientX + 15;
+                const y = event.clientY + 10;
+                
+                // Ensure tooltip stays within viewport
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const maxX = window.innerWidth - tooltipRect.width - 20;
+                const maxY = window.innerHeight - tooltipRect.height - 20;
+                
+                tooltip.style.left = Math.min(x, maxX) + 'px';
+                tooltip.style.top = Math.min(y, maxY) + 'px';
             }
 
             function hideTooltip() {
@@ -741,17 +910,21 @@
             }
 
             function handleRiskClick(risk) {
-                console.log('Risk clicked:', risk.riskId || risk.id);
-                const details = `
+                // Open risk detail view
+                if (risk._id) {
+                    localStorage.setItem('viewingRisk', JSON.stringify(risk));
+                    window.open('risk-detail.html', '_blank');
+                } else {
+                    alert(`
 Risk ID: ${risk.riskId || 'N/A'}
 Title: ${risk.title || 'Untitled'}
-Impact: ${risk.impact || 'N/A'}
-Probability: ${risk.probability || 'N/A'}
+RAM Current: ${risk.hsseRamCurrent || 'N/A'}
+RAM Target: ${risk.hsseRamTarget || 'N/A'}
 Status: ${risk.status || 'N/A'}
 Owner: ${risk.riskOwnerName || 'N/A'}
 Trend: ${risk.trend || 'stable'}
-                `;
-                alert(details);
+                    `);
+                }
             }
 
             function createBadge(risk) {
@@ -765,7 +938,8 @@ Trend: ${risk.trend || 'stable'}
                 const dot = document.createElement('span');
                 const ramLevel = getRamLevel(risk).toLowerCase();
                 dot.className = 'risk-dot';
-                if (ramLevel.includes('high')) dot.classList.add('high');
+                if (ramLevel.includes('very high')) dot.classList.add('critical');
+                else if (ramLevel.includes('high')) dot.classList.add('high');
                 else if (ramLevel.includes('medium')) dot.classList.add('medium');
                 else dot.classList.add('low');
                 
@@ -776,9 +950,14 @@ Trend: ${risk.trend || 'stable'}
                 const trendSpan = document.createElement('span');
                 const trend = risk.trend || 'stable';
                 trendSpan.className = `risk-trend trend-${trend}`;
-                trendSpan.innerHTML = trend === 'up' ? '<i class="fas fa-arrow-up"></i>' :
-                                      trend === 'down' ? '<i class="fas fa-arrow-down"></i>' :
-                                      '<i class="fas fa-minus"></i>';
+                
+                if (trend === 'up') {
+                    trendSpan.innerHTML = '<span class="trend-arrow-up"></span>';
+                } else if (trend === 'down') {
+                    trendSpan.innerHTML = '<span class="trend-arrow-down"></span>';
+                } else {
+                    trendSpan.innerHTML = '<span class="trend-circle"></span>';
+                }
 
                 div.appendChild(dot);
                 div.appendChild(titleSpan);
@@ -815,11 +994,17 @@ Trend: ${risk.trend || 'stable'}
             }
 
             function buildMatrix() {
-                const grid = document.getElementById('riskMatrix');
+                const grid = document.getElementById('matrixGrid');
+                if (!grid) return;
+                
                 grid.innerHTML = '';
                 
-                for (let impact = 5; impact >= 1; impact--) {
-                    for (let prob = 1; prob <= 5; prob++) {
+                const size = currentSize === '5x5' ? 5 : 3;
+                
+                // For 5x5: impact from 5 down to 1, prob from 1 to 5
+                // For 3x3: impact from 3 down to 1, prob from 1 to 3
+                for (let impact = size; impact >= 1; impact--) {
+                    for (let prob = 1; prob <= size; prob++) {
                         const cell = document.createElement('div');
                         cell.className = 'matrix-cell';
                         const level = getRiskLevel(impact, prob);
@@ -829,6 +1014,13 @@ Trend: ${risk.trend || 'stable'}
                             const rImpact = getImpactForView(r);
                             const rProb = getProbabilityForView(r);
                             return rImpact === impact && rProb === prob;
+                        });
+                        
+                        // Sort risks by priority (higher risk level first)
+                        cellRisks.sort((a, b) => {
+                            const aLevel = getRamLevel(a);
+                            const bLevel = getRamLevel(b);
+                            return bLevel.localeCompare(aLevel);
                         });
                         
                         cellRisks.forEach(r => cell.appendChild(createBadge(r)));
@@ -847,18 +1039,28 @@ Trend: ${risk.trend || 'stable'}
                 }
             }
 
+            function switchSize(size, btn) {
+                currentSize = size;
+                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateAxisLabels();
+                if (risks.length > 0) {
+                    buildMatrix();
+                    updateFilterCounts();
+                }
+            }
+
             function refreshMatrix() {
                 loadRisks();
             }
 
             // ---------- EXPORT FUNCTIONS ----------
-            // Export 5x5 matrix as image (renamed function)
             window.exportMatrixImage = function() {
                 const matrixDiv = document.querySelector('.matrix-container');
                 if (!matrixDiv) return;
                 html2canvas(matrixDiv, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
                     const link = document.createElement('a');
-                    link.download = `risk-matrix-5x5.png`;
+                    link.download = `risk-matrix-${currentSize}-${currentView}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                 });
@@ -870,18 +1072,16 @@ Trend: ${risk.trend || 'stable'}
                 let y = 10;
 
                 pdf.setFontSize(16);
-                pdf.text('Risk Profile (with actions summary)', 10, y);
+                pdf.text('Risk Profile - Super Admin View', 10, y);
                 y += 10;
                 pdf.setFontSize(10);
                 pdf.text('Generated: ' + new Date().toLocaleString(), 10, y);
                 y += 10;
 
-                // Matrix description
                 pdf.setFontSize(12);
-                pdf.text('Risk Matrix Snapshot (' + currentView + ' view)', 10, y);
+                pdf.text(`Risk Matrix (${currentView} view, ${currentSize})`, 10, y);
                 y += 8;
 
-                // Add matrix as image
                 const matrixDiv = document.querySelector('.matrix-container');
                 if (matrixDiv) {
                     return html2canvas(matrixDiv, { scale: 2 }).then(canvas => {
@@ -891,29 +1091,73 @@ Trend: ${risk.trend || 'stable'}
                         pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
                         y += imgHeight + 10;
 
-                        // Actions summary
                         pdf.setFontSize(12);
-                        pdf.text('Actions Summary (presentation-ready)', 10, y);
+                        pdf.text('Risk Summary', 10, y);
                         y += 6;
                         pdf.setFontSize(9);
-                        risks.slice(0, 10).forEach((r, idx) => {
-                            if (y > 280) { pdf.addPage(); y = 20; }
-                            const action = r.actionSummary || 'Review risk response';
-                            pdf.text(`• ${r.riskId || 'Risk'}: ${r.title || 'Untitled'} — ${action}`, 12, y);
-                            y += 5;
-                        });
+                        
+                        // Add risk summary table
+                        const headers = [['ID', 'Title', 'RAM Current', 'RAM Target', 'Status', 'Owner']];
+                        const data = risks.slice(0, 15).map(r => [
+                            r.riskId || 'N/A',
+                            (r.title || 'Untitled').substring(0, 20),
+                            r.hsseRamCurrent || '—',
+                            r.hsseRamTarget || '—',
+                            r.status || '—',
+                            r.riskOwnerName || '—'
+                        ]);
+                        
+                        // Add autoTable if available
+                        if (typeof pdf.autoTable === 'function') {
+                            pdf.autoTable({
+                                head: headers,
+                                body: data,
+                                startY: y,
+                                margin: { left: 10, right: 10 },
+                                styles: { fontSize: 8, cellPadding: 2 },
+                                headStyles: { fillColor: [93, 161, 161] }
+                            });
+                        }
 
-                        pdf.save('full-risk-profile.pdf');
+                        pdf.save(`risk-profile-${currentView}-${currentSize}.pdf`);
                     });
                 } else {
                     pdf.save('risk-profile-basic.pdf');
                 }
             };
 
+            // Initialize axis labels
+            updateAxisLabels();
+
+            // Make functions globally available
             window.switchView = switchView;
+            window.switchSize = switchSize;
             window.refreshMatrix = refreshMatrix;
 
-            document.addEventListener('DOMContentLoaded', loadRisks);
+            // Load risks when page loads
+            document.addEventListener('DOMContentLoaded', () => {
+                // Check authentication
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.parent.location.href = '/login.html';
+                    return;
+                }
+                loadRisks();
+            });
+
+            // Add escape key to close tooltip and notify parent
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    hideTooltip();
+                }
+            });
+
+            // Listen for messages from parent
+            window.addEventListener('message', (event) => {
+                if (event.data === 'refreshRisks') {
+                    refreshMatrix();
+                }
+            });
         })();
     </script>
 </body>
