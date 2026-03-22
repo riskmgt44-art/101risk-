@@ -141,13 +141,13 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            margin-right: 8px;
+            margin-right: 12px;
             padding: 2px 0;
             height: auto;
-            gap: 2px;
+            gap: 4px;
         }
         .y-axis-label, .x-axis-label { 
-            font-size: 10px; 
+            font-size: 13px;
             font-weight: 600; 
             color: var(--text-secondary);
             white-space: nowrap;
@@ -159,9 +159,9 @@
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(5, 1fr);
-            gap: 4px;
+            gap: 6px;
             background: #F6F5F7;
-            padding: 4px;
+            padding: 6px;
             border-radius: var(--radius-lg);
             width: 100%;
             aspect-ratio: 5 / 3;
@@ -173,9 +173,9 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 4px;
+            gap: 6px;
             background: #F6F5F7;
-            padding: 4px;
+            padding: 6px;
             border-radius: var(--radius-lg);
             width: 100%;
             aspect-ratio: 3 / 2;
@@ -186,20 +186,19 @@
         .matrix-cell {
             border-radius: var(--radius-md);
             border: 1px solid rgba(255,255,255,0.6);
-            padding: 2px;
+            padding: 6px 4px;
             overflow-y: auto;
             transition: var(--transition);
             display: flex;
             flex-direction: column;
-            gap: 2px;
-            font-size: 8px;
+            gap: 6px;
+            font-size: 12px;
             scrollbar-width: thin;
             scrollbar-color: var(--primary) var(--shimmer-bg);
-            background-color: #fafafa;
             max-height: 100%;
         }
         .matrix-cell::-webkit-scrollbar {
-            width: 3px;
+            width: 4px;
         }
         .matrix-cell::-webkit-scrollbar-track {
             background: var(--shimmer-bg);
@@ -222,41 +221,80 @@
             z-index: 10;
         }
 
-        /* Compact badge styling */
+        /* Compact badge styling - NO WHITE BACKGROUND */
         .risk-badge {
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            padding: 1px 4px 1px 3px;
-            font-size: 7px;
-            font-weight: 500;
+            background: transparent;
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 11px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 2px;
-            border: 1px solid rgba(0,0,0,0.08);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            gap: 6px;
+            border: 1px solid rgba(0,0,0,0.3);
+            box-shadow: none;
             cursor: pointer;
             transition: var(--transition);
             position: relative;
             flex-shrink: 0;
-            line-height: 1.2;
-            height: 16px;
+            line-height: 1.3;
+            height: auto;
+            min-height: 26px;
             width: 100%;
             box-sizing: border-box;
         }
+        
+        /* Default text color for badges - dark for light backgrounds */
+        .risk-badge {
+            color: #000000;
+            text-shadow: 0 0 1px rgba(255,255,255,0.5);
+        }
+        
+        /* White text for red (very high risk) cells */
+        .matrix-cell[data-risk-level="veryhigh"] .risk-badge {
+            color: #FFFFFF;
+            text-shadow: 0 0 2px rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        .matrix-cell[data-risk-level="veryhigh"] .risk-title {
+            color: #FFFFFF;
+        }
+        
+        .matrix-cell[data-risk-level="veryhigh"] .risk-dot {
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        /* Dark text for other cells */
+        .matrix-cell[data-risk-level="high"] .risk-badge,
+        .matrix-cell[data-risk-level="medium"] .risk-badge,
+        .matrix-cell[data-risk-level="low"] .risk-badge {
+            color: #000000;
+            text-shadow: 0 0 1px rgba(255,255,255,0.5);
+            border-color: rgba(0,0,0,0.3);
+        }
+        
         .risk-badge:hover {
+            background: rgba(255,255,255,0.3);
             border-color: var(--primary);
-            background: white;
             transform: translateY(-1px);
         }
+        
+        .matrix-cell[data-risk-level="veryhigh"] .risk-badge:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.8);
+        }
+        
         .risk-badge:active {
             transform: translateY(0);
         }
 
         .risk-dot {
-            width: 4px;
-            height: 4px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.2);
         }
         .risk-dot.critical { background: #FF0000; }
         .risk-dot.high     { background: #FFC107; }
@@ -268,15 +306,19 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            font-size: 7px;
-            font-weight: 500;
-            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 600;
             min-width: 0;
+        }
+        
+        /* Default title color */
+        .risk-title {
+            color: #000000;
         }
 
         .risk-trend {
             margin-left: auto;
-            font-size: 5px;
+            font-size: 8px;
             display: flex;
             align-items: center;
             flex-shrink: 0;
@@ -290,34 +332,37 @@
             position: absolute;
             top: -2px;
             right: -2px;
-            width: 4px;
-            height: 4px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: #0288D1;
-            border: 1.5px solid white;
+            border: 1.5px solid rgba(255,255,255,0.8);
         }
         .risk-change-indicator.orange { background: #ED6C02; }
 
         .x-axis-labels-5x5 {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
-            margin-top: 4px;
-            margin-left: 48px;
+            gap: 6px;
+            margin-top: 8px;
+            margin-left: 60px;
             text-align: center;
         }
         .x-axis-labels-3x3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
-            margin-top: 4px;
-            margin-left: 48px;
+            gap: 6px;
+            margin-top: 8px;
+            margin-left: 60px;
             text-align: center;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
-        .x-axis-labels-5x5 .x-axis-label, .x-axis-labels-3x3 .x-axis-label { text-align: center; }
+        .x-axis-labels-5x5 .x-axis-label, .x-axis-labels-3x3 .x-axis-label { 
+            text-align: center;
+            font-size: 13px;
+        }
 
         /* Filter sections moved below matrix */
         .filters-container {
@@ -335,7 +380,7 @@
             min-width: 180px;
         }
         .filter-group h3 {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.03em;
@@ -345,17 +390,17 @@
         .filter-items {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
         .filter-item {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 10px;
+            gap: 8px;
+            font-size: 12px;
         }
         .filter-color { 
-            width: 8px; 
-            height: 8px; 
+            width: 12px; 
+            height: 12px; 
             border-radius: 4px; 
             flex-shrink: 0; 
         }
@@ -364,13 +409,16 @@
         .filter-color.major-improvement { background: #FF0000; }
         .filter-color.under-review { background: #9C27B0; }
         .filter-color.removed { background: #94A3B8; }
-        .filter-label { color: var(--text-primary); }
+        .filter-label { 
+            color: var(--text-primary);
+            font-size: 12px;
+        }
         .filter-count { 
             margin-left: auto; 
             color: var(--neutral); 
-            font-size: 10px;
-            font-weight: 500;
-            min-width: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 24px;
             text-align: right;
         }
 
@@ -380,15 +428,24 @@
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
             padding: 12px 16px;
-            display: flex; gap: 24px; flex-wrap: wrap;
+            display: flex; gap: 32px; flex-wrap: wrap;
         }
         .legend-group h4 { 
-            font-size: 10px; font-weight: 600; color: var(--text-secondary); 
-            text-transform: uppercase; margin-bottom: 6px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            margin-bottom: 8px; 
         }
-        .legend-items { display: flex; gap: 12px; flex-wrap: wrap; }
-        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; }
-        .legend-color { width: 12px; height: 12px; border-radius: 4px; }
+        .legend-items { display: flex; gap: 16px; flex-wrap: wrap; }
+        .legend-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
         .legend-color.veryhigh { background: #FF0000; }
         .legend-color.high     { background: #FFC107; }
         .legend-color.medium   { background: #FFFF00; }
@@ -398,22 +455,22 @@
         .trend-arrow-up {
             width: 0;
             height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-bottom: 6px solid #00FF00;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 8px solid #00FF00;
             display: inline-block;
         }
         .trend-arrow-down {
             width: 0;
             height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-top: 6px solid #FF0000;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #FF0000;
             display: inline-block;
         }
         .trend-circle {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: var(--neutral);
             display: inline-block;
@@ -424,25 +481,37 @@
             align-items: center;
             justify-content: center;
             height: 200px;
-            font-size: 13px;
+            font-size: 14px;
             color: var(--neutral);
             background: var(--shimmer-bg);
             border-radius: var(--radius);
         }
 
         #riskTooltip {
-            position: absolute; background: white; border-radius: var(--radius-md); padding: 8px 12px;
+            position: absolute; background: white; border-radius: var(--radius-md); padding: 12px 16px;
             box-shadow: var(--shadow-md); border: 1px solid var(--border); z-index: 9999;
-            pointer-events: none; max-width: 220px; font-size: 10px; transition: opacity 0.15s; opacity: 0;
+            pointer-events: none; max-width: 280px; font-size: 12px; transition: opacity 0.15s; opacity: 0;
         }
         #riskTooltip.show { opacity: 1; }
-        .tooltip-title { font-weight: 700; color: var(--text-primary); margin-bottom: 4px; border-bottom: 1px solid var(--border); padding-bottom: 2px; font-size: 11px; }
-        .tooltip-row { display: flex; justify-content: space-between; margin-top: 2px; font-size: 9px; }
+        .tooltip-title { 
+            font-weight: 700; 
+            color: var(--text-primary); 
+            margin-bottom: 8px; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 4px; 
+            font-size: 13px; 
+        }
+        .tooltip-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-top: 4px; 
+            font-size: 11px; 
+        }
         .tooltip-label { color: var(--neutral); font-weight: 500; }
         .tooltip-value { color: var(--text-primary); font-weight: 600; }
 
         @media (max-width: 1200px) {
-            .x-axis-labels-5x5 { margin-left: 40px; }
+            .x-axis-labels-5x5 { margin-left: 50px; }
         }
         @media (max-width: 768px) {
             .risk-visual-header { 
@@ -452,6 +521,16 @@
             .main { padding: 12px; }
             .view-toggle-group { flex-direction: column; align-items: flex-start; }
             .filters-container { flex-direction: column; gap: 16px; }
+            .risk-badge {
+                padding: 3px 4px;
+                font-size: 9px;
+            }
+            .risk-title {
+                font-size: 9px;
+            }
+            .y-axis-label, .x-axis-label {
+                font-size: 11px;
+            }
         }
     </style>
 </head>
@@ -540,7 +619,7 @@
                             <span class="filter-count" id="count-down">0</span>
                         </div>
                         <div class="filter-item">
-                            <i class="fas fa-times-circle" style="color:#94A3B8; width: 12px;"></i>
+                            <i class="fas fa-times-circle" style="color:#94A3B8; width: 14px;"></i>
                             <span class="filter-label">Removed</span>
                             <span class="filter-count" id="count-removed3">0</span>
                         </div>
