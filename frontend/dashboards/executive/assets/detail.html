@@ -29,10 +29,9 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Enable scrolling on entire page */
         html, body {
             height: 100%;
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
         }
         
         body {
@@ -41,7 +40,6 @@
             color: var(--text-primary);
             padding: 32px;
             min-height: 100vh;
-            /* Enable vertical scrolling */
             overflow-y: auto;
         }
         
@@ -61,23 +59,9 @@
             font-weight: 600;
             color: var(--text-primary);
         }
-        .back-link {
-            color: var(--primary);
-            font-size: 14px;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .back-link:hover {
-            color: var(--primary-hover);
-        }
         .action-buttons {
             display: flex;
             gap: 12px;
-            margin-top: 16px;
         }
         .btn-edit, .btn-delete, .btn-back {
             padding: 10px 20px;
@@ -119,13 +103,6 @@
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
             margin-bottom: 32px;
-            min-height: 300px; /* Ensure minimum height */
-        }
-        .asset-name {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--text-primary);
         }
         .category-badge {
             font-size: 14px;
@@ -171,11 +148,10 @@
             line-height: 1.6;
             color: var(--text-primary);
             white-space: pre-wrap;
-            max-height: 300px; /* Make description scrollable if too long */
+            max-height: 300px;
             overflow-y: auto;
             padding-right: 8px;
         }
-        /* Custom scrollbar for description */
         .description-text::-webkit-scrollbar {
             width: 6px;
         }
@@ -211,86 +187,193 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Associated Risks Section */
+        /* Associated Risks Table Section */
         .risks-section {
             background: var(--card-bg);
             border-radius: var(--radius);
             padding: 32px;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
-            min-height: 300px; /* Ensure minimum height */
-            margin-bottom: 60px; /* Add space at bottom for scrolling */
+            margin-bottom: 60px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
         }
         .section-title {
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 24px;
             color: var(--text-primary);
         }
-        .risk-list {
+        .risk-stats {
+            font-size: 13px;
+            color: var(--text-muted);
+            background: rgba(93,161,161,0.08);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        /* Filter Controls */
+        .risk-filters {
             display: flex;
-            flex-direction: column;
             gap: 12px;
-            max-height: 400px; /* Make risk list scrollable if too long */
-            overflow-y: auto;
-            padding-right: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
         }
-        /* Custom scrollbar for risk list */
-        .risk-list::-webkit-scrollbar {
-            width: 6px;
+        .risk-search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
         }
-        .risk-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
+        .risk-search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 13px;
         }
-        .risk-list::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
-        }
-        .risk-item {
-            padding: 16px;
+        .risk-search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
             border: 1px solid var(--border);
             border-radius: 8px;
+            font-size: 13px;
             transition: var(--transition);
         }
-        .risk-item:hover {
-            box-shadow: var(--shadow-sm);
+        .risk-search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
         }
-        .risk-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-        .risk-title {
-            font-weight: 600;
-            font-size: 15px;
-            color: var(--text-primary);
-        }
-        .risk-severity {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .severity-high { background: rgba(239,68,68,0.1); color: var(--red); }
-        .severity-medium { background: rgba(245,158,11,0.1); color: var(--amber); }
-        .severity-low { background: rgba(93,161,161,0.1); color: var(--primary); }
-        .risk-description {
+        .risk-filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             font-size: 13px;
+            background: white;
+            cursor: pointer;
+            min-width: 120px;
+        }
+        .clear-risk-filters {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
             color: var(--text-secondary);
-            margin-bottom: 8px;
-            line-height: 1.5;
         }
-        .risk-status {
+        .clear-risk-filters:hover {
+            background: rgba(93,161,161,0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        /* Risk Table Styles */
+        .risk-table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        .risk-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: rgba(93,161,161,0.05);
+            font-weight: 600;
             font-size: 12px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
         }
+        .risk-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+        .risk-table tr:hover {
+            background: rgba(93,161,161,0.03);
+        }
+        
+        .risk-link {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .risk-link:hover {
+            text-decoration: underline;
+        }
+        
+        .risk-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .risk-pill.critical { background: rgba(239,68,68,0.1); color: #dc2626; }
+        .risk-pill.high { background: rgba(239,68,68,0.1); color: #ef4444; }
+        .risk-pill.medium { background: rgba(245,158,11,0.1); color: #d97706; }
+        .risk-pill.low { background: rgba(93,161,161,0.1); color: var(--primary); }
+        
+        .status-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-open { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .status-progress { background: rgba(245,158,11,0.1); color: #d97706; }
+        .status-mitigated { background: rgba(16,185,129,0.1); color: #10b981; }
+        .status-closed { background: rgba(107,114,128,0.1); color: #6b7280; }
+        
+        .type-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .type-downside { background: rgba(239,68,68,0.1); color: #ef4444; }
+        .type-upside { background: rgba(16,185,129,0.1); color: #10b981; }
+        
+        .action-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-muted);
+            transition: var(--transition);
+            padding: 6px;
+            border-radius: 6px;
+        }
+        .action-icon:hover {
+            color: var(--primary);
+            background: rgba(93,161,161,0.1);
+        }
+        
         .no-risks {
             text-align: center;
-            padding: 40px;
+            padding: 60px 40px;
             color: var(--text-muted);
-            font-style: italic;
+        }
+        .no-risks i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
         }
         
         /* Toast Notification */
@@ -340,16 +423,10 @@
             justify-content: center;
             z-index: 2000;
             backdrop-filter: blur(4px);
-            animation: fadeIn 0.3s ease;
-            overflow-y: auto; /* Enable scrolling in modal overlay */
-            padding: 20px; /* Add padding for small screens */
+            padding: 20px;
         }
         .modal-overlay.open {
             display: flex;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
         .modal {
             background: white;
@@ -357,7 +434,7 @@
             width: 500px;
             max-width: 90vw;
             max-height: 85vh;
-            overflow-y: auto; /* Enable scrolling in modal */
+            overflow-y: auto;
             box-shadow: var(--shadow-lg);
             animation: slideUp 0.3s ease;
         }
@@ -371,25 +448,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 1;
         }
         .modal-title {
             font-size: 18px;
             font-weight: 600;
-            color: var(--text-primary);
         }
         .modal-close {
             cursor: pointer;
             font-size: 24px;
             color: var(--text-muted);
-            line-height: 1;
-            transition: var(--transition);
-        }
-        .modal-close:hover {
-            color: var(--text-primary);
         }
         .modal-body {
             padding: 24px;
@@ -400,11 +467,6 @@
             display: flex;
             gap: 12px;
             justify-content: flex-end;
-            background: #f9fafb;
-            position: sticky;
-            bottom: 0;
-            background: white;
-            z-index: 1;
         }
         .btn-secondary, .btn-primary, .btn-danger {
             padding: 10px 20px;
@@ -413,28 +475,18 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
-            transition: all 0.2s ease;
         }
         .btn-secondary {
             background: #f3f4f6;
             color: var(--text-primary);
         }
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
         .btn-primary {
             background: var(--primary);
             color: white;
         }
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
         .btn-danger {
             background: var(--red);
             color: white;
-        }
-        .btn-danger:hover {
-            background: #dc2626;
         }
         .form-group {
             margin-bottom: 20px;
@@ -454,18 +506,6 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.2s;
-        }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
-        }
-        .form-group textarea {
-            min-height: 90px;
-            resize: vertical;
         }
         .form-row {
             display: flex;
@@ -476,8 +516,6 @@
             flex: 1;
             margin-bottom: 0;
         }
-        
-        /* Delete Modal Specific */
         .delete-icon {
             width: 64px;
             height: 64px;
@@ -493,7 +531,6 @@
         .delete-message {
             text-align: center;
             font-size: 16px;
-            color: var(--text-primary);
             margin-bottom: 8px;
         }
         .delete-submessage {
@@ -509,48 +546,28 @@
             padding: 16px;
             margin-top: 20px;
         }
-        .warning-box p {
-            font-size: 13px;
-            color: #92400e;
-            margin: 0;
-        }
         
-        /* Loading State for Modals */
-        .modal-loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-        }
-        .modal-loading-spinner {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(93,161,161,0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 12px;
-        }
-        
-        /* Responsive adjustments for scrolling */
-        @media (max-height: 800px) {
-            .asset-card, .risks-section {
-                min-height: 200px;
-            }
-            .risk-list {
-                max-height: 300px;
-            }
-        }
-        
-        @media (max-height: 600px) {
+        @media (max-width: 768px) {
             body {
                 padding: 16px;
             }
-            .asset-card, .risks-section {
-                padding: 24px;
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
             }
-            .risk-list {
-                max-height: 200px;
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .asset-card, .risks-section {
+                padding: 20px;
+            }
+            .risk-filters {
+                flex-direction: column;
+            }
+            .risk-search-box, .risk-filter-select, .clear-risk-filters {
+                width: 100%;
             }
         }
     </style>
@@ -619,9 +636,65 @@
         </div>
 
         <div class="risks-section">
-            <h2 class="section-title">Associated Risks</h2>
-            <div id="riskList" class="risk-list">
-                <div class="no-risks">No associated risks found.</div>
+            <div class="section-header">
+                <h2 class="section-title">Associated Risks</h2>
+                <div class="risk-stats" id="riskStats">0 risks</div>
+            </div>
+            
+            <!-- Filter Controls -->
+            <div class="risk-filters">
+                <div class="risk-search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="riskSearchInput" placeholder="Search by title, ID, or owner...">
+                </div>
+                <select class="risk-filter-select" id="riskSeverityFilter">
+                    <option value="">All Severities</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+                <select class="risk-filter-select" id="riskTypeFilter">
+                    <option value="">All Types</option>
+                    <option value="Downside">Downside (Threat)</option>
+                    <option value="Upside">Upside (Opportunity)</option>
+                </select>
+                <select class="risk-filter-select" id="riskStatusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Mitigated">Mitigated</option>
+                    <option value="Closed">Closed</option>
+                </select>
+                <button class="clear-risk-filters" onclick="clearRiskFilters()">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+            
+            <!-- Risk Table -->
+            <div class="risk-table-wrapper">
+                <table class="risk-table" id="riskTable">
+                    <thead>
+                        <tr>
+                            <th>Risk ID</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>HSSE RAM</th>
+                            <th>Visual RAM</th>
+                            <th>Status</th>
+                            <th>Owner</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riskTableBody">
+                        <tr>
+                            <td colspan="8" class="no-risks">
+                                <i class="fas fa-shield-alt"></i>
+                                <div>No associated risks found.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -646,7 +719,7 @@
                         <div class="form-group">
                             <label for="editAssetCategory">Asset Category *</label>
                             <select id="editAssetCategory" required>
-                                <option value="" disabled>Select category</option>
+                                <option value="">Select category</option>
                                 <option value="Department">Department</option>
                                 <option value="Business Unit">Business Unit</option>
                                 <option value="Production Asset">Production Asset</option>
@@ -659,7 +732,7 @@
                         <div class="form-group">
                             <label for="editAssetNature">Asset Nature</label>
                             <select id="editAssetNature">
-                                <option value="">Select nature (optional)</option>
+                                <option value="">Select nature</option>
                                 <option value="Operational">Operational</option>
                                 <option value="Corporate">Corporate</option>
                                 <option value="Technical">Technical</option>
@@ -687,7 +760,7 @@
                     </div>
                     <div class="form-group">
                         <label for="editAssetDescription">Description</label>
-                        <textarea id="editAssetDescription" placeholder="Enter asset description..."></textarea>
+                        <textarea id="editAssetDescription" rows="3"></textarea>
                     </div>
                 </form>
             </div>
@@ -710,15 +783,13 @@
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <div class="delete-message" id="deleteAssetName">Are you sure you want to delete this asset?</div>
-                <div class="delete-submessage">This action cannot be undone. All data associated with this asset will be permanently removed.</div>
-                
+                <div class="delete-submessage">This action cannot be undone.</div>
                 <div class="warning-box">
-                    <p><i class="fas fa-exclamation-circle"></i> <strong>Warning:</strong> If this asset is linked to any risks or actions, the delete operation will fail. Please ensure all associations are removed first.</p>
+                    <p><i class="fas fa-exclamation-circle"></i> If this asset is linked to risks, deletion will fail.</p>
                 </div>
-                
                 <div class="form-group" style="margin-top: 24px;">
                     <label for="confirmDelete">Type "DELETE" to confirm</label>
-                    <input type="text" id="confirmDelete" placeholder="Type DELETE here" style="font-weight: 600; letter-spacing: 1px;">
+                    <input type="text" id="confirmDelete" placeholder="Type DELETE here">
                 </div>
             </div>
             <div class="modal-footer">
@@ -731,8 +802,8 @@
     <script>
         let currentAssetId = null;
         let currentAssetData = null;
+        let allRisks = [];
 
-        // Toast Notification System
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -749,7 +820,6 @@
             }, 3000);
         }
 
-        // Navigation
         function goBack() {
             if (window.parent && window.parent.loadIframePage) {
                 window.parent.loadIframePage('assets/list.html');
@@ -758,7 +828,140 @@
             }
         }
 
-        // Load Asset Details
+        function getRiskSeverityClass(ramLevel) {
+            if (!ramLevel) return 'medium';
+            const level = ramLevel.toLowerCase();
+            if (level.includes('very high')) return 'critical';
+            if (level.includes('high')) return 'high';
+            if (level.includes('medium')) return 'medium';
+            return 'low';
+        }
+
+        function getStatusClass(status) {
+            if (!status) return 'status-open';
+            const s = status.toLowerCase();
+            if (s === 'open') return 'status-open';
+            if (s === 'in progress') return 'status-progress';
+            if (s === 'mitigated') return 'status-mitigated';
+            if (s === 'closed') return 'status-closed';
+            return 'status-open';
+        }
+
+        function getTypeClass(type) {
+            if (!type) return 'type-downside';
+            return type === 'Upside' ? 'type-upside' : 'type-downside';
+        }
+
+        function getLastFourDigits(riskId) {
+            if (!riskId) return '—';
+            const idStr = String(riskId);
+            return idStr.slice(-6);
+        }
+
+        function filterAndRenderRisks() {
+            const searchTerm = document.getElementById('riskSearchInput').value.toLowerCase();
+            const severityFilter = document.getElementById('riskSeverityFilter').value;
+            const typeFilter = document.getElementById('riskTypeFilter').value;
+            const statusFilter = document.getElementById('riskStatusFilter').value;
+            
+            const filteredRisks = allRisks.filter(risk => {
+                const matchesSearch = !searchTerm || 
+                    (risk.title && risk.title.toLowerCase().includes(searchTerm)) ||
+                    (risk.riskId && risk.riskId.toLowerCase().includes(searchTerm)) ||
+                    (risk.riskOwnerName && risk.riskOwnerName.toLowerCase().includes(searchTerm));
+                
+                const riskSeverity = getRiskSeverityClass(risk.hsseRamCurrent);
+                const matchesSeverity = !severityFilter || riskSeverity === severityFilter;
+                const matchesType = !typeFilter || risk.type === typeFilter;
+                const matchesStatus = !statusFilter || risk.status === statusFilter;
+                
+                return matchesSearch && matchesSeverity && matchesType && matchesStatus;
+            });
+            
+            renderRisksTable(filteredRisks);
+            updateRiskStats(filteredRisks.length);
+        }
+
+        function updateRiskStats(count) {
+            const statsEl = document.getElementById('riskStats');
+            if (statsEl) {
+                statsEl.textContent = `${count} risk${count !== 1 ? 's' : ''}`;
+            }
+        }
+
+        function clearRiskFilters() {
+            document.getElementById('riskSearchInput').value = '';
+            document.getElementById('riskSeverityFilter').value = '';
+            document.getElementById('riskTypeFilter').value = '';
+            document.getElementById('riskStatusFilter').value = '';
+            filterAndRenderRisks();
+        }
+
+        function renderRisksTable(risks) {
+            const tbody = document.getElementById('riskTableBody');
+            
+            if (!risks || risks.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-risks">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>No associated risks found.</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            risks.forEach(risk => {
+                const riskId = risk.riskId || `RISK-${getLastFourDigits(risk._id || risk.id)}`;
+                const severityClass = getRiskSeverityClass(risk.hsseRamCurrent);
+                const statusClass = getStatusClass(risk.status);
+                const typeClass = getTypeClass(risk.type);
+                
+                html += `
+                    <tr>
+                        <td>
+                            <a class="risk-link" onclick="viewRiskDetail('${risk._id || risk.id}')">
+                                ${escapeHtml(riskId)}
+                            </a>
+                        </td>
+                        <td>
+                            <a class="risk-link" onclick="viewRiskDetail('${risk._id || risk.id}')">
+                                ${escapeHtml(risk.title || 'Untitled Risk')}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="type-pill ${typeClass}">${escapeHtml(risk.type || 'Downside')}</span>
+                        </td>
+                        <td>
+                            <span class="risk-pill ${severityClass}">${escapeHtml(risk.hsseRamCurrent || '—')}</span>
+                        </td>
+                        <td>
+                            <span class="risk-pill ${severityClass}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span>
+                        </td>
+                        <td>
+                            <span class="status-pill ${statusClass}">${escapeHtml(risk.status || 'Open')}</span>
+                        </td>
+                        <td>${escapeHtml(risk.riskOwnerName || '—')}</td>
+                        <td>
+                            <button class="action-icon" onclick="viewRiskDetail('${risk._id || risk.id}')" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        function viewRiskDetail(riskId) {
+            if (riskId) {
+                window.open(`risk-detail.html?id=${riskId}`, '_blank');
+            }
+        }
+
         async function loadAssetDetail() {
             const params = new URLSearchParams(window.location.search);
             currentAssetId = params.get('id');
@@ -772,33 +975,21 @@
 
             const token = localStorage.getItem('token');
             if (!token) {
-                document.getElementById('loading').innerHTML = '<div style="text-align:center;padding:40px;"><p>Please log in to view asset details.</p><button onclick="window.parent.location.href=\'auth/login.html\'" style="margin-top:20px;padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;">Go to Login</button></div>';
+                document.getElementById('loading').innerHTML = '<div><p>Please log in to view asset details.</p><button onclick="window.parent.location.href=\'auth/login.html\'" style="margin-top:20px;padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:6px;">Go to Login</button></div>';
                 return;
             }
 
             try {
                 const response = await fetch(`/api/assets/${currentAssetId}`, {
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('Asset not found');
-                    } else if (response.status === 401) {
-                        throw new Error('Session expired. Please log in again.');
-                    } else {
-                        throw new Error(`Failed to load asset (${response.status})`);
-                    }
-                }
+                if (!response.ok) throw new Error(`Failed to load asset (${response.status})`);
 
                 const asset = await response.json();
                 currentAssetData = asset;
 
-                // Populate fields
-                document.title = `${asset.name || 'Unnamed Asset'} • Asset Detail • RiskMGT`;
+                document.title = `${asset.name || 'Asset'} • Detail`;
                 document.getElementById('assetName').textContent = asset.name || 'Unnamed Asset';
                 document.getElementById('assetCategory').textContent = asset.category || 'Uncategorized';
                 document.getElementById('assetNature').textContent = asset.nature || '-';
@@ -806,117 +997,64 @@
                 document.getElementById('assetOwner').textContent = asset.owner || '-';
                 
                 if (asset.createdAt) {
-                    const createdDate = new Date(asset.createdAt);
-                    document.getElementById('assetCreated').textContent = createdDate.toLocaleString();
+                    document.getElementById('assetCreated').textContent = new Date(asset.createdAt).toLocaleString();
                 }
-                
                 if (asset.updatedAt) {
-                    const updatedDate = new Date(asset.updatedAt);
-                    document.getElementById('assetUpdated').textContent = updatedDate.toLocaleString();
+                    document.getElementById('assetUpdated').textContent = new Date(asset.updatedAt).toLocaleString();
                 }
 
                 const descEl = document.getElementById('assetDescription');
                 if (asset.description && asset.description.trim()) {
                     descEl.textContent = asset.description.trim();
-                    descEl.classList.remove('no-description');
                 } else {
                     descEl.innerHTML = '<span class="no-description">No description provided.</span>';
                 }
 
-                // Load associated risks
-                await loadAssociatedRisks(currentAssetId, token);
+                await loadAssociatedRisks(token);
 
-                // Hide loading, show content
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
 
-                // Ensure scrolling works
-                setTimeout(() => {
-                    if (document.body.scrollHeight <= window.innerHeight) {
-                        // If content is shorter than viewport, add some bottom padding
-                        document.querySelector('.risks-section').style.marginBottom = '100px';
-                    }
-                }, 100);
-
             } catch (err) {
-                console.error('Error loading asset:', err);
+                console.error('Error:', err);
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').innerHTML = `
-                    <div style="text-align:center;">
-                        <p style="color:var(--red);margin-bottom:16px;"><i class="fas fa-exclamation-circle"></i> ${err.message}</p>
-                        <button onclick="goBack()" style="padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;margin-top:10px;">
-                            <i class="fas fa-arrow-left"></i> Back to Asset List
-                        </button>
-                    </div>
-                `;
+                document.getElementById('error').innerHTML = `<p>${err.message}</p><button onclick="goBack()">Back</button>`;
                 document.getElementById('error').style.display = 'block';
             }
         }
 
-        async function loadAssociatedRisks(assetId, token) {
+        async function loadAssociatedRisks(token) {
             try {
-                const response = await fetch(`/api/assets/${assetId}/risks`, {
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
+                const response = await fetch(`/api/risks`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        // No risks associated, which is fine
-                        return;
-                    }
-                    throw new Error(`Failed to load risks (${response.status})`);
-                }
+                if (!response.ok) throw new Error(`Failed to load risks`);
 
-                const risks = await response.json();
-                const riskList = document.getElementById('riskList');
+                const data = await response.json();
+                const allRisksData = Array.isArray(data) ? data : (data.risks || []);
                 
-                if (!risks || risks.length === 0) {
-                    riskList.innerHTML = '<div class="no-risks">No associated risks found.</div>';
-                    return;
-                }
-
-                let html = '';
-                risks.forEach(risk => {
-                    const severity = risk.severity || 'Low';
-                    const severityClass = `severity-${severity.toLowerCase()}`;
-                    const description = risk.description ? risk.description.substring(0, 120) + (risk.description.length > 120 ? '...' : '') : 'No description';
-                    const status = risk.status || 'Open';
-                    
-                    html += `
-                        <div class="risk-item">
-                            <div class="risk-header">
-                                <div class="risk-title">${risk.title || 'Untitled Risk'}</div>
-                                <div class="risk-severity ${severityClass}">${severity}</div>
-                            </div>
-                            <div class="risk-description">${description}</div>
-                            <div class="risk-status">
-                                <strong>Status:</strong> ${status} | 
-                                <strong>Likelihood:</strong> ${risk.likelihood || 'Medium'} | 
-                                <strong>Impact:</strong> ${risk.impact || 'Medium'}
-                            </div>
-                        </div>
-                    `;
+                allRisks = allRisksData.filter(risk => {
+                    if (risk.assetId === currentAssetId) return true;
+                    if (risk.linkedAssets && risk.linkedAssets.includes(currentAssetId)) return true;
+                    return false;
                 });
                 
-                riskList.innerHTML = html;
+                filterAndRenderRisks();
+                
+                document.getElementById('riskSearchInput').addEventListener('input', filterAndRenderRisks);
+                document.getElementById('riskSeverityFilter').addEventListener('change', filterAndRenderRisks);
+                document.getElementById('riskTypeFilter').addEventListener('change', filterAndRenderRisks);
+                document.getElementById('riskStatusFilter').addEventListener('change', filterAndRenderRisks);
+
             } catch (err) {
                 console.error('Error loading risks:', err);
-                document.getElementById('riskList').innerHTML = `
-                    <div class="no-risks">
-                        <i class="fas fa-exclamation-circle"></i> Error loading associated risks
-                    </div>
-                `;
+                document.getElementById('riskTableBody').innerHTML = '<tr><td colspan="8" class="no-risks">Error loading risks</td></tr>';
             }
         }
 
-        // Edit Modal Functions
         function openEditModal() {
-            if (!currentAssetId || !currentAssetData) return;
-            
-            // Populate edit form with current data
+            if (!currentAssetData) return;
             document.getElementById('editAssetName').value = currentAssetData.name || '';
             document.getElementById('editAssetCategory').value = currentAssetData.category || '';
             document.getElementById('editAssetNature').value = currentAssetData.nature || '';
@@ -924,31 +1062,19 @@
             document.getElementById('editAssetLocation').value = currentAssetData.location || '';
             document.getElementById('editAssetOwner').value = currentAssetData.owner || '';
             document.getElementById('editAssetDescription').value = currentAssetData.description || '';
-            
-            // Show modal
             document.getElementById('editModal').classList.add('open');
-            // Prevent body scroll when modal is open
             document.body.style.overflow = 'hidden';
         }
 
         function closeEditModal() {
             document.getElementById('editModal').classList.remove('open');
-            // Restore body scroll
             document.body.style.overflow = 'auto';
         }
 
         async function saveAssetChanges() {
-            if (!currentAssetId) return;
-            
             const token = localStorage.getItem('token');
             if (!token) {
-                showToast('Please log in to edit assets.', 'error');
-                return;
-            }
-
-            const form = document.getElementById('editAssetForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
+                showToast('Please log in', 'error');
                 return;
             }
 
@@ -967,129 +1093,91 @@
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `Failed to update asset (${response.status})`);
-                }
+                if (!response.ok) throw new Error('Update failed');
 
-                // Close modal and reload data
                 closeEditModal();
-                showToast('Asset updated successfully!', 'success');
-                
-                // Reload asset data
+                showToast('Asset updated successfully', 'success');
                 await loadAssetDetail();
-                
-                // Update parent if exists
-                if (window.parent && window.parent.loadAssets) {
-                    window.parent.loadAssets();
-                }
 
             } catch (err) {
-                console.error('Error updating asset:', err);
-                showToast(err.message || 'Failed to update asset', 'error');
+                showToast(err.message, 'error');
             }
         }
 
-        // Delete Modal Functions
         function openDeleteModal() {
-            if (!currentAssetId || !currentAssetData) return;
-            
-            // Set asset name in delete message
-            document.getElementById('deleteAssetName').textContent = 
-                `Are you sure you want to delete "${currentAssetData.name || 'this asset'}"?`;
-            
-            // Reset confirmation input
+            document.getElementById('deleteAssetName').textContent = `Delete "${currentAssetData?.name || 'this asset'}"?`;
             document.getElementById('confirmDelete').value = '';
             document.getElementById('confirmDeleteBtn').disabled = true;
-            
-            // Show modal
             document.getElementById('deleteModal').classList.add('open');
-            // Prevent body scroll when modal is open
             document.body.style.overflow = 'hidden';
         }
 
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.remove('open');
-            // Restore body scroll
             document.body.style.overflow = 'auto';
         }
 
-        // Enable delete button only when "DELETE" is typed
         document.getElementById('confirmDelete')?.addEventListener('input', function(e) {
-            const deleteBtn = document.getElementById('confirmDeleteBtn');
-            deleteBtn.disabled = e.target.value.toUpperCase() !== 'DELETE';
+            const btn = document.getElementById('confirmDeleteBtn');
+            btn.disabled = e.target.value.toUpperCase() !== 'DELETE';
         });
 
         async function confirmDeleteAsset() {
-            if (!currentAssetId) return;
-            
             const token = localStorage.getItem('token');
             if (!token) {
-                showToast('Please log in to delete assets.', 'error');
+                showToast('Please log in', 'error');
                 return;
             }
 
             try {
                 const response = await fetch(`/api/assets/${currentAssetId}`, {
                     method: 'DELETE',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `Failed to delete asset (${response.status})`);
-                }
+                if (!response.ok) throw new Error('Delete failed');
 
                 closeDeleteModal();
-                showToast(`Asset "${currentAssetData?.name || ''}" deleted successfully`, 'success');
-                
-                // Update parent assets and go back to list
-                setTimeout(() => {
-                    if (window.parent && window.parent.loadAssets) {
-                        window.parent.loadAssets();
-                    }
-                    goBack();
-                }, 1500);
+                showToast('Asset deleted', 'success');
+                setTimeout(() => goBack(), 1500);
 
             } catch (err) {
-                console.error('Error deleting asset:', err);
-                showToast(err.message || 'Failed to delete asset', 'error');
+                showToast(err.message, 'error');
             }
         }
 
-        // Modal close on overlay click
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', function(e) {
                 if (e.target === this) {
                     this.classList.remove('open');
-                    // Restore body scroll
                     document.body.style.overflow = 'auto';
                 }
             });
         });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeEditModal();
-                closeDeleteModal();
-            }
-            if (e.key === 'Delete' && e.ctrlKey && !document.querySelector('.modal-overlay.open')) {
-                openDeleteModal();
-            }
-        });
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
-        // Load asset details on page load
         window.addEventListener('load', loadAssetDetail);
+        
+        window.goBack = goBack;
+        window.openEditModal = openEditModal;
+        window.closeEditModal = closeEditModal;
+        window.saveAssetChanges = saveAssetChanges;
+        window.openDeleteModal = openDeleteModal;
+        window.closeDeleteModal = closeDeleteModal;
+        window.confirmDeleteAsset = confirmDeleteAsset;
+        window.clearRiskFilters = clearRiskFilters;
+        window.viewRiskDetail = viewRiskDetail;
     </script>
 </body>
 </html>
