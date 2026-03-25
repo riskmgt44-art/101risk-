@@ -49,13 +49,11 @@
         }
         
         /* Custom Scrollbar Styles */
-        /* Firefox */
         * {
             scrollbar-width: thin;
             scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-bg);
         }
         
-        /* WebKit (Chrome, Safari, Edge) */
         ::-webkit-scrollbar {
             width: var(--scrollbar-width);
             height: var(--scrollbar-width);
@@ -84,7 +82,6 @@
             background: transparent;
         }
         
-        /* Specific element scrollbar styles */
         .nav {
             scrollbar-width: thin;
             scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -127,7 +124,6 @@
             background: rgba(93, 161, 161, 0.4);
         }
         
-        /* Modal scrollbar */
         .modal::-webkit-scrollbar-track {
             margin: 0;
             background: rgba(0,0,0,0.02);
@@ -141,7 +137,6 @@
             background: rgba(0,0,0,0.2);
         }
         
-        /* Smooth scrolling */
         html {
             scroll-behavior: smooth;
         }
@@ -150,7 +145,6 @@
             grid-template-columns: var(--sidebar-collapsed) 1fr;
         }
         
-        /* Accessibility: Focus styles */
         button:focus-visible,
         input:focus-visible,
         select:focus-visible,
@@ -160,7 +154,6 @@
             box-shadow: var(--focus-ring);
         }
         
-        /* Skip to main content for screen readers */
         .skip-to-content {
             position: absolute;
             top: -40px;
@@ -176,7 +169,6 @@
             top: 0;
         }
         
-        /* Mobile menu button */
         .mobile-menu-btn {
             display: none;
             position: fixed;
@@ -207,7 +199,6 @@
             display: block;
         }
         
-        /* Sidebar */
         .sidebar {
             grid-row: 1 / -1;
             background: var(--card-bg);
@@ -268,7 +259,6 @@
             flex-shrink: 0;
         }
         
-        /* Sidebar toggle button */
         .sidebar-toggle {
             background: none;
             border: none;
@@ -351,7 +341,6 @@
             flex-shrink: 0;
         }
         
-        /* Tooltip for collapsed sidebar */
         .nav-tooltip {
             position: absolute;
             left: calc(var(--sidebar-collapsed) + 8px);
@@ -456,7 +445,6 @@
             display: none;
         }
         
-        /* Dropdown Styles */
         .nav-item.dropdown {
             justify-content: space-between;
             position: relative;
@@ -515,7 +503,6 @@
             padding: 12px 16px;
         }
         
-        /* Header */
         .header {
             grid-column: 2 / -1;
             background: var(--card-bg);
@@ -575,7 +562,6 @@
             font-weight: 600;
         }
         
-        /* Main Content */
         .main {
             grid-column: 2 / -1;
             overflow: hidden;
@@ -610,10 +596,75 @@
             overflow-y: auto;
             height: 100%;
             scrollbar-gutter: stable;
-            padding-right: 28px; /* Make room for scrollbar */
+            padding-right: 28px;
         }
         
-        /* Responsive Design */
+        /* Session Expired Overlay */
+        .session-expired-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        
+        .session-expired-overlay.active {
+            display: flex;
+        }
+        
+        .session-expired-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            max-width: 450px;
+            animation: slideIn 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .session-expired-icon {
+            font-size: 64px;
+            color: var(--red);
+            margin-bottom: 20px;
+        }
+        
+        .session-expired-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        
+        .session-expired-message {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        
+        .redirect-countdown {
+            font-size: 13px;
+            color: var(--primary);
+            margin-top: 16px;
+            font-weight: 500;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         @media (max-width: 768px) {
             body {
                 display: block;
@@ -661,9 +712,13 @@
                 width: 180px;
             }
             
-            /* Adjust scrollbar for mobile */
             ::-webkit-scrollbar {
                 width: 6px;
+            }
+            
+            .session-expired-card {
+                margin: 20px;
+                padding: 32px 24px;
             }
         }
         
@@ -685,7 +740,6 @@
             }
         }
         
-        /* KPI Cards */
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(192px, 1fr)); gap: 19.2px; margin-bottom: 38.4px; }
         .kpi-card { background: var(--card-bg); border-radius: var(--radius); padding: 19.2px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); text-align: center; }
         .kpi-value { font-size: 28.8px; font-weight: 700; margin-bottom: 6.4px; }
@@ -697,7 +751,6 @@
         .kpi-value.active { color: var(--green); }
         .kpi-label { font-size: 12px; color: var(--text-secondary); }
 
-        /* Dashboard Access */
         .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(256px, 1fr)); gap: 19.2px; margin-bottom: 38.4px; }
         .dashboard-card { background: var(--card-bg); border-radius: var(--radius); padding: 22.4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); display: flex; flex-direction: column; }
@@ -708,7 +761,6 @@
         .btn-view { align-self: flex-start; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 9.6px; font-size: 11.2px; font-weight: 600; cursor: pointer; transition: var(--transition); }
         .btn-view:hover { background: var(--primary-hover); }
 
-        /* Approvals & Governance */
         .split-section { display: grid; grid-template-columns: 2fr 1fr; gap: 25.6px; margin-bottom: 38.4px; }
         .approvals-panel { background: var(--card-bg); border-radius: var(--radius); padding: 22.4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
         .governance-panel { background: var(--card-bg); border-radius: var(--radius); padding: 22.4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
@@ -727,7 +779,6 @@
         .loading .real-content { display: none; }
         body:not(.loading) .shimmer { display: none !important; }
 
-        /* Unified Modal Styles */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5);
             display: none; align-items: center; justify-content: center;
@@ -813,7 +864,6 @@
         }
         .btn-primary:hover { background: var(--primary-hover); }
         
-        /* Toast styles */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -879,7 +929,6 @@
             fill: currentColor;
         }
         
-        /* Screen reader only */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -906,6 +955,25 @@
     
     <!-- Mobile overlay -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
+    
+    <!-- Session Expired Overlay -->
+    <div class="session-expired-overlay" id="sessionExpiredOverlay">
+        <div class="session-expired-card">
+            <div class="session-expired-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="session-expired-title">Session Expired</div>
+            <div class="session-expired-message">
+                Your session has expired or you are not logged in. Please log in again to continue using the Risk Management Platform.
+            </div>
+            <button class="btn-primary" id="redirectToLoginBtn" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Go to Login
+            </button>
+            <div class="redirect-countdown" id="redirectCountdown">
+                Redirecting in <span id="countdownSeconds">5</span> seconds...
+            </div>
+        </div>
+    </div>
     
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
@@ -1111,8 +1179,192 @@
             </div>
         </div>
     </div>
+
 <script>
-    // Initialize sidebar state
+    // ============================================
+    // AUTHENTICATION MANAGER
+    // ============================================
+    class AuthManager {
+        constructor() {
+            this.token = null;
+            this.tokenExpiry = null;
+            this.checkInterval = null;
+            this.redirectCountdown = null;
+            this.isRedirecting = false;
+            this.LOGIN_URL = '/auth/login.html';
+        }
+        
+        init() {
+            this.checkToken();
+            this.startTokenExpiryCheck();
+            this.setupApiInterceptor();
+        }
+        
+        getToken() {
+            return localStorage.getItem('token');
+        }
+        
+        decodeToken(token) {
+            try {
+                const payload = token.split('.')[1];
+                const decoded = JSON.parse(atob(payload));
+                return decoded;
+            } catch (e) {
+                console.error('Failed to decode token:', e);
+                return null;
+            }
+        }
+        
+        checkToken() {
+            const token = this.getToken();
+            
+            if (!token) {
+                this.handleUnauthenticated('No authentication token found');
+                return false;
+            }
+            
+            const decoded = this.decodeToken(token);
+            if (!decoded) {
+                this.handleUnauthenticated('Invalid token format');
+                return false;
+            }
+            
+            const currentTime = Math.floor(Date.now() / 1000);
+            if (decoded.exp && decoded.exp < currentTime) {
+                this.handleUnauthenticated('Token has expired');
+                return false;
+            }
+            
+            this.token = token;
+            this.tokenExpiry = decoded.exp ? decoded.exp * 1000 : null;
+            
+            return true;
+        }
+        
+        handleUnauthenticated(reason) {
+            console.log('Authentication failure:', reason);
+            this.clearAuth();
+            this.showSessionExpiredOverlay();
+        }
+        
+        clearAuth() {
+            localStorage.removeItem('token');
+            this.token = null;
+            this.tokenExpiry = null;
+        }
+        
+        showSessionExpiredOverlay() {
+            const overlay = document.getElementById('sessionExpiredOverlay');
+            if (!overlay) return;
+            
+            if (overlay.classList.contains('active')) return;
+            
+            overlay.classList.add('active');
+            
+            let seconds = 5;
+            const countdownSpan = document.getElementById('countdownSeconds');
+            const redirectBtn = document.getElementById('redirectToLoginBtn');
+            
+            if (this.redirectCountdown) {
+                clearInterval(this.redirectCountdown);
+            }
+            
+            this.redirectCountdown = setInterval(() => {
+                seconds--;
+                if (countdownSpan) {
+                    countdownSpan.textContent = seconds;
+                }
+                
+                if (seconds <= 0) {
+                    clearInterval(this.redirectCountdown);
+                    this.redirectToLogin();
+                }
+            }, 1000);
+            
+            if (redirectBtn) {
+                redirectBtn.onclick = () => {
+                    if (this.redirectCountdown) {
+                        clearInterval(this.redirectCountdown);
+                    }
+                    this.redirectToLogin();
+                };
+            }
+        }
+        
+        hideSessionExpiredOverlay() {
+            const overlay = document.getElementById('sessionExpiredOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+            if (this.redirectCountdown) {
+                clearInterval(this.redirectCountdown);
+                this.redirectCountdown = null;
+            }
+        }
+        
+        redirectToLogin() {
+            if (this.isRedirecting) return;
+            this.isRedirecting = true;
+            
+            if (this.checkInterval) {
+                clearInterval(this.checkInterval);
+                this.checkInterval = null;
+            }
+            
+            window.location.href = this.LOGIN_URL;
+        }
+        
+        startTokenExpiryCheck() {
+            if (this.checkInterval) {
+                clearInterval(this.checkInterval);
+            }
+            
+            this.checkInterval = setInterval(() => {
+                this.checkToken();
+            }, 30000);
+        }
+        
+        setupApiInterceptor() {
+            const originalFetch = window.fetch;
+            const self = this;
+            
+            window.fetch = function(...args) {
+                return originalFetch.apply(this, args).then(async (response) => {
+                    if (response.status === 401) {
+                        console.log('Received 401 unauthorized response');
+                        self.handleUnauthenticated('API returned 401');
+                        throw new Error('Session expired');
+                    }
+                    return response;
+                }).catch((error) => {
+                    if (error.message === 'Session expired') {
+                        throw error;
+                    }
+                    throw error;
+                });
+            };
+        }
+        
+        logout() {
+            this.clearAuth();
+            window.location.href = this.LOGIN_URL;
+        }
+    }
+
+    // Initialize auth manager
+    const authManager = new AuthManager();
+    
+    // Check auth immediately
+    if (!authManager.checkToken()) {
+        authManager.showSessionExpiredOverlay();
+    } else {
+        authManager.init();
+    }
+    
+    // ============================================
+    // UI FUNCTIONS
+    // ============================================
+    
     function initSidebarState() {
         const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
         const isMobile = window.innerWidth <= 768;
@@ -1125,7 +1377,6 @@
         }
     }
     
-    // Toggle sidebar
     function toggleSidebar() {
         if (window.innerWidth <= 768) {
             document.body.classList.toggle('mobile-menu-open');
@@ -1140,13 +1391,11 @@
         }
     }
     
-    // Handle mobile overlay click
     document.getElementById('mobileOverlay').addEventListener('click', function() {
         document.body.classList.remove('mobile-menu-open');
         document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', 'false');
     });
     
-    // Handle window resize
     function handleResize() {
         const isMobile = window.innerWidth <= 768;
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -1159,47 +1408,6 @@
             document.body.classList.remove('mobile-menu-open');
             mobileMenuBtn.setAttribute('aria-expanded', 'false');
             initSidebarState();
-        }
-    }
-    
-    // Role-based access control for Analyst
-    function checkUserPermissions() {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const userRole = payload.role || 'analyst';
-            
-            // Set role display
-            document.getElementById('userRole').textContent = userRole.charAt(0).toUpperCase() + userRole.slice(1);
-            document.getElementById('pageTitle').textContent = 'Analyst Dashboard';
-            
-            // Update user name from token if available
-            if (payload.name) {
-                document.getElementById('userName').textContent = payload.name;
-                const initials = payload.name.split(' ').map(n => n[0].toUpperCase()).join('').slice(0,2);
-                document.getElementById('userAvatar').textContent = initials || 'AN';
-            }
-            
-            // Hide admin-only elements for analysts
-            if (userRole === 'analyst') {
-                const adminElements = document.querySelectorAll('[data-admin-only]');
-                adminElements.forEach(el => el.style.display = 'none');
-                
-                // Update sidebar navigation for analyst
-                const navItems = document.querySelectorAll('.nav-item');
-                navItems.forEach(item => {
-                    const target = item.getAttribute('data-target');
-                    // Hide admin-only pages
-                    if (target && (target.includes('users.html') || target.includes('settings.html') || target.includes('reports.html'))) {
-                        item.style.display = 'none';
-                    }
-                });
-            }
-            
-        } catch (e) {
-            console.error('Failed to check user permissions:', e);
         }
     }
     
@@ -1247,8 +1455,7 @@
         logoutModal.classList.remove('open');
         showToast('You have been logged out successfully.', 'success');
         setTimeout(() => { 
-            localStorage.removeItem('token');
-            window.location.href = '/auth/login.html'; 
+            authManager.logout();
         }, 1000);
     });
 
@@ -1269,7 +1476,6 @@
         overviewContent.style.display = 'none';
         overviewHeader.style.display = 'none';
         
-        // Add error handling for iframe
         iframe.onerror = function() {
             console.error('Error loading iframe:', target);
             const fallbackHtml = `
@@ -1291,23 +1497,9 @@
                             max-width: 600px;
                             margin: 0 auto;
                         }
-                        h1 {
-                            color: #ef4444;
-                            margin-bottom: 20px;
-                        }
-                        code {
-                            background: #f3f4f6;
-                            padding: 2px 6px;
-                            border-radius: 4px;
-                            font-family: monospace;
-                        }
-                        .help {
-                            margin-top: 30px;
-                            text-align: left;
-                            background: #f8fafc;
-                            padding: 20px;
-                            border-radius: 8px;
-                        }
+                        h1 { color: #ef4444; margin-bottom: 20px; }
+                        code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+                        .help { margin-top: 30px; text-align: left; background: #f8fafc; padding: 20px; border-radius: 8px; }
                     </style>
                 </head>
                 <body>
@@ -1321,7 +1513,6 @@
                                 <li>Path is correct relative to index.html</li>
                                 <li>You're running a local server</li>
                             </ol>
-                            <p><strong>Quick test:</strong> Try opening <a href="${target}" target="_blank">${target}</a> in a new tab.</p>
                         </div>
                     </div>
                 </body>
@@ -1358,9 +1549,8 @@
 
     // ========== ASSET LOADING FUNCTIONS ==========
 
-    // Load assigned assets for Analyst
     async function loadAssets() {
-        const token = localStorage.getItem('token');
+        const token = authManager.getToken();
         if (!token) {
             console.log('No token found, skipping asset load');
             return;
@@ -1369,16 +1559,9 @@
         try {
             console.log('🔍 Loading assets for analyst...');
             
-            // Debug token first
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const userRole = payload.role || 'analyst';
-            const userId = payload.userID || payload.sub;
-            console.log('User role from token:', userRole, 'User ID:', userId);
-            
             let assets = [];
             let successfulEndpoint = '';
             
-            // Try the same endpoints as Asset Overview page
             const endpoints = [
                 { url: '/api/dashboard/analyst/assigned-assets', name: 'assigned-assets' },
                 { url: '/api/dashboard/analyst/overview', name: 'analyst-overview' },
@@ -1387,7 +1570,6 @@
                 { url: '/api/assets', name: 'all-assets' }
             ];
 
-            // Try each endpoint in order
             for (const endpoint of endpoints) {
                 try {
                     console.log(`Trying ${endpoint.name}: ${endpoint.url}`);
@@ -1404,18 +1586,13 @@
                         const data = await response.json();
                         console.log(`Got data from ${endpoint.name}:`, data);
                         
-                        // Handle different response structures
                         if (endpoint.name === 'analyst-overview') {
-                            // Data from /api/dashboard/analyst/overview has assignedAssetDetails
                             assets = data.assignedAssetDetails || [];
                         } else if (Array.isArray(data)) {
-                            // Direct array of assets
                             assets = data;
                         } else if (data.assets && Array.isArray(data.assets)) {
-                            // Wrapped in { assets: [...] }
                             assets = data.assets;
                         } else if (data.data && Array.isArray(data.data)) {
-                            // Wrapped in { data: [...] }
                             assets = data.data;
                         }
                         
@@ -1424,12 +1601,9 @@
                             console.log(`Successfully got ${assets.length} assets from ${endpoint.name}`);
                             break;
                         }
-                    } else if (response.status === 404) {
-                        console.log(`Endpoint ${endpoint.name} not found (404)`);
-                        continue;
-                    } else if (response.status === 403) {
-                        console.log(`Access denied to ${endpoint.name} (403)`);
-                        continue;
+                    } else if (response.status === 401) {
+                        authManager.handleUnauthenticated('Session expired while loading assets');
+                        return;
                     }
                 } catch (err) {
                     console.log(`Error with ${endpoint.name}:`, err.message);
@@ -1438,7 +1612,6 @@
             
             if (assets.length === 0) {
                 console.log('No assets found from any endpoint');
-                // Check if we have assets in localStorage from previous load
                 const savedAssets = localStorage.getItem('analystAssets');
                 if (savedAssets) {
                     try {
@@ -1450,16 +1623,12 @@
                     }
                 }
             } else {
-                // Save to localStorage for offline use
                 localStorage.setItem('analystAssets', JSON.stringify(assets));
             }
             
             console.log(`Total assets to display: ${assets.length} from ${successfulEndpoint}`);
-            
-            // Populate the sidebar with assets
             populateSidebarAssets(assets);
             
-            // Update the assets count in the governance panel
             const assignedAssetsCount = document.getElementById('assignedAssetsCount');
             if (assignedAssetsCount) {
                 assignedAssetsCount.textContent = assets.length;
@@ -1467,7 +1636,6 @@
             
         } catch (err) {
             console.error('Load assets error:', err);
-            // Show error in sidebar
             const dynamicAssets = document.getElementById('dynamicAssets');
             if (dynamicAssets) {
                 dynamicAssets.innerHTML = `
@@ -1480,16 +1648,13 @@
         }
     }
 
-    // Helper function to update the asset count badge
     function updateAssetCountBadge(count) {
         const assetDropdown = document.getElementById('assetDropdown');
         if (!assetDropdown) return;
         
-        // Remove existing badge
         const existingBadge = assetDropdown.querySelector('.asset-count-badge');
         if (existingBadge) existingBadge.remove();
         
-        // Create new badge
         const badge = document.createElement('span');
         badge.className = 'asset-count-badge';
         badge.style.cssText = `
@@ -1508,7 +1673,6 @@
         assetDropdown.appendChild(badge);
     }
 
-    // New function specifically for populating sidebar assets - WITH fa-box icon
     function populateSidebarAssets(assets) {
         const dynamicAssets = document.getElementById('dynamicAssets');
         if (!dynamicAssets) {
@@ -1518,23 +1682,19 @@
         
         console.log(`Populating ${assets.length} assets into sidebar...`);
         
-        // Clear existing dynamically added items (keep only the static ones)
         const existingDynamicItems = dynamicAssets.querySelectorAll('.dynamic-asset-item, .no-assets-message, .error-message');
         existingDynamicItems.forEach(item => item.remove());
         
         if (assets && assets.length > 0) {
-            // Sort assets alphabetically
             assets.sort((a, b) => {
                 const nameA = a.name || '';
                 const nameB = b.name || '';
                 return nameA.localeCompare(nameB);
             });
             
-            // Create a container for dynamic assets
             const dynamicContainer = document.createElement('div');
             dynamicContainer.className = 'dynamic-assets-container';
             
-            // Add each asset to the container
             assets.forEach(asset => {
                 const assetId = asset._id || asset.id;
                 const assetName = asset.name || 'Unnamed Asset';
@@ -1549,8 +1709,7 @@
                 subItem.setAttribute('data-asset-id', assetId);
                 subItem.setAttribute('data-target', `pages/asset-details.html?id=${assetId}&name=${encodeURIComponent(assetName)}`);
                 
-                // Determine icon based on category - USING fa-box (solid box)
-                let iconClass = 'fas fa-box'; // Changed from fa-box-open to fa-box
+                let iconClass = 'fas fa-box';
                 if (asset.category) {
                     const categoryLower = asset.category.toLowerCase();
                     if (categoryLower.includes('production')) iconClass = 'fas fa-industry';
@@ -1561,7 +1720,6 @@
                     else if (categoryLower.includes('network')) iconClass = 'fas fa-network-wired';
                     else if (categoryLower.includes('database')) iconClass = 'fas fa-database';
                     else if (categoryLower.includes('cloud')) iconClass = 'fas fa-cloud';
-                    else if (categoryLower.includes('web') || categoryLower.includes('application')) iconClass = 'fas fa-globe';
                 }
                 
                 subItem.innerHTML = `
@@ -1572,37 +1730,24 @@
                 subItem.addEventListener('click', function(e) {
                     e.stopPropagation();
                     
-                    // Update active state
                     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                     this.classList.add('active');
                     
-                    // Update page title
                     const pageTitle = document.getElementById('pageTitle');
                     if (pageTitle) {
                         pageTitle.textContent = `${assetName} • Risk+ Analyst`;
                     }
                     
-                    // Load the asset page
                     const target = this.getAttribute('data-target');
-                    if (window.loadIframePage) {
-                        loadIframePage(target);
-                    } else {
-                        console.log('Would load:', target);
-                        // Fallback: update URL hash
-                        window.location.hash = `asset-${assetId}`;
-                    }
+                    loadIframePage(target);
                 });
                 
                 dynamicContainer.appendChild(subItem);
             });
             
-            // Insert the dynamic container at the beginning of dynamicAssets
             dynamicAssets.insertBefore(dynamicContainer, dynamicAssets.firstChild);
-            
-            // Update asset count badge
             updateAssetCountBadge(assets.length);
             
-            // Auto-open the dropdown
             const assetDropdown = document.getElementById('assetDropdown');
             if (assetDropdown && !assetDropdown.classList.contains('open')) {
                 setTimeout(() => {
@@ -1611,7 +1756,6 @@
             }
             
         } else {
-            // No assets - show message
             const noAssetsMsg = document.createElement('div');
             noAssetsMsg.className = 'nav-item sub-item no-assets-message';
             noAssetsMsg.style.cssText = `
@@ -1621,7 +1765,7 @@
                 padding: 15px 10px;
             `;
             noAssetsMsg.innerHTML = `
-                <i class="fas fa-box"></i> <!-- Changed from fa-info-circle to fa-box -->
+                <i class="fas fa-box"></i>
                 <span>No assets assigned</span>
             `;
             
@@ -1629,11 +1773,10 @@
         }
     }
 
-    // Load dashboard data for Analyst
     async function loadDashboardData() {
-        const token = localStorage.getItem('token');
+        const token = authManager.getToken();
         if (!token) {
-            console.log('No token found');
+            authManager.handleUnauthenticated('Please login to view dashboard data');
             return;
         }
 
@@ -1650,12 +1793,13 @@
                 const data = await response.json();
                 updateAnalystDashboard(data);
                 
-                // Check if dashboard has asset details we can use
                 if (data.assignedAssetDetails && data.assignedAssetDetails.length > 0) {
                     console.log('Got assigned assets from dashboard data');
-                    // Update sidebar with these assets too
                     populateSidebarAssets(data.assignedAssetDetails);
                 }
+            } else if (response.status === 401) {
+                authManager.handleUnauthenticated('Session expired while loading dashboard');
+                return;
             } else if (response.status === 403) {
                 console.log('Analyst access denied, user may not be an analyst');
                 showToast('Access denied. Analyst role required.', 'error');
@@ -1669,48 +1813,21 @@
     }
     
     function updateAnalystDashboard(data) {
-        // Update KPI cards
         document.getElementById('totalRisks').textContent = data.totalRisks || 0;
         document.getElementById('highSeverityRisks').textContent = data.highSeverityRisks || 0;
         document.getElementById('openActions').textContent = data.openActions || 0;
         document.getElementById('overdueActions').textContent = data.overdueActions || 0;
         
-        // Update Analyst-specific metrics (if these elements exist)
-        const myCreatedRisksEl = document.getElementById('myCreatedRisks');
-        const myPendingSubmissionsEl = document.getElementById('myPendingSubmissions');
-        const myApprovedSubmissionsEl = document.getElementById('myApprovedSubmissions');
-        const myActionsCreatedEl = document.getElementById('myActionsCreated');
-        
-        if (myCreatedRisksEl) myCreatedRisksEl.textContent = data.myCreatedRisks || 0;
-        if (myPendingSubmissionsEl) myPendingSubmissionsEl.textContent = data.myPendingSubmissions || 0;
-        if (myApprovedSubmissionsEl) myApprovedSubmissionsEl.textContent = data.myApprovedSubmissions || 0;
-        if (myActionsCreatedEl) myActionsCreatedEl.textContent = data.myActionsCreated || 0;
-
-        // Update governance panel
         document.getElementById('assignedAssetsCount').textContent = data.assignedAssets || 0;
         document.getElementById('auditEntries24h').textContent = data.auditEntries24h || 0;
         document.getElementById('riskUpdates7d').textContent = data.riskUpdates7d || 0;
-        
-        // Update asset health with appropriate styling
-        const assetHealthEl = document.getElementById('assetHealth');
-        if (assetHealthEl) {
-            const health = data.assetHealth || 'Healthy';
-            assetHealthEl.textContent = health;
-            assetHealthEl.className = 'asset-health ' + health.toLowerCase();
-        }
-        
-        // Update user role display
-        if (data.userRole) {
-            document.getElementById('userRole').textContent = data.userRole.charAt(0).toUpperCase() + data.userRole.slice(1);
-        }
 
         document.body.classList.remove('loading');
     }
 
     function updateUserDisplay() {
-        const token = localStorage.getItem('token');
+        const token = authManager.getToken();
         if (!token) {
-            // Use default values if no token
             document.getElementById('userAvatar').textContent = 'AN';
             document.getElementById('userName').textContent = 'Analyst User';
             document.getElementById('userRole').textContent = 'Analyst';
@@ -1718,7 +1835,9 @@
         }
 
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
+            const payload = authManager.decodeToken(token);
+            if (!payload) return;
+            
             const fullName = payload.name || (payload.firstName + ' ' + payload.lastName) || 'Analyst User';
             const initials = fullName.split(' ').map(n => n[0].toUpperCase()).join('').slice(0,2) || 'AN';
 
@@ -1734,66 +1853,52 @@
         }
     }
 
-    // Debug function to check asset loading
-    function debugAssetLoading() {
-        console.log('=== DEBUG ASSET LOADING ===');
+    function checkUserPermissions() {
+        const token = authManager.getToken();
+        if (!token) return;
         
-        const endpoints = [
-            '/api/dashboard/analyst/assigned-assets',
-            '/api/dashboard/analyst/overview', 
-            '/api/user/assets/assigned',
-            '/api/assets/my',
-            '/api/assets',
-            '/api/dashboard/analyst'
-        ];
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.log('No token available');
-            return;
-        }
-        
-        endpoints.forEach(async (endpoint) => {
-            try {
-                const response = await fetch(endpoint, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                console.log(`${endpoint}: ${response.status}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(`${endpoint} data:`, data);
-                }
-            } catch (err) {
-                console.log(`${endpoint} error:`, err.message);
+        try {
+            const payload = authManager.decodeToken(token);
+            if (!payload) return;
+            
+            const userRole = payload.role || 'analyst';
+            
+            document.getElementById('userRole').textContent = userRole.charAt(0).toUpperCase() + userRole.slice(1);
+            document.getElementById('pageTitle').textContent = 'Analyst Dashboard';
+            
+            if (payload.name) {
+                document.getElementById('userName').textContent = payload.name;
+                const initials = payload.name.split(' ').map(n => n[0].toUpperCase()).join('').slice(0,2);
+                document.getElementById('userAvatar').textContent = initials || 'AN';
             }
-        });
+            
+        } catch (e) {
+            console.error('Failed to check user permissions:', e);
+        }
     }
 
     // Initialize on load
     window.addEventListener('load', () => {
-        // Setup sidebar toggle
-        document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
-        document.getElementById('mobileMenuBtn').addEventListener('click', toggleSidebar);
-        
-        // Initialize sidebar state
-        initSidebarState();
-        
-        // Setup window resize handler
-        window.addEventListener('resize', handleResize);
-        handleResize(); // Initial check
-        
-        // Initialize the application
-        updateUserDisplay();
-        checkUserPermissions();
-        loadDashboardData();
-        loadAssets(); // This should now work
-        
-        // Remove loading state after 3 seconds max
-        setTimeout(() => {
-            document.body.classList.remove('loading');
-        }, 3000);
+        if (authManager.getToken() && !document.getElementById('sessionExpiredOverlay').classList.contains('active')) {
+            document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+            document.getElementById('mobileMenuBtn').addEventListener('click', toggleSidebar);
+            
+            initSidebarState();
+            window.addEventListener('resize', handleResize);
+            handleResize();
+            
+            updateUserDisplay();
+            checkUserPermissions();
+            loadDashboardData();
+            loadAssets();
+        }
     });
+
+    setTimeout(() => {
+        if (authManager.getToken()) {
+            document.body.classList.remove('loading');
+        }
+    }, 3000);
 </script>
 </body>
 </html>
