@@ -49,13 +49,11 @@
         }
         
         /* Custom Scrollbar Styles */
-        /* Firefox */
         * {
             scrollbar-width: thin;
             scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-bg);
         }
         
-        /* WebKit (Chrome, Safari, Edge) */
         ::-webkit-scrollbar {
             width: var(--scrollbar-width);
             height: var(--scrollbar-width);
@@ -84,7 +82,6 @@
             background: transparent;
         }
         
-        /* Specific element scrollbar styles */
         .nav {
             scrollbar-width: thin;
             scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -127,7 +124,6 @@
             background: rgba(93, 161, 161, 0.4);
         }
         
-        /* Modal scrollbar */
         .modal::-webkit-scrollbar-track {
             margin: 0;
             background: rgba(0,0,0,0.02);
@@ -141,7 +137,6 @@
             background: rgba(0,0,0,0.2);
         }
         
-        /* Smooth scrolling */
         html {
             scroll-behavior: smooth;
         }
@@ -150,7 +145,6 @@
             grid-template-columns: var(--sidebar-collapsed) 1fr;
         }
         
-        /* Accessibility: Focus styles */
         button:focus-visible,
         input:focus-visible,
         select:focus-visible,
@@ -160,7 +154,6 @@
             box-shadow: var(--focus-ring);
         }
         
-        /* Skip to main content for screen readers */
         .skip-to-content {
             position: absolute;
             top: -40px;
@@ -176,7 +169,6 @@
             top: 0;
         }
         
-        /* Mobile menu button */
         .mobile-menu-btn {
             display: none;
             position: fixed;
@@ -207,7 +199,6 @@
             display: block;
         }
         
-        /* Sidebar */
         .sidebar {
             grid-row: 1 / -1;
             background: var(--card-bg);
@@ -268,7 +259,6 @@
             flex-shrink: 0;
         }
         
-        /* Sidebar toggle button */
         .sidebar-toggle {
             background: none;
             border: none;
@@ -351,7 +341,6 @@
             flex-shrink: 0;
         }
         
-        /* Tooltip for collapsed sidebar */
         .nav-tooltip {
             position: absolute;
             left: calc(var(--sidebar-collapsed) + 8px);
@@ -456,7 +445,6 @@
             display: none;
         }
         
-        /* Dropdown Styles */
         .nav-item.dropdown {
             justify-content: space-between;
             position: relative;
@@ -515,7 +503,6 @@
             padding: 12px 16px;
         }
         
-        /* Add Asset Button */
         .add-asset-btn {
             margin: 12.8px 19.2px;
             padding: 9.6px;
@@ -546,7 +533,6 @@
             display: none;
         }
         
-        /* Header */
         .header {
             grid-column: 2 / -1;
             background: var(--card-bg);
@@ -606,7 +592,6 @@
             font-weight: 600;
         }
         
-        /* Main Content */
         .main {
             grid-column: 2 / -1;
             overflow: hidden;
@@ -641,10 +626,75 @@
             overflow-y: auto;
             height: 100%;
             scrollbar-gutter: stable;
-            padding-right: 28px; /* Make room for scrollbar */
+            padding-right: 28px;
         }
         
-        /* Responsive Design */
+        /* Session Expired Overlay */
+        .session-expired-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        
+        .session-expired-overlay.active {
+            display: flex;
+        }
+        
+        .session-expired-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            max-width: 450px;
+            animation: slideIn 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .session-expired-icon {
+            font-size: 64px;
+            color: var(--red);
+            margin-bottom: 20px;
+        }
+        
+        .session-expired-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        
+        .session-expired-message {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        
+        .redirect-countdown {
+            font-size: 13px;
+            color: var(--primary);
+            margin-top: 16px;
+            font-weight: 500;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         @media (max-width: 768px) {
             body {
                 display: block;
@@ -692,9 +742,13 @@
                 width: 180px;
             }
             
-            /* Adjust scrollbar for mobile */
             ::-webkit-scrollbar {
                 width: 6px;
+            }
+            
+            .session-expired-card {
+                margin: 20px;
+                padding: 32px 24px;
             }
         }
         
@@ -716,7 +770,6 @@
             }
         }
         
-        /* KPI Cards */
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(192px, 1fr)); gap: 19.2px; margin-bottom: 38.4px; }
         .kpi-card { background: var(--card-bg); border-radius: var(--radius); padding: 19.2px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); text-align: center; }
         .kpi-value { font-size: 28.8px; font-weight: 700; margin-bottom: 6.4px; }
@@ -728,7 +781,6 @@
         .kpi-value.active { color: var(--green); }
         .kpi-label { font-size: 12px; color: var(--text-secondary); }
 
-        /* Dashboard Access */
         .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(256px, 1fr)); gap: 19.2px; margin-bottom: 38.4px; }
         .dashboard-card { background: var(--card-bg); border-radius: var(--radius); padding: 22.4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); display: flex; flex-direction: column; }
@@ -739,14 +791,12 @@
         .btn-view { align-self: flex-start; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 9.6px; font-size: 11.2px; font-weight: 600; cursor: pointer; transition: var(--transition); }
         .btn-view:hover { background: var(--primary-hover); }
 
-        /* Approvals & Governance */
         .split-section { display: grid; grid-template-columns: 2fr 1fr; gap: 25.6px; margin-bottom: 38.4px; }
         .approvals-panel { background: var(--card-bg); border-radius: var(--radius); padding: 22.4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
         .governance-panel { background: var(--card-bg); border-radius: var(--radius); padding: 22.4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
         .governance-item { display: flex; justify-content: space-between; padding: 9.6px 0; font-size: 11.2px; }
         .governance-item:not(:last-child) { border-bottom: 1px solid var(--border); }
 
-        /* Admin Shortcuts */
         .admin-section { background: rgba(93,161,161,0.06); border-radius: var(--radius); padding: 25.6px; border: 1px solid rgba(93,161,161,0.2); }
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); gap: 16px; }
         .admin-card { text-align: center; padding: 16px; background: white; border-radius: 11.2px; box-shadow: var(--shadow-sm); cursor: pointer; transition: var(--transition); }
@@ -768,7 +818,6 @@
         .loading .real-content { display: none; }
         body:not(.loading) .shimmer { display: none !important; }
 
-        /* Unified Modal Styles */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5);
             display: none; align-items: center; justify-content: center;
@@ -854,7 +903,6 @@
         }
         .btn-primary:hover { background: var(--primary-hover); }
         
-        /* Toast styles */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -920,7 +968,6 @@
             fill: currentColor;
         }
         
-        /* Custom Select Dropdown with Search */
         .custom-select {
             position: relative;
             width: 100%;
@@ -1031,7 +1078,6 @@
             font-style: italic;
         }
         
-        /* Screen reader only */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -1046,7 +1092,7 @@
     </style>
 </head>
 <body class="loading">
-    <!-- Skip to main content for screen readers -->
+    <!-- Skip to main content -->
     <a href="#overview-content" class="skip-to-content">
         Skip to main content
     </a>
@@ -1123,7 +1169,6 @@
                 <span>Audit Trail</span>
                 <span class="nav-tooltip">Audit Trail</span>
             </div>
-        
             <div class="nav-item" data-target="admin/users.html">
                 <i class="fas fa-cog"></i>
                 <span>Admin</span>
@@ -1148,7 +1193,6 @@
     <header class="header" id="overviewHeader">
         <h1 class="page-title" id="pageTitle">Admin Dashboard</h1>
         <div class="header-actions">
-           
             <button class="notifications" id="notificationsBtn" aria-label="Notifications">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge">0</span>
@@ -1285,6 +1329,25 @@
 
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Session Expired Overlay -->
+    <div class="session-expired-overlay" id="sessionExpiredOverlay">
+        <div class="session-expired-card">
+            <div class="session-expired-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="session-expired-title">Session Expired</div>
+            <div class="session-expired-message">
+                Your session has expired or you are not logged in. Please log in again to continue using the Risk Management Platform.
+            </div>
+            <button class="btn-primary" id="redirectToLoginBtn" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Go to Login
+            </button>
+            <div class="redirect-countdown" id="redirectCountdown">
+                Redirecting in <span id="countdownSeconds">5</span> seconds...
+            </div>
+        </div>
+    </div>
+
     <!-- Logout Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal">
@@ -1381,639 +1444,766 @@
             </div>
         </div>
     </div>
+
 <script>
-        // Initialize sidebar state
-        function initSidebarState() {
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            const isMobile = window.innerWidth <= 768;
+    // ============================================
+    // AUTHENTICATION MANAGER
+    // ============================================
+    class AuthManager {
+        constructor() {
+            this.token = null;
+            this.tokenExpiry = null;
+            this.checkInterval = null;
+            this.redirectCountdown = null;
+            this.isRedirecting = false;
+            this.LOGIN_URL = '/auth/login.html';
+        }
+        
+        init() {
+            this.checkToken();
+            this.startTokenExpiryCheck();
+            this.setupApiInterceptor();
+        }
+        
+        getToken() {
+            return localStorage.getItem('token');
+        }
+        
+        decodeToken(token) {
+            try {
+                const payload = token.split('.')[1];
+                const decoded = JSON.parse(atob(payload));
+                return decoded;
+            } catch (e) {
+                console.error('Failed to decode token:', e);
+                return null;
+            }
+        }
+        
+        checkToken() {
+            const token = this.getToken();
             
-            if (isMobile) {
-                document.body.classList.remove('sidebar-collapsed');
-                document.body.classList.remove('mobile-menu-open');
-            } else {
-                document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+            if (!token) {
+                this.handleUnauthenticated('No authentication token found');
+                return false;
             }
-        }
-        
-        // Toggle sidebar
-        function toggleSidebar() {
-            if (window.innerWidth <= 768) {
-                document.body.classList.toggle('mobile-menu-open');
-                const isOpen = document.body.classList.contains('mobile-menu-open');
-                document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', isOpen);
-            } else {
-                document.body.classList.toggle('sidebar-collapsed');
-                const isCollapsed = document.body.classList.contains('sidebar-collapsed');
-                localStorage.setItem('sidebarCollapsed', isCollapsed);
-                document.getElementById('sidebarToggle').setAttribute('aria-label', 
-                    isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
-            }
-        }
-        
-        // Handle mobile overlay click
-        document.getElementById('mobileOverlay').addEventListener('click', function() {
-            document.body.classList.remove('mobile-menu-open');
-            document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', 'false');
-        });
-        
-        // Handle window resize
-        function handleResize() {
-            const isMobile = window.innerWidth <= 768;
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             
-            if (isMobile) {
-                mobileMenuBtn.style.display = 'flex';
-                document.body.classList.remove('sidebar-collapsed');
-            } else {
-                mobileMenuBtn.style.display = 'none';
-                document.body.classList.remove('mobile-menu-open');
-                mobileMenuBtn.setAttribute('aria-expanded', 'false');
-                initSidebarState();
+            const decoded = this.decodeToken(token);
+            if (!decoded) {
+                this.handleUnauthenticated('Invalid token format');
+                return false;
             }
+            
+            const currentTime = Math.floor(Date.now() / 1000);
+            if (decoded.exp && decoded.exp < currentTime) {
+                this.handleUnauthenticated('Token has expired');
+                return false;
+            }
+            
+            this.token = token;
+            this.tokenExpiry = decoded.exp ? decoded.exp * 1000 : null;
+            
+            return true;
         }
         
-        // Your existing functions (unchanged)
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <svg class="toast-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    ${type === 'success' 
-                        ? '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>'
-                        : '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>'
+        handleUnauthenticated(reason) {
+            console.log('Authentication failure:', reason);
+            this.clearAuth();
+            this.showSessionExpiredOverlay();
+        }
+        
+        clearAuth() {
+            localStorage.removeItem('token');
+            this.token = null;
+            this.tokenExpiry = null;
+        }
+        
+        showSessionExpiredOverlay() {
+            const overlay = document.getElementById('sessionExpiredOverlay');
+            if (!overlay) return;
+            
+            if (overlay.classList.contains('active')) return;
+            
+            overlay.classList.add('active');
+            
+            let seconds = 5;
+            const countdownSpan = document.getElementById('countdownSeconds');
+            const redirectBtn = document.getElementById('redirectToLoginBtn');
+            
+            if (this.redirectCountdown) {
+                clearInterval(this.redirectCountdown);
+            }
+            
+            this.redirectCountdown = setInterval(() => {
+                seconds--;
+                if (countdownSpan) {
+                    countdownSpan.textContent = seconds;
+                }
+                
+                if (seconds <= 0) {
+                    clearInterval(this.redirectCountdown);
+                    this.redirectToLogin();
+                }
+            }, 1000);
+            
+            if (redirectBtn) {
+                redirectBtn.onclick = () => {
+                    if (this.redirectCountdown) {
+                        clearInterval(this.redirectCountdown);
                     }
+                    this.redirectToLogin();
+                };
+            }
+        }
+        
+        hideSessionExpiredOverlay() {
+            const overlay = document.getElementById('sessionExpiredOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+            if (this.redirectCountdown) {
+                clearInterval(this.redirectCountdown);
+                this.redirectCountdown = null;
+            }
+        }
+        
+        redirectToLogin() {
+            if (this.isRedirecting) return;
+            this.isRedirecting = true;
+            
+            if (this.checkInterval) {
+                clearInterval(this.checkInterval);
+                this.checkInterval = null;
+            }
+            
+            window.location.href = this.LOGIN_URL;
+        }
+        
+        startTokenExpiryCheck() {
+            if (this.checkInterval) {
+                clearInterval(this.checkInterval);
+            }
+            
+            this.checkInterval = setInterval(() => {
+                this.checkToken();
+            }, 30000);
+        }
+        
+        setupApiInterceptor() {
+            const originalFetch = window.fetch;
+            const self = this;
+            
+            window.fetch = function(...args) {
+                return originalFetch.apply(this, args).then(async (response) => {
+                    if (response.status === 401) {
+                        console.log('Received 401 unauthorized response');
+                        self.handleUnauthenticated('API returned 401');
+                        throw new Error('Session expired');
+                    }
+                    return response;
+                }).catch((error) => {
+                    if (error.message === 'Session expired') {
+                        throw error;
+                    }
+                    throw error;
+                });
+            };
+        }
+        
+        logout() {
+            this.clearAuth();
+            window.location.href = this.LOGIN_URL;
+        }
+    }
+
+    // Initialize auth manager
+    const authManager = new AuthManager();
+    
+    // Check auth immediately
+    if (!authManager.checkToken()) {
+        authManager.showSessionExpiredOverlay();
+    } else {
+        authManager.init();
+    }
+    
+    // ============================================
+    // UI FUNCTIONS
+    // ============================================
+    
+    function initSidebarState() {
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            document.body.classList.remove('sidebar-collapsed');
+            document.body.classList.remove('mobile-menu-open');
+        } else {
+            document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+        }
+    }
+    
+    function toggleSidebar() {
+        if (window.innerWidth <= 768) {
+            document.body.classList.toggle('mobile-menu-open');
+            const isOpen = document.body.classList.contains('mobile-menu-open');
+            document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', isOpen);
+        } else {
+            document.body.classList.toggle('sidebar-collapsed');
+            const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+            document.getElementById('sidebarToggle').setAttribute('aria-label', 
+                isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+        }
+    }
+    
+    document.getElementById('mobileOverlay').addEventListener('click', function() {
+        document.body.classList.remove('mobile-menu-open');
+        document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', 'false');
+    });
+    
+    function handleResize() {
+        const isMobile = window.innerWidth <= 768;
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        
+        if (isMobile) {
+            mobileMenuBtn.style.display = 'flex';
+            document.body.classList.remove('sidebar-collapsed');
+        } else {
+            mobileMenuBtn.style.display = 'none';
+            document.body.classList.remove('mobile-menu-open');
+            mobileMenuBtn.setAttribute('aria-expanded', 'false');
+            initSidebarState();
+        }
+    }
+    
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <svg class="toast-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                ${type === 'success' 
+                    ? '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>'
+                    : '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>'
+                }
+            </svg>
+            <div class="toast-message">${message}</div>
+            <div class="toast-close" onclick="this.parentElement.classList.remove('show'); setTimeout(() => this.parentElement.remove(), 400);">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
-                <div class="toast-message">${message}</div>
-                <div class="toast-close" onclick="this.parentElement.classList.remove('show'); setTimeout(() => this.parentElement.remove(), 400);">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
+            </div>
+        `;
+        container.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('show'));
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 5000);
+    }
+
+    // Logout modal handling
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelLogout = document.getElementById('cancelLogout');
+    const confirmLogout = document.getElementById('confirmLogout');
+    const closeLogoutModal = document.getElementById('closeLogoutModal');
+
+    logoutBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        logoutModal.classList.add('open');
+    });
+
+    cancelLogout.addEventListener('click', () => logoutModal.classList.remove('open'));
+    closeLogoutModal.addEventListener('click', () => logoutModal.classList.remove('open'));
+    confirmLogout.addEventListener('click', () => {
+        logoutModal.classList.remove('open');
+        showToast('You have been logged out successfully.', 'success');
+        setTimeout(() => { 
+            authManager.logout();
+        }, 1000);
+    });
+
+    logoutModal.addEventListener('click', (e) => {
+        if (e.target === logoutModal) logoutModal.classList.remove('open');
+    });
+
+    const iframe = document.getElementById('content-frame');
+    const overviewContent = document.getElementById('overview-content');
+    const overviewHeader = document.getElementById('overviewHeader');
+    const pageTitle = document.getElementById('pageTitle');
+    const navItems = document.querySelectorAll('.nav-item');
+
+    function loadIframePage(target) {
+        console.log('Loading page:', target);
+        iframe.src = target;
+        iframe.style.display = 'block';
+        overviewContent.style.display = 'none';
+        overviewHeader.style.display = 'none';
+        
+        iframe.onerror = function() {
+            console.error('Error loading iframe:', target);
+            const fallbackHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {
+                            font-family: 'Inter', sans-serif;
+                            padding: 40px;
+                            background: #f9f9f9;
+                            text-align: center;
+                        }
+                        .error-container {
+                            background: white;
+                            border-radius: 12px;
+                            padding: 40px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                            max-width: 600px;
+                            margin: 0 auto;
+                        }
+                        h1 { color: #ef4444; margin-bottom: 20px; }
+                        code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+                        .help { margin-top: 30px; text-align: left; background: #f8fafc; padding: 20px; border-radius: 8px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="error-container">
+                        <h1>404 - Page Not Found</h1>
+                        <p>The requested page <code>${target}</code> could not be found.</p>
+                        <div class="help">
+                            <h3>Please check:</h3>
+                            <ol>
+                                <li>File exists at: <code>${target}</code></li>
+                                <li>Path is correct relative to index.html</li>
+                                <li>You're running a local server</li>
+                            </ol>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            iframe.srcdoc = fallbackHtml;
+        };
+    }
+
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (this.classList.contains('dropdown')) {
+                this.classList.toggle('open');
+                return;
+            }
+
+            navItems.forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+
+            const itemText = this.textContent.trim();
+            pageTitle.textContent = `${itemText} • RiskMGT`;
+
+            const target = this.getAttribute('data-target');
+
+            if (target === 'overview') {
+                iframe.style.display = 'none';
+                overviewContent.style.display = 'block';
+                overviewHeader.style.display = 'flex';
+            } else if (target) {
+                loadIframePage(target);
+            }
+        });
+    });
+
+    // Asset management functions (simplified for brevity - same as original)
+    const addAssetBtn = document.getElementById('addAssetBtn');
+    const addAssetModal = document.getElementById('addAssetModal');
+    const closeAssetModal = document.getElementById('closeAssetModal');
+    const cancelAsset = document.getElementById('cancelAsset');
+    const saveAsset = document.getElementById('saveAsset');
+    const assetForm = document.getElementById('assetForm');
+    const dynamicAssets = document.getElementById('dynamicAssets');
+    const parentOrgInput = document.getElementById('parentOrganization');
+
+    let allUsers = [];
+    let selectedOwner = null;
+
+    async function loadUsersForAssetOwner() {
+        const token = authManager.getToken();
+        if (!token) {
+            authManager.handleUnauthenticated('No token for loading users');
+            return;
+        }
+
+        const dropdown = document.getElementById('assetOwnerDropdown');
+        dropdown.innerHTML = '<div class="no-results">Loading users...</div>';
+
+        try {
+            const response = await fetch('/api/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    authManager.handleUnauthenticated('Session expired while loading users');
+                    return;
+                }
+                throw new Error(`Failed to load users: ${response.status}`);
+            }
+
+            allUsers = await response.json();
+            populateUserDropdown('');
+        } catch (err) {
+            console.error('Failed to load users:', err);
+            dropdown.innerHTML = '<div class="no-results">Failed to load users. Please try again.</div>';
+        }
+    }
+
+    function populateUserDropdown(searchTerm = '') {
+        const dropdown = document.getElementById('assetOwnerDropdown');
+        
+        if (!allUsers.length) {
+            dropdown.innerHTML = '<div class="no-results">No users found in organization</div>';
+            return;
+        }
+
+        let filteredUsers = allUsers;
+        
+        if (searchTerm.trim()) {
+            const term = searchTerm.toLowerCase();
+            filteredUsers = allUsers.filter(user => 
+                (user.firstName && user.firstName.toLowerCase().includes(term)) ||
+                (user.lastName && user.lastName.toLowerCase().includes(term)) ||
+                (user.email && user.email.toLowerCase().includes(term))
+            );
+        }
+
+        if (filteredUsers.length === 0) {
+            dropdown.innerHTML = '<div class="no-results">No users match your search</div>';
+            return;
+        }
+
+        let dropdownHTML = '';
+        
+        filteredUsers.forEach(user => {
+            const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            const initials = (user.firstName?.[0] || '') + (user.lastName?.[0] || '') || '??';
+            const isSelected = selectedOwner && selectedOwner.id === user.id;
+            
+            dropdownHTML += `
+                <div class="select-option ${isSelected ? 'selected' : ''}" 
+                     data-user-id="${user.id}" 
+                     data-user-name="${fullName}"
+                     data-user-email="${user.email || ''}">
+                    <div class="user-avatar">${initials.toUpperCase()}</div>
+                    <div class="user-info-dropdown">
+                        <div class="user-name-dropdown">${fullName || 'Unnamed User'}</div>
+                        <div class="user-email-dropdown">${user.email || ''}</div>
+                    </div>
+                    <div class="user-role-badge">${user.role || 'User'}</div>
                 </div>
             `;
-            container.appendChild(toast);
-            requestAnimationFrame(() => toast.classList.add('show'));
+        });
+
+        dropdown.innerHTML = dropdownHTML;
+
+        dropdown.querySelectorAll('.select-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const userName = this.getAttribute('data-user-name');
+                
+                selectedOwner = {
+                    id: userId,
+                    name: userName
+                };
+                
+                document.getElementById('assetOwnerSearch').value = userName;
+                document.getElementById('assetOwnerId').value = userId;
+                
+                dropdown.querySelectorAll('.select-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                dropdown.classList.remove('open');
+            });
+        });
+    }
+
+    function toggleAssetOwnerDropdown(show) {
+        const dropdown = document.getElementById('assetOwnerDropdown');
+        if (show) {
+            dropdown.classList.add('open');
+            if (dropdown.innerHTML.includes('Loading')) {
+                loadUsersForAssetOwner();
+            }
+        } else {
             setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 400);
-            }, 5000);
+                dropdown.classList.remove('open');
+            }, 200);
         }
+    }
 
-        // Logout modal handling (unchanged)
-        const logoutBtn = document.getElementById('logoutBtn');
-        const logoutModal = document.getElementById('logoutModal');
-        const cancelLogout = document.getElementById('cancelLogout');
-        const confirmLogout = document.getElementById('confirmLogout');
-        const closeLogoutModal = document.getElementById('closeLogoutModal');
-
-        logoutBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            logoutModal.classList.add('open');
-        });
-
-        cancelLogout.addEventListener('click', () => logoutModal.classList.remove('open'));
-        closeLogoutModal.addEventListener('click', () => logoutModal.classList.remove('open'));
-        confirmLogout.addEventListener('click', () => {
-            logoutModal.classList.remove('open');
-            showToast('You have been logged out successfully.', 'success');
-            setTimeout(() => { 
-                localStorage.removeItem('token');
-                window.location.href = '/auth/login.html'; 
-            }, 1000);
-        });
-
-        logoutModal.addEventListener('click', (e) => {
-            if (e.target === logoutModal) logoutModal.classList.remove('open');
-        });
-
-        const iframe = document.getElementById('content-frame');
-        const overviewContent = document.getElementById('overview-content');
-        const overviewHeader = document.getElementById('overviewHeader');
-        const pageTitle = document.getElementById('pageTitle');
-        const navItems = document.querySelectorAll('.nav-item');
-
-        function loadIframePage(target) {
-            console.log('Loading page:', target);
-            iframe.src = target;
-            iframe.style.display = 'block';
-            overviewContent.style.display = 'none';
-            overviewHeader.style.display = 'none';
-            
-            // Add error handling for iframe
-            iframe.onerror = function() {
-                console.error('Error loading iframe:', target);
-                const fallbackHtml = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <style>
-                            body {
-                                font-family: 'Inter', sans-serif;
-                                padding: 40px;
-                                background: #f9f9f9;
-                                text-align: center;
-                            }
-                            .error-container {
-                                background: white;
-                                border-radius: 12px;
-                                padding: 40px;
-                                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-                                max-width: 600px;
-                                margin: 0 auto;
-                            }
-                            h1 {
-                                color: #ef4444;
-                                margin-bottom: 20px;
-                            }
-                            code {
-                                background: #f3f4f6;
-                                padding: 2px 6px;
-                                border-radius: 4px;
-                                font-family: monospace;
-                            }
-                            .help {
-                                margin-top: 30px;
-                                text-align: left;
-                                background: #f8fafc;
-                                padding: 20px;
-                                border-radius: 8px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="error-container">
-                            <h1>404 - Page Not Found</h1>
-                            <p>The requested page <code>${target}</code> could not be found.</p>
-                            <div class="help">
-                                <h3>Please check:</h3>
-                                <ol>
-                                    <li>File exists at: <code>${target}</code></li>
-                                    <li>Path is correct relative to index.html</li>
-                                    <li>File is in the <code>dashboards/executive/</code> folder</li>
-                                    <li>You're running a local server</li>
-                                </ol>
-                                <p><strong>Quick test:</strong> Try opening <a href="${target}" target="_blank">${target}</a> in a new tab.</p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-                `;
-                iframe.srcdoc = fallbackHtml;
-            };
+    async function openAddAssetModal() {
+        const token = authManager.getToken();
+        if (!token) {
+            authManager.handleUnauthenticated('Please login to add assets');
+            return;
         }
+        
+        addAssetModal.classList.add('open');
+        assetForm.reset();
+        parentOrgInput.value = '';
+        parentOrgInput.placeholder = 'Loading organization name...';
+        document.getElementById('assetOwnerSearch').value = '';
+        document.getElementById('assetOwnerId').value = '';
+        selectedOwner = null;
 
-        navItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                if (this.classList.contains('dropdown')) {
-                    this.classList.toggle('open');
+        try {
+            const response = await fetch('/api/user/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    authManager.handleUnauthenticated('Session expired');
+                    closeAddAssetModal();
                     return;
                 }
-
-                navItems.forEach(nav => nav.classList.remove('active'));
-                this.classList.add('active');
-
-                const itemText = this.textContent.trim();
-                pageTitle.textContent = `${itemText} • RiskMGT`;
-
-                const target = this.getAttribute('data-target');
-
-                if (target === 'overview') {
-                    iframe.style.display = 'none';
-                    overviewContent.style.display = 'block';
-                    overviewHeader.style.display = 'flex';
-                } else if (target) {
-                    loadIframePage(target);
-                }
-            });
-        });
-
-        const addAssetBtn = document.getElementById('addAssetBtn');
-        const addAssetModal = document.getElementById('addAssetModal');
-        const closeAssetModal = document.getElementById('closeAssetModal');
-        const cancelAsset = document.getElementById('cancelAsset');
-        const saveAsset = document.getElementById('saveAsset');
-        const assetForm = document.getElementById('assetForm');
-        const dynamicAssets = document.getElementById('dynamicAssets');
-        const parentOrgInput = document.getElementById('parentOrganization');
-
-        // Asset owner dropdown variables
-        let allUsers = [];
-        let selectedOwner = null;
-
-        // Load users for asset owner dropdown - UPDATED TO USE /api/users
-        async function loadUsersForAssetOwner() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                showToast('Please login to assign asset owners', 'error');
-                return;
+                throw new Error(`HTTP ${response.status}`);
             }
 
-            const dropdown = document.getElementById('assetOwnerDropdown');
-            dropdown.innerHTML = '<div class="no-results">Loading users...</div>';
+            const userData = await response.json();
+            let orgName = 'Your Organization';
+            if (userData.organization?.name) orgName = userData.organization.name;
+            else if (userData.organization?.Name) orgName = userData.organization.Name;
+            else if (userData.organizationName) orgName = userData.organizationName;
+            else if (userData.company) orgName = userData.company;
 
-            try {
-                // Use the correct endpoint /api/users instead
-                const response = await fetch('/api/users', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+            parentOrgInput.value = orgName;
+        } catch (err) {
+            console.error('Failed to load organization name:', err);
+            parentOrgInput.placeholder = 'Failed to load organization name';
+        }
+    }
 
-                if (!response.ok) {
-                    throw new Error(`Failed to load users: ${response.status}`);
-                }
+    function closeAddAssetModal() {
+        addAssetModal.classList.remove('open');
+    }
 
-                allUsers = await response.json();
-                populateUserDropdown('');
-            } catch (err) {
-                console.error('Failed to load users:', err);
-                dropdown.innerHTML = '<div class="no-results">Failed to load users. Please try again.</div>';
-                showToast('Failed to load users for assignment', 'error');
-            }
+    addAssetBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openAddAssetModal();
+    });
+
+    closeAssetModal.addEventListener('click', closeAddAssetModal);
+    cancelAsset.addEventListener('click', closeAddAssetModal);
+    addAssetModal.addEventListener('click', (e) => {
+        if (e.target === addAssetModal) closeAddAssetModal();
+    });
+
+    const assetOwnerSearch = document.getElementById('assetOwnerSearch');
+    const assetOwnerDropdown = document.getElementById('assetOwnerDropdown');
+
+    assetOwnerSearch.addEventListener('focus', () => {
+        toggleAssetOwnerDropdown(true);
+    });
+
+    assetOwnerSearch.addEventListener('input', (e) => {
+        populateUserDropdown(e.target.value);
+        toggleAssetOwnerDropdown(true);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select')) {
+            toggleAssetOwnerDropdown(false);
+        }
+    });
+
+    async function saveAssetToBackend() {
+        if (!assetForm.checkValidity()) {
+            assetForm.reportValidity();
+            return;
         }
 
-        // Populate user dropdown with search results
-        function populateUserDropdown(searchTerm = '') {
-            const dropdown = document.getElementById('assetOwnerDropdown');
-            const searchInput = document.getElementById('assetOwnerSearch');
-            
-            if (!allUsers.length) {
-                dropdown.innerHTML = '<div class="no-results">No users found in organization</div>';
-                return;
-            }
+        const token = authManager.getToken();
+        if (!token) {
+            authManager.handleUnauthenticated('Please login to add assets');
+            return;
+        }
 
-            let filteredUsers = allUsers;
-            
-            if (searchTerm.trim()) {
-                const term = searchTerm.toLowerCase();
-                filteredUsers = allUsers.filter(user => 
-                    (user.firstName && user.firstName.toLowerCase().includes(term)) ||
-                    (user.lastName && user.lastName.toLowerCase().includes(term)) ||
-                    (user.email && user.email.toLowerCase().includes(term)) ||
-                    (user.jobTitle && user.jobTitle.toLowerCase().includes(term))
-                );
-            }
+        const payload = {
+            name: document.getElementById('assetName').value.trim(),
+            category: document.getElementById('assetCategory').value,
+            nature: document.getElementById('assetNature').value,
+            location: document.getElementById('assetLocation').value.trim(),
+            ownerUserId: document.getElementById('assetOwnerId').value,
+            description: document.getElementById('assetDescription').value.trim(),
+        };
 
-            if (filteredUsers.length === 0) {
-                dropdown.innerHTML = '<div class="no-results">No users match your search</div>';
-                return;
-            }
-
-            let dropdownHTML = '';
-            
-            filteredUsers.forEach(user => {
-                const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-                const initials = (user.firstName?.[0] || '') + (user.lastName?.[0] || '') || '??';
-                const isSelected = selectedOwner && selectedOwner.id === user.id;
-                
-                dropdownHTML += `
-                    <div class="select-option ${isSelected ? 'selected' : ''}" 
-                         data-user-id="${user.id}" 
-                         data-user-name="${fullName}"
-                         data-user-email="${user.email || ''}">
-                        <div class="user-avatar">${initials.toUpperCase()}</div>
-                        <div class="user-info-dropdown">
-                            <div class="user-name-dropdown">${fullName || 'Unnamed User'}</div>
-                            <div class="user-email-dropdown">${user.email || ''}</div>
-                        </div>
-                        <div class="user-role-badge">${user.role || 'User'}</div>
-                    </div>
-                `;
+        try {
+            const response = await fetch('/api/assets', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
             });
 
-            dropdown.innerHTML = dropdownHTML;
-
-            // Add click handlers to dropdown items
-            dropdown.querySelectorAll('.select-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    const userId = this.getAttribute('data-user-id');
-                    const userName = this.getAttribute('data-user-name');
-                    const userEmail = this.getAttribute('data-user-email');
-                    
-                    selectedOwner = {
-                        id: userId,
-                        name: userName,
-                        email: userEmail
-                    };
-                    
-                    document.getElementById('assetOwnerSearch').value = userName;
-                    document.getElementById('assetOwnerId').value = userId;
-                    
-                    // Update selected state
-                    dropdown.querySelectorAll('.select-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                    
-                    // Close dropdown
-                    dropdown.classList.remove('open');
-                });
-            });
-        }
-
-        // Toggle dropdown visibility
-        function toggleAssetOwnerDropdown(show) {
-            const dropdown = document.getElementById('assetOwnerDropdown');
-            if (show) {
-                dropdown.classList.add('open');
-                if (dropdown.innerHTML.includes('Loading')) {
-                    loadUsersForAssetOwner();
-                }
-            } else {
-                // Small delay to allow click events to register
-                setTimeout(() => {
-                    dropdown.classList.remove('open');
-                }, 200);
-            }
-        }
-
-        async function openAddAssetModal() {
-            addAssetModal.classList.add('open');
-            assetForm.reset();
-            parentOrgInput.value = '';
-            parentOrgInput.placeholder = 'Loading organization name...';
-            document.getElementById('assetOwnerSearch').value = '';
-            document.getElementById('assetOwnerId').value = '';
-            selectedOwner = null;
-
-            const token = localStorage.getItem('token');
-            if (!token) {
-                parentOrgInput.placeholder = 'Login required';
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/user/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const userData = await response.json();
-
-                let orgName = 'Your Organization';
-                if (userData.organization?.name) orgName = userData.organization.name;
-                else if (userData.organization?.Name) orgName = userData.organization.Name;
-                else if (userData.organizationName) orgName = userData.organizationName;
-                else if (userData.orgName) orgName = userData.orgName;
-                else if (userData.company) orgName = userData.company;
-                else if (userData.name) orgName = userData.name;
-
-                parentOrgInput.value = orgName;
-            } catch (err) {
-                console.error('Failed to load organization name:', err);
-                parentOrgInput.placeholder = 'Failed to load organization name';
-                parentOrgInput.value = '';
-            }
-        }
-
-        function closeAddAssetModal() {
-            addAssetModal.classList.remove('open');
-        }
-
-        addAssetBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openAddAssetModal();
-        });
-
-        closeAssetModal.addEventListener('click', closeAddAssetModal);
-        cancelAsset.addEventListener('click', closeAddAssetModal);
-        addAssetModal.addEventListener('click', (e) => {
-            if (e.target === addAssetModal) closeAddAssetModal();
-        });
-
-        // Asset owner search functionality
-        const assetOwnerSearch = document.getElementById('assetOwnerSearch');
-        const assetOwnerDropdown = document.getElementById('assetOwnerDropdown');
-
-        assetOwnerSearch.addEventListener('focus', () => {
-            toggleAssetOwnerDropdown(true);
-        });
-
-        assetOwnerSearch.addEventListener('input', (e) => {
-            populateUserDropdown(e.target.value);
-            toggleAssetOwnerDropdown(true);
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.custom-select')) {
-                toggleAssetOwnerDropdown(false);
-            }
-        });
-
-        // Handle keyboard navigation in dropdown
-        assetOwnerSearch.addEventListener('keydown', (e) => {
-            const dropdown = document.getElementById('assetOwnerDropdown');
-            const options = dropdown.querySelectorAll('.select-option');
-            
-            if (!dropdown.classList.contains('open')) return;
-            
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                const current = dropdown.querySelector('.select-option.highlighted') || options[0];
-                const next = current.nextElementSibling || options[0];
-                
-                options.forEach(opt => opt.classList.remove('highlighted'));
-                next.classList.add('highlighted');
-                next.scrollIntoView({ block: 'nearest' });
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                const current = dropdown.querySelector('.select-option.highlighted') || options[options.length - 1];
-                const prev = current.previousElementSibling || options[options.length - 1];
-                
-                options.forEach(opt => opt.classList.remove('highlighted'));
-                prev.classList.add('highlighted');
-                prev.scrollIntoView({ block: 'nearest' });
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                const highlighted = dropdown.querySelector('.select-option.highlighted');
-                if (highlighted) {
-                    highlighted.click();
-                }
-            } else if (e.key === 'Escape') {
-                toggleAssetOwnerDropdown(false);
-            }
-        });
-
-        async function saveAssetToBackend() {
-            if (!assetForm.checkValidity()) {
-                assetForm.reportValidity();
-                return;
-            }
-
-            const token = localStorage.getItem('token');
-            if (!token) {
-                showToast('Please login to add assets', 'error');
-                return;
-            }
-
-            const payload = {
-                name: document.getElementById('assetName').value.trim(),
-                category: document.getElementById('assetCategory').value,
-                nature: document.getElementById('assetNature').value,
-                location: document.getElementById('assetLocation').value.trim(),
-                ownerUserId: document.getElementById('assetOwnerId').value,
-                description: document.getElementById('assetDescription').value.trim(),
-            };
-
-            try {
-                const response = await fetch('/api/assets', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json();
-                    showToast(errData.message || 'Failed to add asset', 'error');
+            if (!response.ok) {
+                if (response.status === 401) {
+                    authManager.handleUnauthenticated('Session expired while saving asset');
                     return;
                 }
-
-                const asset = await response.json();
-                await loadAssets();
-                closeAddAssetModal();
-                showToast(`Business asset "${asset.name}" added successfully`, 'success');
-            } catch (err) {
-                showToast('Network error adding asset', 'error');
-            }
-        }
-
-        function addAssetToSidebar(asset) {
-            const subItem = document.createElement('div');
-            subItem.className = 'nav-item sub-item';
-            subItem.setAttribute('data-target', `assets/detail.html?id=${asset._id || asset.id}&name=${encodeURIComponent(asset.name)}`);
-            subItem.innerHTML = `
-                <i class="fas fa-box-open"></i>
-                <span>${asset.name}</span>
-            `;
-
-            subItem.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                this.classList.add('active');
-
-                const itemText = this.textContent.trim();
-                document.getElementById('pageTitle').textContent = `${itemText} • RiskMGT`;
-
-                const target = this.getAttribute('data-target');
-                loadIframePage(target);
-            });
-
-            dynamicAssets.appendChild(subItem);
-        }
-
-        async function loadAssets() {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-
-            try {
-                const response = await fetch('/api/assets', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!response.ok) {
-                    console.warn('Assets fetch failed:', response.status);
-                    return;
-                }
-
-                const assets = await response.json();
-                dynamicAssets.innerHTML = '';
-                assets.forEach(addAssetToSidebar);
-            } catch (err) {
-                console.error('Load assets error:', err);
-            }
-        }
-
-        saveAsset.addEventListener('click', saveAssetToBackend);
-
-        async function loadDashboardData() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                showToast('Please login to view dashboard data', 'error');
-                document.body.classList.remove('loading');
+                const errData = await response.json();
+                showToast(errData.message || 'Failed to add asset', 'error');
                 return;
             }
 
-            try {
-                const response = await fetch('/api/dashboard/executive', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+            const asset = await response.json();
+            await loadAssets();
+            closeAddAssetModal();
+            showToast(`Business asset "${asset.name}" added successfully`, 'success');
+        } catch (err) {
+            showToast('Network error adding asset', 'error');
+        }
+    }
 
-                if (!response.ok) {
-                    throw new Error(`Failed to load data: ${response.status}`);
+    function addAssetToSidebar(asset) {
+        const subItem = document.createElement('div');
+        subItem.className = 'nav-item sub-item';
+        subItem.setAttribute('data-target', `assets/detail.html?id=${asset._id || asset.id}&name=${encodeURIComponent(asset.name)}`);
+        subItem.innerHTML = `
+            <i class="fas fa-box-open"></i>
+            <span>${asset.name}</span>
+        `;
+
+        subItem.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+            const itemText = this.textContent.trim();
+            document.getElementById('pageTitle').textContent = `${itemText} • RiskMGT`;
+            const target = this.getAttribute('data-target');
+            loadIframePage(target);
+        });
+
+        dynamicAssets.appendChild(subItem);
+    }
+
+    async function loadAssets() {
+        const token = authManager.getToken();
+        if (!token) return;
+
+        try {
+            const response = await fetch('/api/assets', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    authManager.handleUnauthenticated('Session expired while loading assets');
+                    return;
                 }
-
-                const data = await response.json();
-
-                document.getElementById('totalRisks').textContent = data.totalRisks || 0;
-                document.getElementById('highSeverityRisks').textContent = data.highSeverityRisks || 0;
-                document.getElementById('openActions').textContent = data.openActions || 0;
-                document.getElementById('overdueActions').textContent = data.overdueActions || 0;
-                document.getElementById('pendingApprovals').textContent = data.pendingApprovals || 0;
-                document.getElementById('activeUsers').textContent = data.activeUsers || 0;
-
-                document.getElementById('auditEntries24h').textContent = data.auditEntries24h || 0;
-                document.getElementById('recentRoleChanges').textContent = data.recentRoleChanges || 0;
-                document.getElementById('policyUpdates30d').textContent = data.policyUpdates30d || 0;
-
-                document.body.classList.remove('loading');
-
-            } catch (err) {
-                console.error('Dashboard fetch error:', err);
-                showToast('Failed to load dashboard data.', 'error');
-                document.body.classList.remove('loading');
+                console.warn('Assets fetch failed:', response.status);
+                return;
             }
+
+            const assets = await response.json();
+            dynamicAssets.innerHTML = '';
+            assets.forEach(addAssetToSidebar);
+        } catch (err) {
+            console.error('Load assets error:', err);
+        }
+    }
+
+    saveAsset.addEventListener('click', saveAssetToBackend);
+
+    async function loadDashboardData() {
+        const token = authManager.getToken();
+        if (!token) {
+            authManager.handleUnauthenticated('Please login to view dashboard data');
+            return;
         }
 
-        function updateUserDisplay() {
-            const token = localStorage.getItem('token');
-            if (!token) return;
+        try {
+            const response = await fetch('/api/dashboard/executive', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const fullName = payload.name || (payload.firstName + ' ' + payload.lastName) || 'User';
-                const role = payload.role || 'User';
-                const initials = fullName.split(' ').map(n => n[0].toUpperCase()).join('').slice(0,2) || '??';
-
-                document.getElementById('userAvatar').textContent = initials;
-                document.getElementById('userName').textContent = fullName;
-                document.getElementById('userRole').textContent = role.charAt(0).toUpperCase() + role.slice(1);
-            } catch (e) {
-                console.error('Failed to decode token for user display', e);
-                document.getElementById('userName').textContent = 'User';
-                document.getElementById('userRole').textContent = 'Unknown';
+            if (!response.ok) {
+                if (response.status === 401) {
+                    authManager.handleUnauthenticated('Session expired while loading dashboard');
+                    return;
+                }
+                throw new Error(`Failed to load data: ${response.status}`);
             }
-        }
 
-        // Initialize on load
-        window.addEventListener('load', () => {
-            // Setup sidebar toggle
+            const data = await response.json();
+
+            document.getElementById('totalRisks').textContent = data.totalRisks || 0;
+            document.getElementById('highSeverityRisks').textContent = data.highSeverityRisks || 0;
+            document.getElementById('openActions').textContent = data.openActions || 0;
+            document.getElementById('overdueActions').textContent = data.overdueActions || 0;
+            document.getElementById('pendingApprovals').textContent = data.pendingApprovals || 0;
+            document.getElementById('activeUsers').textContent = data.activeUsers || 0;
+            document.getElementById('auditEntries24h').textContent = data.auditEntries24h || 0;
+            document.getElementById('recentRoleChanges').textContent = data.recentRoleChanges || 0;
+            document.getElementById('policyUpdates30d').textContent = data.policyUpdates30d || 0;
+
+            document.body.classList.remove('loading');
+
+        } catch (err) {
+            console.error('Dashboard fetch error:', err);
+            showToast('Failed to load dashboard data.', 'error');
+            document.body.classList.remove('loading');
+        }
+    }
+
+    function updateUserDisplay() {
+        const token = authManager.getToken();
+        if (!token) return;
+
+        try {
+            const payload = authManager.decodeToken(token);
+            if (!payload) return;
+            
+            const fullName = payload.name || (payload.firstName + ' ' + payload.lastName) || 'User';
+            const role = payload.role || 'User';
+            const initials = fullName.split(' ').map(n => n[0].toUpperCase()).join('').slice(0,2) || '??';
+
+            document.getElementById('userAvatar').textContent = initials;
+            document.getElementById('userName').textContent = fullName;
+            document.getElementById('userRole').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+        } catch (e) {
+            console.error('Failed to decode token for user display', e);
+            document.getElementById('userName').textContent = 'User';
+            document.getElementById('userRole').textContent = 'Unknown';
+        }
+    }
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+        if (authManager.getToken() && !document.getElementById('sessionExpiredOverlay').classList.contains('active')) {
             document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
             document.getElementById('mobileMenuBtn').addEventListener('click', toggleSidebar);
             
-            // Initialize sidebar state
             initSidebarState();
-            
-            // Setup window resize handler
             window.addEventListener('resize', handleResize);
-            handleResize(); // Initial check
+            handleResize();
             
-            // Your existing initialization
             updateUserDisplay();
             loadDashboardData();
             loadAssets();
-        });
+        }
+    });
 
-        setTimeout(() => {
+    setTimeout(() => {
+        if (authManager.getToken()) {
             document.body.classList.remove('loading');
-        }, 8000);
-    </script>
+        }
+    }, 8000);
+</script>
 </body>
 </html>
