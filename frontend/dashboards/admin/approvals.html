@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+            --focus-ring: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        /* Shimmer Skeleton */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 1.2s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* Top Nav */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 10;
+        }
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 40px;
+            background: rgba(93,161,161,0.08);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            position: relative;
+        }
+        .nav-tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary);
+        }
+        .nav-tab.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .nav-tab:hover:not(.active):not(.disabled) { background: rgba(93,161,161,0.15); }
+        .nav-tab .favicon {
+            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+        }
+        .tab-badge {
+            background: var(--amber);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 20px;
+            margin-left: 6px;
+        }
+        .actions-group { display: flex; align-items: center; gap: 12px; }
+        .search-box input {
+            padding: 8px 12.8px; border: 1px solid var(--border); border-radius: 9.6px;
+            width: 320px; font-size: 12px; background: #f9f9f9;
+        }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
+        .btn-primary {
+            padding: 8px 16px; background: var(--primary); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary-outline {
+            padding: 8px 16px; background: transparent; color: var(--primary); border: 1px solid var(--primary);
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-secondary-outline:hover { background: rgba(93,161,161,0.1); }
+
+        /* Filter Bar */
+        .filter-bar {
+            padding: 12px 32px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            z-index: 9;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .filter-select {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            min-width: 140px;
+        }
+
+        /* Main Layout */
+        .main { position: fixed; top: 120px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+        .content-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .page-content { display: none; height: 100%; overflow: auto; }
+
+        /* Table View */
+        .table-view { display: block; height: 100%; padding: 24px; }
+        .table-container {
+            width: 100%; height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        table { min-width: 1600px; width: 100%; border-collapse: collapse; table-layout: auto; }
+        thead { position: sticky; top: 0; background: var(--card-bg); z-index: 8; }
+        th { 
+            padding: 8px 6px; 
+            font-size: 10.5px; 
+            font-weight: 600; 
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); 
+            text-align: left; 
+            white-space: nowrap;
+            background: var(--card-bg);
+        }
+        td { 
+            padding: 8px 6px; 
+            font-size: 11.5px; 
+            border-bottom: 1px solid var(--border); 
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        th:nth-child(1), td:nth-child(1) { min-width: 40px; }
+        th:nth-child(2), td:nth-child(2) { min-width: 100px; }
+        th:nth-child(3), td:nth-child(3) { min-width: 100px; }
+        th:nth-child(4), td:nth-child(4) { min-width: 250px; }
+        th:nth-child(5), td:nth-child(5) { min-width: 180px; }
+        th:nth-child(6), td:nth-child(6) { min-width: 120px; }
+        th:nth-child(7), td:nth-child(7) { min-width: 120px; }
+        th:nth-child(8), td:nth-child(8) { min-width: 100px; }
+        th:nth-child(9), td:nth-child(9) { min-width: 90px; }
+        th:nth-child(10), td:nth-child(10) { min-width: 90px; }
+        th:nth-child(11), td:nth-child(11) { min-width: 100px; }
+        th:nth-child(12), td:nth-child(12) { min-width: 120px; }
+
+        .clickable-row { cursor: pointer; transition: background-color 0.2s ease; }
+        .clickable-row:hover { background: rgba(93,161,161,0.05); }
+        .clickable-row.selected { background: rgba(93,161,161,0.1); border-left: 3px solid var(--primary); }
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+
+        /* Quick Actions Dropdown */
+        .quick-actions-dropdown {
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            z-index: 1000;
+            min-width: 200px;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .quick-action-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+        .quick-action-item:hover { background: rgba(93,161,161,0.08); }
+        .quick-action-item i { width: 20px; color: var(--primary); font-size: 14px; }
+        .quick-action-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+        /* Skeleton */
+        .skeleton-row td { padding: 12px 6px; }
+        .skeleton-cell { height: 20px; background: var(--shimmer-bg); border-radius: 4px; position: relative; overflow: hidden; }
+        .skeleton-cell::before {
+            content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shimmer 1.2s infinite;
+        }
+        .skeleton-pill { height: 24px; width: 80px; background: var(--shimmer-bg); border-radius: 20px; position: relative; overflow: hidden; }
+        .skeleton-pill::before {
+            content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shimmer 1.2s infinite;
+        }
+
+        /* Mobile Cards */
+        .card-view { display: none; padding: 16px; overflow-y: auto; height: 100%; }
+        .approval-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .approval-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .approval-card.selected { border: 2px solid var(--primary); background: rgba(93,161,161,0.02); }
+        .approval-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .approval-card-title { font-size: 16px; font-weight: 600; cursor: pointer; }
+        .approval-card-title:hover { color: var(--primary); }
+        .approval-card-grid { display: grid; grid-template-columns: 100px 1fr; gap: 8px 16px; font-size: 13px; }
+        .approval-card-label { color: var(--text-secondary); font-weight: 500; }
+
+        /* Pills */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .pill-pending { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-rejected { background: rgba(239,68,68,0.1); color: var(--red); }
+        .pill-risk { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .pill-action { background: rgba(59,130,246,0.1); color: var(--blue); }
+        .pill-delete { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none;
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .icon-btn.small { width: 28px; height: 28px; font-size: 12px; }
+        .icon-btn:hover { background: rgba(93,161,161,0.1); color: var(--primary); }
+
+        /* SLA indicators */
+        .sla-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .sla-normal { background: #f1f5f9; color: var(--neutral); }
+        .sla-warning { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .sla-breach { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        /* Full Screen Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-full {
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+        @keyframes slideIn { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        .modal-title { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+        .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-secondary);
+            line-height: 1;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        .modal-close:hover { background: rgba(93,161,161,0.1); color: var(--text-primary); }
+        .modal-body { padding: 24px; flex: 1; overflow-y: auto; background: var(--bg); }
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+
+        .btn-secondary, .btn-success, .btn-danger {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary { background: #f3f4f6; color: var(--text-primary); }
+        .btn-secondary:hover { background: #e5e7eb; }
+        .btn-success { background: var(--green); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: var(--red); color: white; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* Diff table */
+        .diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .diff-table th {
+            background: #f8fafc;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+        .diff-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .old-value { color: var(--red); text-decoration: line-through; }
+        .new-value { color: var(--green); font-weight: 500; }
+
+        /* Form */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: var(--focus-ring);
+        }
+
+        /* Selected Approval Indicator */
+        .selected-approval-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-md);
+        }
+        .selected-approval-indicator.show { display: flex; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast-icon { width: 24px; height: 24px; }
+        .toast-message { font-size: 14px; font-weight: 500; }
+        .toast.error { border-left-color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+        .toast.warning { border-left-color: var(--amber); }
+
+        .file-input-hidden { display: none; }
+
+        /* Responsive */
+        @media (max-width: 1024px) { 
+            table { min-width: 1400px; } 
+        }
+        @media (max-width: 768px) {
+            .top-nav { 
+                padding: 0 16px; 
+                flex-direction: column;
+                height: auto;
+                padding: 12px 16px;
+                gap: 12px;
+            }
+            .tabs-group { width: 100%; overflow-x: auto; }
+            .actions-group { width: 100%; flex-wrap: wrap; }
+            .search-box input { width: 100%; }
+            .filter-bar { padding: 12px 16px; flex-direction: column; align-items: stretch; }
+            .main { top: 180px; }
+            .table-view { display: none; }
+            .card-view { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" data-content="all-approvals" onclick="switchTab('all-approvals')">
+                <div class="favicon">A</div>
+                <span>All Approvals</span>
+            </div>
+            <div class="nav-tab" data-content="pending-approvals" onclick="switchTab('pending-approvals')">
+                <div class="favicon">P</div>
+                <span>Pending</span>
+                <span class="tab-badge" id="pendingCount">0</span>
+            </div>
+            <div class="nav-tab" data-content="delete-requests" onclick="switchTab('delete-requests')">
+                <div class="favicon">D</div>
+                <span>Delete Requests</span>
+                <span class="tab-badge" id="deleteCount" style="background: var(--red);">0</span>
+            </div>
+        </div>
+        <div class="actions-group">
+            <div class="search-box">
+                <input type="text" placeholder="Search approvals..." id="searchInput" onkeyup="searchApprovals()">
+            </div>
+            <button class="btn-icon" onclick="refreshApprovals()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-secondary-outline" onclick="exportApprovalsToExcel()" title="Export to Excel">
+                <i class="fas fa-file-excel"></i> Export
+            </button>
+        </div>
+    </nav>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">Type:</span>
+            <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                <option value="all">All Types</option>
+                <option value="risk">Risk</option>
+                <option value="action">Action</option>
+                <option value="delete">Delete Request</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Date:</span>
+            <select class="filter-select" id="dateFilter" onchange="applyFilters()">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+            </select>
+        </div>
+    </div>
+
+    <main class="main">
+        <div class="content-wrapper">
+            <!-- All Approvals -->
+            <div id="all-approvals" class="page-content" style="display:block;">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="approvalsTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Type</th>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Change Requested</th>
+                                    <th>Requester</th>
+                                    <th>Owner</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>SLA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvalsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-view" id="mobileApprovals"></div>
+            </div>
+
+            <!-- Pending Approvals -->
+            <div id="pending-approvals" class="page-content">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="pendingTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Type</th>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Change Requested</th>
+                                    <th>Requester</th>
+                                    <th>Owner</th>
+                                    <th>Submitted</th>
+                                    <th>SLA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Requests -->
+            <div id="delete-requests" class="page-content">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="deleteTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Item Type</th>
+                                    <th>ID</th>
+                                    <th>Description</th>
+                                    <th>Requester</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>SLA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deleteTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Selected Approval Indicator -->
+    <div class="selected-approval-indicator" id="selectedApprovalIndicator">
+        <i class="fas fa-gavel"></i>
+        <span id="selectedApprovalName">No approval selected</span>
+        <i class="fas fa-times-circle" onclick="clearSelectedApproval()" style="cursor: pointer;"></i>
+    </div>
+
+    <!-- Approval Modal -->
+    <div class="modal-overlay" id="approvalModal">
+        <div class="modal-full">
+            <div class="modal-header">
+                <div class="modal-title">Review Approval Request</div>
+                <div class="modal-close" onclick="closeModal('approvalModal')">×</div>
+            </div>
+            <div class="modal-body" id="approvalModalBody"></div>
+            <div class="modal-footer" id="approvalModalFooter">
+                <button class="btn-secondary" onclick="closeModal('approvalModal')">Cancel</button>
+                <button class="btn-danger" onclick="submitRejection()">Reject</button>
+                <button class="btn-success" onclick="submitApproval()">Approve</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+<script>
+// ============================================
+// GLOBAL VARIABLES
+// ============================================
+let allApprovals = [];
+let filteredApprovals = [];
+let currentApproval = null;
+let currentUser = null;
+let selectedApprovalId = null;
+let selectedApprovalTitle = null;
+let quickActionsDropdown = null;
+let searchTimeout = null;
+
+const API_BASE = '/api';
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '—';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        return date.toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'2-digit' });
+    } catch { return '—'; }
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return '—';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        return date.toLocaleString('en-GB');
+    } catch { return '—'; }
+}
+
+function getStatusClass(status) {
+    if (!status) return 'pill-pending';
+    switch(status.toLowerCase()) {
+        case 'pending': return 'pill-pending';
+        case 'approved': return 'pill-approved';
+        case 'rejected': return 'pill-rejected';
+        default: return 'pill-pending';
+    }
+}
+
+function getTypeClass(type) {
+    if (!type) return 'pill-risk';
+    const t = type.toLowerCase();
+    if (t.includes('delete')) return 'pill-delete';
+    if (t.includes('action')) return 'pill-action';
+    return 'pill-risk';
+}
+
+function calculateSLAHours(submittedAt) {
+    if (!submittedAt) return 0;
+    try { return Math.round((new Date() - new Date(submittedAt)) / (1000 * 60 * 60)); } catch { return 0; }
+}
+
+function getSLAStatus(submittedAt) {
+    if (!submittedAt) return 'normal';
+    const hours = calculateSLAHours(submittedAt);
+    if (hours > 72) return 'breach';
+    if (hours > 48) return 'warning';
+    return 'normal';
+}
+
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+    } catch { return {}; }
+}
+
+// ============================================
+// TOAST NOTIFICATION
+// ============================================
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} toast-icon"></i>
+        <div class="toast-message">${escapeHtml(message)}</div>
+    `;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
+// ============================================
+// TAB SWITCHING
+// ============================================
+function switchTab(contentId) {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.nav-tab[data-content="${contentId}"]`)?.classList.add('active');
+    document.querySelectorAll('.page-content').forEach(c => c.style.display = 'none');
+    document.getElementById(contentId).style.display = 'block';
+    
+    if (contentId === 'pending-approvals') renderPendingTable();
+    else if (contentId === 'delete-requests') renderDeleteTable();
+}
+
+function updateBadgeCounts() {
+    const pendingCount = allApprovals.filter(a => a.status === 'pending').length;
+    const deleteCount = allApprovals.filter(a => (a.type || '').toLowerCase().includes('delete') && a.status === 'pending').length;
+    document.getElementById('pendingCount').textContent = pendingCount;
+    document.getElementById('deleteCount').textContent = deleteCount;
+}
+
+function setSelectedApproval(approvalId, approvalTitle) {
+    selectedApprovalId = approvalId;
+    selectedApprovalTitle = approvalTitle;
+    document.getElementById('selectedApprovalName').textContent = approvalTitle || `Approval ${approvalId?.slice(-6)}`;
+    document.getElementById('selectedApprovalIndicator').classList.add('show');
+}
+
+function clearSelectedApproval() {
+    selectedApprovalId = null;
+    selectedApprovalTitle = null;
+    document.getElementById('selectedApprovalIndicator').classList.remove('show');
+    showToast('Approval selection cleared', 'info');
+}
+
+// ============================================
+// DATA LOADING
+// ============================================
+async function loadApprovals() {
+    showSkeletonLoading();
+    try {
+        const token = localStorage.getItem('token');
+        const [approvalsRes, deleteRes] = await Promise.all([
+            fetch(`${API_BASE}/approvals`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${API_BASE}/delete-requests`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+        
+        let approvals = [], deleteReqs = [];
+        if (approvalsRes.ok) approvals = (await approvalsRes.json()).approvals || [];
+        if (deleteRes.ok) deleteReqs = (await deleteRes.json()).requests || [];
+        
+        allApprovals = [
+            ...approvals.map(a => ({ ...a, type: a.type || 'risk' })),
+            ...deleteReqs.map(d => ({ ...d, type: 'delete', title: d.actionTitle || 'Delete Request' }))
+        ];
+        
+        filteredApprovals = [...allApprovals];
+        renderApprovals(filteredApprovals);
+        updateBadgeCounts();
+    } catch (error) {
+        console.error('Error loading approvals:', error);
+        showEmptyState();
+    }
+}
+
+function showSkeletonLoading() {
+    const tbody = document.getElementById('approvalsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+        const row = document.createElement('tr'); row.className = 'skeleton-row';
+        row.innerHTML = Array(11).fill('<td><div class="skeleton-cell"></div></td>').join('');
+        tbody.appendChild(row);
+    }
+}
+
+function showEmptyState() {
+    const tbody = document.getElementById('approvalsTableBody');
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:80px;"><i class="fas fa-inbox" style="font-size:48px;opacity:0.3;"></i><div style="margin-top:16px;">No approvals found</div></td></tr>`;
+    }
+}
+
+// ============================================
+// RENDERING
+// ============================================
+function renderApprovals(approvals) {
+    const tbody = document.getElementById('approvalsTableBody');
+    const mobile = document.getElementById('mobileApprovals');
+    if (!tbody || !mobile) return;
+    
+    if (!approvals.length) { showEmptyState(); return; }
+
+    tbody.innerHTML = approvals.map(approval => {
+        const id = approval._id || approval.id;
+        const shortId = id.slice(-8);
+        const type = approval.type || 'risk';
+        const status = approval.status || 'pending';
+        const slaStatus = getSLAStatus(approval.submittedAt || approval.createdAt);
+        const isSelected = selectedApprovalId === id;
+        
+        return `
+            <tr class="clickable-row ${isSelected ? 'selected' : ''}" onclick="showQuickActions(event, '${id}', '${escapeHtml(approval.title || 'Approval')}')">
+                <td><button class="icon-btn" onclick="event.stopPropagation(); showQuickActions(event, '${id}', '${escapeHtml(approval.title || 'Approval')}')"><i class="fas fa-ellipsis-v"></i></button></td>
+                <td><span class="pill ${getTypeClass(type)}">${escapeHtml(type)}</span></td>
+                <td><code>${escapeHtml(shortId)}</code></td>
+                <td><strong>${escapeHtml(approval.title || approval.description || 'Untitled')}</strong></td>
+                <td>${escapeHtml((approval.changeDescription || approval.description || '').substring(0, 60))}</td>
+                <td>${escapeHtml(approval.submittedBy || approval.requester || '—')}</td>
+                <td>${escapeHtml(approval.owner || approval.riskTitle || '—')}</td>
+                <td><span class="pill ${getStatusClass(status)}">${escapeHtml(status)}</span></td>
+                <td>${formatDate(approval.submittedAt || approval.createdAt)}</td>
+                <td><span class="sla-badge sla-${slaStatus}">${slaStatus === 'breach' ? 'Breach' : slaStatus === 'warning' ? 'Warning' : 'OK'}</span></td>
+                <td>
+                    <button class="icon-btn" onclick="event.stopPropagation(); setSelectedApproval('${id}', '${escapeHtml(approval.title)}')" title="Select"><i class="fas fa-check-circle"></i></button>
+                    ${status === 'pending' ? `<button class="btn-success" style="padding:4px 8px; font-size:11px;" onclick="event.stopPropagation(); openApprovalModal('${id}')">Review</button>` : `<button class="icon-btn" onclick="event.stopPropagation(); viewApproval('${id}')" title="View"><i class="fas fa-eye"></i></button>`}
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    mobile.innerHTML = approvals.map(approval => {
+        const id = approval._id || approval.id;
+        const type = approval.type || 'risk';
+        const status = approval.status || 'pending';
+        const slaStatus = getSLAStatus(approval.submittedAt || approval.createdAt);
+        const isSelected = selectedApprovalId === id;
+        
+        return `
+            <div class="approval-card ${isSelected ? 'selected' : ''}" onclick="showQuickActions(event, '${id}', '${escapeHtml(approval.title || 'Approval')}')">
+                <div class="approval-card-header">
+                    <div>
+                        <div style="display:flex; gap:4px; margin-bottom:8px;">
+                            <span class="pill ${getTypeClass(type)}">${escapeHtml(type)}</span>
+                            <span class="pill ${getStatusClass(status)}">${escapeHtml(status)}</span>
+                        </div>
+                        <div class="approval-card-title">${escapeHtml(approval.title || approval.description || 'Untitled')}</div>
+                    </div>
+                    <button class="icon-btn small" onclick="event.stopPropagation(); setSelectedApproval('${id}', '${escapeHtml(approval.title)}')"><i class="fas fa-check-circle"></i></button>
+                </div>
+                <div class="approval-card-grid">
+                    <div class="approval-card-label">Requester</div><div>${escapeHtml(approval.submittedBy || approval.requester || '—')}</div>
+                    <div class="approval-card-label">Owner</div><div>${escapeHtml(approval.owner || approval.riskTitle || '—')}</div>
+                    <div class="approval-card-label">Submitted</div><div>${formatDate(approval.submittedAt || approval.createdAt)}</div>
+                    <div class="approval-card-label">SLA</div><div><span class="sla-badge sla-${slaStatus}">${slaStatus === 'breach' ? 'SLA Breach' : slaStatus === 'warning' ? 'Warning' : 'OK'}</span></div>
+                </div>
+                <div style="margin-top:16px; display:flex; gap:8px;">
+                    ${status === 'pending' ? `<button class="btn-success" style="flex:1;" onclick="event.stopPropagation(); openApprovalModal('${id}')">Review</button>` : `<button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); viewApproval('${id}')">View</button>`}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    renderPendingTable();
+    renderDeleteTable();
+}
+
+function renderPendingTable() {
+    const tbody = document.getElementById('pendingTableBody');
+    if (!tbody) return;
+    const pending = filteredApprovals.filter(a => a.status === 'pending' && !(a.type || '').toLowerCase().includes('delete'));
+    if (!pending.length) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;">No pending approvals</td></tr>';
+        return;
+    }
+    tbody.innerHTML = pending.map(approval => {
+        const id = approval._id || approval.id;
+        const slaStatus = getSLAStatus(approval.submittedAt || approval.createdAt);
+        return `
+            <tr class="clickable-row" onclick="openApprovalModal('${id}')">
+                <td><button class="icon-btn" onclick="event.stopPropagation(); showQuickActions(event, '${id}', '${escapeHtml(approval.title)}')"><i class="fas fa-ellipsis-v"></i></button></td>
+                <td><span class="pill ${getTypeClass(approval.type)}">${escapeHtml(approval.type || 'risk')}</span></td>
+                <td><code>${escapeHtml(id.slice(-8))}</code></td>
+                <td>${escapeHtml(approval.title || 'Untitled')}</td>
+                <td>${escapeHtml((approval.changeDescription || '').substring(0, 50))}</td>
+                <td>${escapeHtml(approval.submittedBy || '—')}</td>
+                <td>${escapeHtml(approval.owner || '—')}</td>
+                <td>${formatDate(approval.submittedAt)}</td>
+                <td><span class="sla-badge sla-${slaStatus}">${slaStatus === 'breach' ? 'Breach' : slaStatus === 'warning' ? 'Warning' : 'OK'}</span></td>
+                <td><button class="btn-success" style="padding:4px 8px;" onclick="event.stopPropagation(); openApprovalModal('${id}')">Review</button></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderDeleteTable() {
+    const tbody = document.getElementById('deleteTableBody');
+    if (!tbody) return;
+    const deletes = filteredApprovals.filter(a => (a.type || '').toLowerCase().includes('delete'));
+    if (!deletes.length) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;">No delete requests</td></tr>';
+        return;
+    }
+    tbody.innerHTML = deletes.map(approval => {
+        const id = approval._id || approval.id;
+        const status = approval.status || 'pending';
+        const slaStatus = getSLAStatus(approval.submittedAt || approval.createdAt);
+        return `
+            <tr class="clickable-row" onclick="${status === 'pending' ? `openApprovalModal('${id}')` : `viewApproval('${id}')`}">
+                <td><button class="icon-btn" onclick="event.stopPropagation(); showQuickActions(event, '${id}', '${escapeHtml(approval.title)}')"><i class="fas fa-ellipsis-v"></i></button></td>
+                <td>Action</td>
+                <td><code>${escapeHtml((approval.actionId || id).slice(-8))}</code></td>
+                <td>${escapeHtml(approval.actionTitle || approval.description || 'Delete request')}</td>
+                <td>${escapeHtml(approval.submittedBy || approval.requester || '—')}</td>
+                <td>${escapeHtml(approval.reason || approval.description || '—')}</td>
+                <td><span class="pill ${getStatusClass(status)}">${escapeHtml(status)}</span></td>
+                <td>${formatDate(approval.submittedAt)}</td>
+                <td><span class="sla-badge sla-${slaStatus}">${slaStatus === 'breach' ? 'Breach' : slaStatus === 'warning' ? 'Warning' : 'OK'}</span></td>
+                <td>${status === 'pending' ? `<button class="btn-success" style="padding:4px 8px;" onclick="event.stopPropagation(); openApprovalModal('${id}')">Review</button>` : `<button class="icon-btn" onclick="event.stopPropagation(); viewApproval('${id}')"><i class="fas fa-eye"></i></button>`}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ============================================
+// QUICK ACTIONS
+// ============================================
+function showQuickActions(event, approvalId, approvalTitle) {
+    event.stopPropagation();
+    if (quickActionsDropdown) { quickActionsDropdown.remove(); quickActionsDropdown = null; }
+    
+    const approval = allApprovals.find(a => (a._id || a.id) === approvalId);
+    const isPending = approval?.status === 'pending';
+    
+    const dropdown = document.createElement('div');
+    dropdown.className = 'quick-actions-dropdown';
+    dropdown.innerHTML = `
+        <div class="quick-action-item" onclick="quickSelectApproval('${approvalId}', '${escapeHtml(approvalTitle)}')"><i class="fas fa-check-circle"></i>Select</div>
+        <div class="quick-action-divider"></div>
+        <div class="quick-action-item" onclick="quickViewApproval('${approvalId}')"><i class="fas fa-eye"></i>View Details</div>
+        ${isPending ? `<div class="quick-action-item" onclick="quickReviewApproval('${approvalId}')"><i class="fas fa-gavel"></i>Review</div>` : ''}
+    `;
+    
+    document.body.appendChild(dropdown);
+    quickActionsDropdown = dropdown;
+    
+    const rect = event.target.getBoundingClientRect();
+    dropdown.style.top = `${rect.bottom + 5}px`;
+    dropdown.style.left = `${Math.min(rect.left, window.innerWidth - 250)}px`;
+    
+    setTimeout(() => document.addEventListener('click', function closeDropdown(e) {
+        if (!dropdown.contains(e.target)) { dropdown.remove(); quickActionsDropdown = null; document.removeEventListener('click', closeDropdown); }
+    }), 0);
+}
+
+function quickSelectApproval(approvalId, approvalTitle) { if (quickActionsDropdown) quickActionsDropdown.remove(); setSelectedApproval(approvalId, approvalTitle); }
+function quickViewApproval(approvalId) { if (quickActionsDropdown) quickActionsDropdown.remove(); viewApproval(approvalId); }
+function quickReviewApproval(approvalId) { if (quickActionsDropdown) quickActionsDropdown.remove(); openApprovalModal(approvalId); }
+
+// ============================================
+// MODAL FUNCTIONS
+// ============================================
+function openApprovalModal(approvalId) {
+    const approval = allApprovals.find(a => (a._id || a.id) === approvalId);
+    if (!approval) { showToast('Approval not found', 'error'); return; }
+    currentApproval = approval;
+    
+    const modalBody = document.getElementById('approvalModalBody');
+    const isDelete = (approval.type || '').toLowerCase().includes('delete');
+    
+    let changesHtml = '';
+    if (approval.changes && Object.keys(approval.changes).length) {
+        changesHtml = '<table class="diff-table"><thead><tr><th>Field</th><th>Old</th><th>New</th></tr></thead><tbody>';
+        for (const [field, change] of Object.entries(approval.changes)) {
+            changesHtml += `<tr><td>${escapeHtml(field)}</td><td class="old-value">${escapeHtml(change.old || '—')}</td><td class="new-value">${escapeHtml(change.new || '—')}</td></tr>`;
+        }
+        changesHtml += '</tbody></table>';
+    } else if (isDelete) {
+        changesHtml = `<div style="padding:16px; background:#fef2f2; border-radius:8px;"><strong style="color:var(--red);">Delete Request</strong><div style="margin-top:8px;">Reason: ${escapeHtml(approval.reason || 'No reason provided')}</div></div>`;
+    } else {
+        changesHtml = '<p style="color:var(--text-muted);">No change details available</p>';
+    }
+    
+    modalBody.innerHTML = `
+        <div style="margin-bottom:20px;">
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+                <span class="pill ${getTypeClass(approval.type)}">${escapeHtml(approval.type || 'Request')}</span>
+                <span class="pill ${getStatusClass(approval.status)}">${escapeHtml(approval.status || 'pending')}</span>
+            </div>
+            <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+                <div style="display:grid; grid-template-columns:100px 1fr; gap:8px;">
+                    <div style="color:var(--text-secondary);">ID:</div><div><code>${escapeHtml(approval._id || approval.id)}</code></div>
+                    <div style="color:var(--text-secondary);">Requester:</div><div>${escapeHtml(approval.submittedBy || approval.requester || '—')}</div>
+                    <div style="color:var(--text-secondary);">Submitted:</div><div>${formatDateTime(approval.submittedAt || approval.createdAt)}</div>
+                </div>
+            </div>
+        </div>
+        <h4 style="margin-bottom:12px;">Change Details</h4>
+        ${changesHtml}
+        <div class="form-group" style="margin-top:20px;">
+            <label>Comment ${isDelete ? '(required for rejection)' : ''}</label>
+            <textarea id="approvalComment" placeholder="Add a comment..."></textarea>
+        </div>
+    `;
+    
+    document.getElementById('approvalModal').classList.add('open');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('open');
+    currentApproval = null;
+}
+
+function viewApproval(approvalId) {
+    const approval = allApprovals.find(a => (a._id || a.id) === approvalId);
+    if (!approval) return;
+    
+    let details = `ID: ${approval._id}\nType: ${approval.type}\nTitle: ${approval.title}\nStatus: ${approval.status}`;
+    details += `\nRequester: ${approval.submittedBy || approval.requester}\nSubmitted: ${formatDateTime(approval.submittedAt)}`;
+    if (approval.processedAt) details += `\nProcessed: ${formatDateTime(approval.processedAt)}`;
+    if (approval.comment) details += `\nComment: ${approval.comment}`;
+    alert(details);
+}
+
+async function submitApproval() {
+    if (!currentApproval) return;
+    const comment = document.getElementById('approvalComment')?.value || '';
+    await processDecision('approved', comment);
+}
+
+async function submitRejection() {
+    if (!currentApproval) return;
+    const comment = document.getElementById('approvalComment')?.value || '';
+    if (!comment) { showToast('Comment required for rejection', 'warning'); return; }
+    await processDecision('rejected', comment);
+}
+
+async function processDecision(status, comment) {
+    const id = currentApproval._id || currentApproval.id;
+    const isDelete = (currentApproval.type || '').toLowerCase().includes('delete');
+    
+    try {
+        const token = localStorage.getItem('token');
+        const endpoint = isDelete ? `${API_BASE}/delete-requests/${id}` : `${API_BASE}/approvals/${id}`;
+        const payload = isDelete 
+            ? { decision: status, comments: comment, rejectionReason: status === 'rejected' ? comment : undefined }
+            : { status, comment };
+        
+        const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        showToast(`Request ${status}`, 'success');
+        closeModal('approvalModal');
+        await loadApprovals();
+    } catch (error) { showToast('Failed: ' + error.message, 'error'); }
+}
+
+// ============================================
+// FILTERS & SEARCH
+// ============================================
+function applyFilters() {
+    const type = document.getElementById('typeFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const date = document.getElementById('dateFilter').value;
+    
+    filteredApprovals = allApprovals.filter(a => {
+        if (type !== 'all') {
+            const aType = (a.type || '').toLowerCase();
+            if (type === 'delete' && !aType.includes('delete')) return false;
+            if (type !== 'delete' && !aType.includes(type)) return false;
+        }
+        if (status !== 'all' && a.status !== status) return false;
+        if (date !== 'all') {
+            const d = new Date(a.submittedAt || a.createdAt);
+            const now = new Date();
+            if (date === 'today' && d.toDateString() !== now.toDateString()) return false;
+            if (date === 'week' && (now - d) > 7 * 24 * 60 * 60 * 1000) return false;
+            if (date === 'month' && (now - d) > 30 * 24 * 60 * 60 * 1000) return false;
+        }
+        return true;
+    });
+    renderApprovals(filteredApprovals);
+}
+
+function searchApprovals() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        filteredApprovals = allApprovals.filter(a => {
+            if (!term) return true;
+            return `${a.title} ${a.description} ${a.submittedBy} ${a._id}`.toLowerCase().includes(term);
+        });
+        renderApprovals(filteredApprovals);
+    }, 300);
+}
+
+// ============================================
+// EXPORT
+// ============================================
+function exportApprovalsToExcel() {
+    if (!filteredApprovals.length) { showToast('No approvals to export', 'warning'); return; }
+    const rows = filteredApprovals.map(a => ({
+        'ID': a._id || a.id, 'Type': a.type, 'Title': a.title, 'Status': a.status,
+        'Requester': a.submittedBy || a.requester, 'Owner': a.owner, 'Submitted': a.submittedAt,
+        'Processed': a.processedAt, 'Comment': a.comment
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Approvals');
+    XLSX.writeFile(wb, `approvals_${new Date().toISOString().slice(0,10)}.xlsx`);
+    showToast(`Exported ${filteredApprovals.length} approvals`, 'success');
+}
+
+function refreshApprovals() { loadApprovals(); showToast('Refreshing...', 'success'); }
+
+// ============================================
+// INITIALIZATION
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login.html'; return; }
+    try { currentUser = parseJwt(token); } catch (e) {}
+    
+    await loadApprovals();
+    
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+        m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id)); });
+});
+
+// Expose globals
+window.switchTab = switchTab;
+window.openApprovalModal = openApprovalModal;
+window.closeModal = closeModal;
+window.viewApproval = viewApproval;
+window.submitApproval = submitApproval;
+window.submitRejection = submitRejection;
+window.refreshApprovals = refreshApprovals;
+window.exportApprovalsToExcel = exportApprovalsToExcel;
+window.applyFilters = applyFilters;
+window.searchApprovals = searchApprovals;
+window.showQuickActions = showQuickActions;
+window.quickSelectApproval = quickSelectApproval;
+window.quickViewApproval = quickViewApproval;
+window.quickReviewApproval = quickReviewApproval;
+window.setSelectedApproval = setSelectedApproval;
+window.clearSelectedApproval = clearSelectedApproval;
+</script>
+</body>
+</html>

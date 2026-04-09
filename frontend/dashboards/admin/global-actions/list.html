@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Actions • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+            --focus-ring: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        /* Shimmer Skeleton */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 1.2s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* Top Nav */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 10;
+        }
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 40px;
+            background: rgba(93,161,161,0.08);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary);
+        }
+        .nav-tab.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .nav-tab:hover:not(.active):not(.disabled) { background: rgba(93,161,161,0.15); }
+        .nav-tab .favicon {
+            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+        }
+        .actions-group { display: flex; align-items: center; gap: 12px; }
+        .search-box input {
+            padding: 8px 12.8px; border: 1px solid var(--border); border-radius: 9.6px;
+            width: 320px; font-size: 12px; background: #f9f9f9;
+        }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
+        .btn-primary {
+            padding: 8px 16px; background: var(--primary); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary-outline {
+            padding: 8px 16px; background: transparent; color: var(--primary); border: 1px solid var(--primary);
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-secondary-outline:hover { background: rgba(93,161,161,0.1); }
+        .btn-primary.loading {
+            position: relative;
+            color: transparent;
+        }
+        .btn-primary.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: button-spin 0.8s linear infinite;
+        }
+        @keyframes button-spin { to { transform: rotate(360deg); } }
+
+        /* Filter Bar */
+        .filter-bar {
+            padding: 12px 32px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .filter-select {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            min-width: 140px;
+        }
+
+        /* Main Layout */
+        .main { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+        .content-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .page-content { display: none; height: 100%; overflow: auto; }
+
+        /* Table View */
+        .table-view { display: block; height: 100%; padding: 24px; }
+        .table-container {
+            width: 100%; height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        table { min-width: 1600px; width: 100%; border-collapse: collapse; table-layout: auto; }
+        thead { position: sticky; top: 0; background: var(--card-bg); z-index: 8; }
+        th { 
+            padding: 8px 6px; 
+            font-size: 10.5px; 
+            font-weight: 600; 
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); 
+            text-align: left; 
+            white-space: nowrap;
+            background: var(--card-bg);
+        }
+        td { 
+            padding: 8px 6px; 
+            font-size: 11.5px; 
+            border-bottom: 1px solid var(--border); 
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        th:nth-child(1), td:nth-child(1) { min-width: 40px; }
+        th:nth-child(2), td:nth-child(2) { min-width: 80px; }
+        th:nth-child(3), td:nth-child(3) { min-width: 250px; }
+        th:nth-child(4), td:nth-child(4) { min-width: 100px; }
+        th:nth-child(5), td:nth-child(5) { min-width: 120px; }
+        th:nth-child(6), td:nth-child(6) { min-width: 120px; }
+        th:nth-child(7), td:nth-child(7) { min-width: 100px; }
+        th:nth-child(8), td:nth-child(8) { min-width: 100px; }
+        th:nth-child(9), td:nth-child(9) { min-width: 80px; }
+        th:nth-child(10), td:nth-child(10) { min-width: 150px; }
+        th:nth-child(11), td:nth-child(11) { min-width: 100px; }
+        th:nth-child(12), td:nth-child(12) { min-width: 80px; }
+        
+        .clickable-row { cursor: pointer; transition: background-color 0.2s ease; }
+        .clickable-row:hover { background: rgba(93,161,161,0.05); }
+        .clickable-row.selected { background: rgba(93,161,161,0.1); border-left: 3px solid var(--primary); }
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+
+        /* Quick Actions Dropdown */
+        .quick-actions-dropdown {
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            z-index: 1000;
+            min-width: 200px;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .quick-action-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+        .quick-action-item:hover { background: rgba(93,161,161,0.08); }
+        .quick-action-item i { width: 20px; color: var(--primary); font-size: 14px; }
+        .quick-action-item.danger { color: var(--red); }
+        .quick-action-item.danger i { color: var(--red); }
+        .quick-action-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+        /* Skeleton */
+        .skeleton-row td { padding: 12px 6px; }
+        .skeleton-cell { height: 20px; background: var(--shimmer-bg); border-radius: 4px; position: relative; overflow: hidden; }
+        .skeleton-cell::before {
+            content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shimmer 1.2s infinite;
+        }
+        .skeleton-pill { height: 24px; width: 80px; background: var(--shimmer-bg); border-radius: 20px; position: relative; overflow: hidden; }
+        .skeleton-pill::before {
+            content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shimmer 1.2s infinite;
+        }
+
+        /* Mobile Cards */
+        .card-view { display: none; padding: 16px; overflow-y: auto; height: 100%; }
+        .action-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .action-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .action-card.selected { border: 2px solid var(--primary); background: rgba(93,161,161,0.02); }
+        .action-card.overdue { border-left: 4px solid var(--red); }
+        .action-card.due-soon { border-left: 4px solid var(--amber); }
+        .action-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .action-card-title { font-size: 16px; font-weight: 600; cursor: pointer; }
+        .action-card-title:hover { color: var(--primary); }
+        .action-card-grid { display: grid; grid-template-columns: 120px 1fr; gap: 8px 16px; font-size: 13px; }
+        .action-card-label { color: var(--text-secondary); font-weight: 500; }
+
+        /* Pills */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .pill-pending { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-in-progress { background: rgba(59,130,246,0.1); color: var(--blue); }
+        .pill-completed { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-closed { background: rgba(107,114,128,0.1); color: var(--neutral); }
+        .pill-proposed { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-high { background: rgba(239,68,68,0.1); color: var(--red); }
+        .pill-medium { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .pill-low { background: rgba(16,185,129,0.1); color: var(--green); }
+
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none;
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .icon-btn.small { width: 28px; height: 28px; font-size: 12px; }
+        .icon-btn.danger { color: var(--red); }
+        .icon-btn.danger:hover { background: rgba(239,68,68,0.1); }
+        .icon-btn:hover { background: rgba(93,161,161,0.1); color: var(--primary); }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 80px;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        /* Full Screen Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-full {
+            background: white;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+        @keyframes slideIn { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        .modal-title { font-size: 24px; font-weight: 600; color: var(--text-primary); }
+        .modal-close {
+            cursor: pointer;
+            font-size: 28px;
+            color: var(--text-secondary);
+            line-height: 1;
+            transition: var(--transition);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        .modal-close:hover { background: rgba(93,161,161,0.1); color: var(--text-primary); }
+        .modal-body { padding: 32px; flex: 1; background: var(--bg); overflow-y: auto; min-height: 0; }
+        .modal-footer {
+            padding: 20px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+
+        .btn-secondary, .btn-success, .btn-danger {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 120px;
+        }
+        .btn-secondary { background: #f3f4f6; color: var(--text-primary); }
+        .btn-secondary:hover { background: #e5e7eb; }
+        .btn-success { background: var(--primary); color: white; }
+        .btn-success:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--red); color: white; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* Form Styles */
+        .form-container { max-width: 1000px; margin: 0 auto; }
+        .form-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-group { margin-bottom: 24px; }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background: white;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-row { display: flex; gap: 24px; margin-bottom: 24px; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; }
+        .required::after { content: ' *'; color: var(--red); }
+
+        /* Progress Slider */
+        #progressSlider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            outline: none;
+        }
+        #progressSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: transform 0.1s ease;
+        }
+        #progressSlider::-webkit-slider-thumb:hover { transform: scale(1.2); background: var(--primary-hover); }
+        #sliderValueLabel {
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(93,161,161,0.1);
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* Selected Action Indicator */
+        .selected-action-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-md);
+        }
+        .selected-action-indicator.show { display: flex; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast-icon { width: 24px; height: 24px; }
+        .toast-message { font-size: 14px; font-weight: 500; }
+        .toast.error { border-left-color: var(--red); }
+        .toast.error .toast-icon { color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+        .toast.success .toast-icon { color: var(--green); }
+        .toast.warning { border-left-color: var(--amber); }
+        .toast.warning .toast-icon { color: var(--amber); }
+
+        .file-input-hidden { display: none; }
+
+        /* Responsive */
+        @media (max-width: 1024px) { 
+            table { min-width: 1400px; } 
+            .form-row { flex-direction: column; gap: 16px; }
+        }
+        @media (max-width: 768px) {
+            .top-nav { 
+                padding: 0 16px; 
+                flex-direction: column;
+                height: auto;
+                padding: 12px 16px;
+                gap: 12px;
+            }
+            .tabs-group { width: 100%; overflow-x: auto; padding-bottom: 4px; }
+            .actions-group { width: 100%; flex-wrap: wrap; gap: 8px; }
+            .search-box input { width: 100%; min-width: 200px; }
+            .filter-bar { padding: 12px 16px; flex-direction: column; align-items: stretch; }
+            .filter-group { flex-direction: column; align-items: stretch; }
+            .table-view { display: none; }
+            .card-view { display: block; }
+            .modal-body { padding: 20px; }
+            .form-section { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" data-content="actions-content" onclick="switchTab('actions-content')">
+                <div class="favicon">A</div>
+                <span>All Actions</span>
+            </div>
+            <div class="nav-tab" data-content="my-actions-content" onclick="switchTab('my-actions-content')">
+                <div class="favicon">M</div>
+                <span>My Actions</span>
+            </div>
+            <div class="nav-tab" data-content="overdue-content" onclick="switchTab('overdue-content')">
+                <div class="favicon">!</div>
+                <span>Overdue</span>
+            </div>
+            <div class="nav-tab disabled" data-content="action-details-content" id="actionDetailsTab" onclick="switchTab('action-details-content')">
+                <div class="favicon">D</div>
+                <span>Action Details</span>
+            </div>
+        </div>
+        <div class="actions-group">
+            <div class="search-box">
+                <input type="text" placeholder="Search actions..." id="searchInput" onkeyup="searchActions()">
+            </div>
+            <button class="btn-icon" onclick="refreshActions()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-secondary-outline" onclick="exportActionsToExcel()" title="Export to Excel">
+                <i class="fas fa-file-excel"></i> Export
+            </button>
+            <button class="btn-secondary-outline" onclick="importActions()" title="Import Actions">
+                <i class="fas fa-upload"></i> Import
+            </button>
+            <button class="btn-primary" onclick="openCreateActionModal()">
+                <i class="fas fa-plus"></i> Action
+            </button>
+        </div>
+    </nav>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Priority:</span>
+            <select class="filter-select" id="priorityFilter" onchange="applyFilters()">
+                <option value="all">All Priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Owner:</span>
+            <select class="filter-select" id="ownerFilter" onchange="applyFilters()">
+                <option value="all">All Owners</option>
+            </select>
+        </div>
+    </div>
+
+    <main class="main">
+        <div class="content-wrapper">
+            <!-- All Actions -->
+            <div id="actions-content" class="page-content" style="display:block;">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="actionsTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Owner</th>
+                                    <th>Risk</th>
+                                    <th>Start Date</th>
+                                    <th>Due Date</th>
+                                    <th>Progress</th>
+                                    <th>Cost</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="actionsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-view" id="mobileActions"></div>
+            </div>
+
+            <!-- My Actions -->
+            <div id="my-actions-content" class="page-content">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="myActionsTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Risk</th>
+                                    <th>Due Date</th>
+                                    <th>Progress</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="myActionsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overdue -->
+            <div id="overdue-content" class="page-content">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="overdueTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Owner</th>
+                                    <th>Risk</th>
+                                    <th>Due Date</th>
+                                    <th>Days Overdue</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="overdueTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Details -->
+            <div id="action-details-content" class="page-content">
+                <iframe id="actionDetailsFrame" src="" style="width:100%;height:100%;border:none;" scrolling="no" title="Action Details"></iframe>
+            </div>
+        </div>
+    </main>
+
+    <!-- Selected Action Indicator -->
+    <div class="selected-action-indicator" id="selectedActionIndicator">
+        <i class="fas fa-tasks"></i>
+        <span id="selectedActionName">No action selected</span>
+        <i class="fas fa-times-circle" onclick="clearSelectedAction()" style="cursor: pointer;"></i>
+    </div>
+
+    <!-- Create Action Modal -->
+    <div class="modal-overlay" id="createActionModal">
+        <div class="modal-full">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-plus-circle" style="margin-right: 12px; color: var(--primary);" id="modalIcon"></i>
+                    <span id="modalTitle">Create New Action</span>
+                </div>
+                <div class="modal-close" onclick="closeCreateActionModal()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="form-container">
+                    <form id="createActionForm">
+                        <input type="hidden" id="actionId">
+                        
+                        <div class="form-section">
+                            <h3 class="section-title"><i class="fas fa-info-circle"></i> Basic Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="actionTitle" class="required">Title</label>
+                                    <input type="text" id="actionTitle" required maxlength="200" placeholder="Enter action title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="actionPriority">Priority</label>
+                                    <select id="actionPriority">
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="low">Low</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="actionDescription">Description</label>
+                                <textarea id="actionDescription" rows="3" placeholder="Describe the action..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title"><i class="fas fa-user"></i> Ownership & Linking</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="actionOwner">Owner</label>
+                                    <input type="text" id="actionOwner" placeholder="Assigned to">
+                                </div>
+                                <div class="form-group">
+                                    <label for="actionRiskId">Linked Risk (Optional)</label>
+                                    <input type="text" id="actionRiskId" placeholder="Risk ID">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="actionSubProject">Sub Project</label>
+                                    <input type="text" id="actionSubProject" placeholder="Sub project / department">
+                                </div>
+                                <div class="form-group">
+                                    <label for="actionStatus" class="required">Status</label>
+                                    <select id="actionStatus" required>
+                                        <option value="pending">Pending</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title"><i class="fas fa-calendar"></i> Timeline & Progress</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="actionStartDate">Start Date</label>
+                                    <input type="date" id="actionStartDate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="actionDueDate">Due Date</label>
+                                    <input type="date" id="actionDueDate">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="actionProgress">Progress (%)</label>
+                                    <input type="number" id="actionProgress" min="0" max="100" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="actionCost">Cost ($)</label>
+                                    <input type="number" id="actionCost" step="0.01" min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title"><i class="fas fa-sticky-note"></i> Notes</h3>
+                            <div class="form-group">
+                                <textarea id="actionNotes" rows="3" placeholder="Additional notes..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCreateActionModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-success" onclick="submitActionForm()">
+                    <i class="fas fa-paper-plane"></i> <span id="submitButtonText">Create Action</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Progress Modal -->
+    <div class="modal-overlay" id="progressModal">
+        <div class="modal-full" style="max-width: 500px; height: auto; max-height: 400px; border-radius: var(--radius);">
+            <div class="modal-header">
+                <div class="modal-title">Update Progress</div>
+                <div class="modal-close" onclick="closeModal('progressModal')">×</div>
+            </div>
+            <div class="modal-body">
+                <form id="progressForm">
+                    <input type="hidden" id="progressActionId">
+                    <div class="form-group">
+                        <label>Current Progress</label>
+                        <input type="text" id="currentProgressDisplay" readonly style="background:#f5f5f5;">
+                    </div>
+                    <div class="form-group">
+                        <label>New Progress: <span id="sliderValueLabel">0</span>%</label>
+                        <input type="range" id="progressSlider" min="0" max="100" step="1" value="0" style="width:100%; margin-top:8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--neutral); padding:0 4px;">
+                            <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('progressModal')">Cancel</button>
+                <button class="btn-success" onclick="submitProgressUpdate()">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="importFileInput" accept=".json,.csv,.xlsx" style="display: none;" onchange="handleImportFile(this)">
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+<script>
+// ============================================
+// GLOBAL VARIABLES
+// ============================================
+let allActions = [];
+let filteredActions = [];
+let risks = [];
+let currentUser = null;
+let isLoading = false;
+let isEditMode = false;
+let currentEditActionId = null;
+let selectedActionId = null;
+let selectedActionTitle = null;
+let quickActionsDropdown = null;
+let searchTimeout = null;
+
+const API_BASE = '/api';
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '—';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        return date.toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'2-digit' });
+    } catch { return '—'; }
+}
+
+function formatCurrency(amount) {
+    if (!amount && amount !== 0) return '—';
+    return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:0 }).format(amount);
+}
+
+function getStatusClass(status) {
+    if (!status) return 'pill-pending';
+    switch(status.toLowerCase()) {
+        case 'pending': return 'pill-pending';
+        case 'in-progress': return 'pill-in-progress';
+        case 'completed': return 'pill-completed';
+        case 'approved': return 'pill-approved';
+        case 'closed': return 'pill-closed';
+        case 'proposed': return 'pill-proposed';
+        default: return 'pill-pending';
+    }
+}
+
+function getPriorityClass(priority) {
+    if (!priority) return 'pill-medium';
+    switch(priority.toLowerCase()) {
+        case 'high': return 'pill-high';
+        case 'medium': return 'pill-medium';
+        case 'low': return 'pill-low';
+        default: return 'pill-medium';
+    }
+}
+
+function isOverdue(action) {
+    if (!action.dueDate || action.status === 'completed') return false;
+    const dueDate = new Date(action.dueDate);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return dueDate < today;
+}
+
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+    } catch { return {}; }
+}
+
+// ============================================
+// TOAST NOTIFICATION
+// ============================================
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} toast-icon"></i>
+        <div class="toast-message">${escapeHtml(message)}</div>
+    `;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
+// ============================================
+// TAB SWITCHING
+// ============================================
+function switchTab(contentId) {
+    const tab = document.querySelector(`.nav-tab[data-content="${contentId}"]`);
+    if (tab && tab.classList.contains('disabled')) {
+        showToast('Please select an action first', 'warning');
+        return;
+    }
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.nav-tab[data-content="${contentId}"]`)?.classList.add('active');
+    document.querySelectorAll('.page-content').forEach(c => c.style.display = 'none');
+    document.getElementById(contentId).style.display = 'block';
+    
+    if (contentId === 'my-actions-content') renderMyActions(filteredActions);
+    else if (contentId === 'overdue-content') renderOverdue(filteredActions);
+}
+
+function updateDisabledTabs() {
+    const actionDetailsTab = document.getElementById('actionDetailsTab');
+    if (selectedActionId) {
+        actionDetailsTab.classList.remove('disabled');
+        document.getElementById('selectedActionName').textContent = selectedActionTitle || `Action ${selectedActionId.slice(-6)}`;
+        document.getElementById('selectedActionIndicator').classList.add('show');
+    } else {
+        actionDetailsTab.classList.add('disabled');
+        document.getElementById('selectedActionIndicator').classList.remove('show');
+    }
+}
+
+function setSelectedAction(actionId, actionTitle) {
+    selectedActionId = actionId;
+    selectedActionTitle = actionTitle;
+    updateDisabledTabs();
+    document.getElementById('actionDetailsFrame').src = `action-details.html?id=${encodeURIComponent(actionId)}`;
+}
+
+function clearSelectedAction() {
+    selectedActionId = null;
+    selectedActionTitle = null;
+    updateDisabledTabs();
+    document.querySelectorAll('#actionsTableBody tr').forEach(row => row.classList.remove('selected'));
+    document.getElementById('actionDetailsFrame').src = '';
+    showToast('Action selection cleared', 'info');
+}
+
+// ============================================
+// DATA LOADING
+// ============================================
+async function loadRisks() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/risks`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            risks = Array.isArray(data) ? data : (data.risks || []);
+        }
+    } catch (error) { console.error('Failed to load risks', error); }
+}
+
+async function loadActions() {
+    if (isLoading) return;
+    isLoading = true;
+    showSkeletonLoading();
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/actions`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        allActions = Array.isArray(data) ? data : (data.actions || []);
+        
+        const riskMap = new Map();
+        risks.forEach(risk => riskMap.set(risk._id || risk.id, risk));
+        allActions = allActions.map(action => {
+            const risk = action.riskId ? riskMap.get(action.riskId) : null;
+            return {
+                ...action,
+                riskTitle: risk?.title || 'Unknown Risk',
+                riskIdentifier: risk?.riskId || (action.riskId ? action.riskId.slice(-6) : 'N/A')
+            };
+        });
+
+        filteredActions = [...allActions];
+        renderActions(filteredActions);
+        populateOwnerFilters();
+    } catch (error) {
+        console.error('Error loading actions:', error);
+        showEmptyState();
+    } finally {
+        isLoading = false;
+    }
+}
+
+function showSkeletonLoading() {
+    const tbody = document.getElementById('actionsTableBody');
+    const mobile = document.getElementById('mobileActions');
+    if (!tbody || !mobile) return;
+    
+    tbody.innerHTML = '';
+    mobile.innerHTML = '';
+    
+    for (let i = 0; i < 5; i++) {
+        const row = document.createElement('tr'); row.className = 'skeleton-row';
+        row.innerHTML = Array(13).fill('<td><div class="skeleton-cell"></div></td>').join('');
+        tbody.appendChild(row);
+    }
+    for (let i = 0; i < 3; i++) {
+        const card = document.createElement('div'); card.className = 'action-card skeleton';
+        card.innerHTML = '<div class="skeleton" style="height:80px;"></div>';
+        mobile.appendChild(card);
+    }
+}
+
+function showEmptyState() {
+    const tbody = document.getElementById('actionsTableBody');
+    const mobile = document.getElementById('mobileActions');
+    const msg = `<tr><td colspan="13" style="text-align:center;padding:80px;"><i class="fas fa-tasks" style="font-size:48px;opacity:0.3;"></i><div style="margin-top:16px;">No actions found</div><button class="btn-primary" onclick="openCreateActionModal()" style="margin-top:16px;">Create First Action</button></td></tr>`;
+    if (tbody) tbody.innerHTML = msg;
+    if (mobile) mobile.innerHTML = '<div class="action-card" style="text-align:center;padding:40px;"><i class="fas fa-tasks" style="font-size:48px;opacity:0.3;"></i><div>No actions found</div><button class="btn-primary" onclick="openCreateActionModal()" style="margin-top:16px;">Create First Action</button></div>';
+}
+
+// ============================================
+// RENDERING
+// ============================================
+function renderActions(actions) {
+    const tbody = document.getElementById('actionsTableBody');
+    const mobile = document.getElementById('mobileActions');
+    if (!tbody || !mobile) return;
+    
+    if (!actions.length) { showEmptyState(); return; }
+
+    tbody.innerHTML = actions.map(action => {
+        const overdue = isOverdue(action);
+        const isSelected = selectedActionId === (action._id || action.id);
+        return `
+            <tr class="clickable-row ${isSelected ? 'selected' : ''}" data-action-id="${action._id || action.id}" 
+                onclick="showQuickActions(event, '${action._id || action.id}', '${escapeHtml(action.title || 'Action')}')">
+                <td><button class="icon-btn" onclick="event.stopPropagation(); showQuickActions(event, '${action._id || action.id}', '${escapeHtml(action.title || 'Action')}')"><i class="fas fa-ellipsis-v"></i></button></td>
+                <td>${escapeHtml((action.actionId || action._id || '').slice(-6))}</td>
+                <td><strong>${escapeHtml(action.title || 'Untitled')}</strong></td>
+                <td>${escapeHtml((action.description || '').substring(0, 60))}${action.description?.length > 60 ? '...' : ''}</td>
+                <td><span class="pill ${getStatusClass(action.status)}">${escapeHtml(action.status || 'pending')}</span></td>
+                <td><span class="pill ${getPriorityClass(action.priority)}">${escapeHtml(action.priority || 'medium')}</span></td>
+                <td>${escapeHtml(action.owner || '—')}</td>
+                <td>${escapeHtml(action.riskIdentifier || '—')}</td>
+                <td>${formatDate(action.startDate)}</td>
+                <td style="${overdue ? 'color:var(--red); font-weight:600;' : ''}">${formatDate(action.dueDate)}</td>
+                <td><div style="display:flex; align-items:center; gap:6px;"><div class="progress-bar"><div class="progress-fill" style="width:${action.progress || 0}%;"></div></div><span>${action.progress || 0}%</span></div></td>
+                <td>${formatCurrency(action.cost)}</td>
+                <td>
+                    <button class="icon-btn" onclick="event.stopPropagation(); setSelectedAction('${action._id || action.id}', '${escapeHtml(action.title)}')" title="Select"><i class="fas fa-check-circle"></i></button>
+                    <button class="icon-btn" onclick="event.stopPropagation(); updateProgress('${action._id || action.id}')" title="Update Progress"><i class="fas fa-chart-line"></i></button>
+                    <button class="icon-btn" onclick="event.stopPropagation(); editAction('${action._id || action.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    mobile.innerHTML = actions.map(action => {
+        const overdue = isOverdue(action);
+        const isSelected = selectedActionId === (action._id || action.id);
+        return `
+            <div class="action-card ${overdue ? 'overdue' : ''} ${isSelected ? 'selected' : ''}" data-action-id="${action._id || action.id}"
+                onclick="showQuickActions(event, '${action._id || action.id}', '${escapeHtml(action.title || 'Action')}')">
+                <div class="action-card-header">
+                    <div class="action-card-title">${escapeHtml(action.title || 'Untitled')}</div>
+                    <div style="display:flex; gap:4px;">
+                        <button class="icon-btn small" onclick="event.stopPropagation(); setSelectedAction('${action._id || action.id}', '${escapeHtml(action.title)}')"><i class="fas fa-check-circle"></i></button>
+                        <button class="icon-btn small" onclick="event.stopPropagation(); showQuickActions(event, '${action._id || action.id}', '${escapeHtml(action.title)}')"><i class="fas fa-ellipsis-v"></i></button>
+                    </div>
+                </div>
+                <div class="action-card-grid">
+                    <div class="action-card-label">Status</div><div><span class="pill ${getStatusClass(action.status)}">${escapeHtml(action.status || 'pending')}</span></div>
+                    <div class="action-card-label">Priority</div><div><span class="pill ${getPriorityClass(action.priority)}">${escapeHtml(action.priority || 'medium')}</span></div>
+                    <div class="action-card-label">Owner</div><div>${escapeHtml(action.owner || '—')}</div>
+                    <div class="action-card-label">Risk</div><div>${escapeHtml(action.riskIdentifier || '—')}</div>
+                    <div class="action-card-label">Due Date</div><div style="${overdue ? 'color:var(--red);' : ''}">${formatDate(action.dueDate)}</div>
+                    <div class="action-card-label">Progress</div><div><div class="progress-bar"><div class="progress-fill" style="width:${action.progress || 0}%;"></div></div> ${action.progress || 0}%</div>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:16px;">
+                    <button class="btn-secondary" onclick="event.stopPropagation(); updateProgress('${action._id || action.id}')" style="flex:1;"><i class="fas fa-chart-line"></i> Update</button>
+                    <button class="btn-primary" onclick="event.stopPropagation(); editAction('${action._id || action.id}')" style="flex:1;"><i class="fas fa-edit"></i> Edit</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    renderMyActions(actions);
+    renderOverdue(actions);
+}
+
+function renderMyActions(actions) {
+    const tbody = document.getElementById('myActionsTableBody');
+    if (!tbody || !currentUser) return;
+    const myActions = actions.filter(a => a.owner === currentUser.name || a.owner === currentUser.email || a.ownerId === currentUser.id);
+    if (!myActions.length) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;">No actions assigned to you</td></tr>';
+        return;
+    }
+    tbody.innerHTML = myActions.map(action => `
+        <tr class="clickable-row" onclick="showQuickActions(event, '${action._id || action.id}', '${escapeHtml(action.title)}')">
+            <td><button class="icon-btn" onclick="event.stopPropagation(); showQuickActions(event, '${action._id || action.id}', '${escapeHtml(action.title)}')"><i class="fas fa-ellipsis-v"></i></button></td>
+            <td>${escapeHtml((action.actionId || action._id || '').slice(-6))}</td>
+            <td>${escapeHtml(action.title || 'Untitled')}</td>
+            <td><span class="pill ${getStatusClass(action.status)}">${escapeHtml(action.status || 'pending')}</span></td>
+            <td><span class="pill ${getPriorityClass(action.priority)}">${escapeHtml(action.priority || 'medium')}</span></td>
+            <td>${escapeHtml(action.riskIdentifier || '—')}</td>
+            <td style="${isOverdue(action) ? 'color:var(--red);' : ''}">${formatDate(action.dueDate)}</td>
+            <td><div class="progress-bar"><div class="progress-fill" style="width:${action.progress || 0}%;"></div></div> ${action.progress || 0}%</td>
+            <td><button class="btn-primary" style="padding:4px 8px;" onclick="event.stopPropagation(); updateProgress('${action._id || action.id}')">Update</button></td>
+        </tr>
+    `).join('');
+}
+
+function renderOverdue(actions) {
+    const tbody = document.getElementById('overdueTableBody');
+    if (!tbody) return;
+    const overdue = actions.filter(a => isOverdue(a));
+    if (!overdue.length) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;">No overdue actions</td></tr>';
+        return;
+    }
+    tbody.innerHTML = overdue.map(action => {
+        const daysOverdue = Math.floor((new Date() - new Date(action.dueDate)) / (1000*60*60*24));
+        return `
+            <tr class="clickable-row" onclick="showQuickActions(event, '${action._id || action.id}', '${escapeHtml(action.title)}')">
+                <td><button class="icon-btn" onclick="event.stopPropagation(); showQuickActions(event, '${action._id || action.id}', '${escapeHtml(action.title)}')"><i class="fas fa-ellipsis-v"></i></button></td>
+                <td>${escapeHtml((action.actionId || action._id || '').slice(-6))}</td>
+                <td>${escapeHtml(action.title || 'Untitled')}</td>
+                <td><span class="pill ${getStatusClass(action.status)}">${escapeHtml(action.status || 'pending')}</span></td>
+                <td><span class="pill ${getPriorityClass(action.priority)}">${escapeHtml(action.priority || 'medium')}</span></td>
+                <td>${escapeHtml(action.owner || '—')}</td>
+                <td>${escapeHtml(action.riskIdentifier || '—')}</td>
+                <td style="color:var(--red);">${formatDate(action.dueDate)}</td>
+                <td style="color:var(--red);">${daysOverdue} days</td>
+                <td><button class="btn-primary" style="padding:4px 8px;" onclick="event.stopPropagation(); updateProgress('${action._id || action.id}')">Update</button></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ============================================
+// QUICK ACTIONS
+// ============================================
+function showQuickActions(event, actionId, actionTitle) {
+    event.stopPropagation();
+    if (quickActionsDropdown) { quickActionsDropdown.remove(); quickActionsDropdown = null; }
+    
+    const dropdown = document.createElement('div');
+    dropdown.className = 'quick-actions-dropdown';
+    dropdown.innerHTML = `
+        <div class="quick-action-item" onclick="quickSelectAction('${actionId}', '${escapeHtml(actionTitle)}')"><i class="fas fa-check-circle"></i>Select Action</div>
+        <div class="quick-action-divider"></div>
+        <div class="quick-action-item" onclick="quickViewAction('${actionId}')"><i class="fas fa-eye"></i>View Details</div>
+        <div class="quick-action-item" onclick="quickEditAction('${actionId}')"><i class="fas fa-edit"></i>Edit Action</div>
+        <div class="quick-action-item" onclick="quickUpdateProgress('${actionId}')"><i class="fas fa-chart-line"></i>Update Progress</div>
+        <div class="quick-action-divider"></div>
+        <div class="quick-action-item danger" onclick="quickDeleteAction('${actionId}')"><i class="fas fa-trash"></i>Delete Action</div>
+    `;
+    
+    document.body.appendChild(dropdown);
+    quickActionsDropdown = dropdown;
+    
+    const rect = event.target.getBoundingClientRect();
+    dropdown.style.top = `${rect.bottom + 5}px`;
+    dropdown.style.left = `${Math.min(rect.left, window.innerWidth - 250)}px`;
+    
+    setTimeout(() => document.addEventListener('click', function closeDropdown(e) {
+        if (!dropdown.contains(e.target)) { dropdown.remove(); quickActionsDropdown = null; document.removeEventListener('click', closeDropdown); }
+    }), 0);
+}
+
+function quickSelectAction(actionId, actionTitle) { if (quickActionsDropdown) quickActionsDropdown.remove(); setSelectedAction(actionId, actionTitle); }
+function quickViewAction(actionId) { if (quickActionsDropdown) quickActionsDropdown.remove(); switchTab('action-details-content'); setSelectedAction(actionId, ''); }
+function quickEditAction(actionId) { if (quickActionsDropdown) quickActionsDropdown.remove(); editAction(actionId); }
+function quickUpdateProgress(actionId) { if (quickActionsDropdown) quickActionsDropdown.remove(); updateProgress(actionId); }
+async function quickDeleteAction(actionId) { if (quickActionsDropdown) quickActionsDropdown.remove(); if (confirm('Delete this action?')) await deleteAction(actionId); }
+
+// ============================================
+// FILTERS & SEARCH
+// ============================================
+function populateOwnerFilters() {
+    const ownerFilter = document.getElementById('ownerFilter');
+    if (!ownerFilter) return;
+    const owners = [...new Set(allActions.map(a => a.owner).filter(Boolean))].sort();
+    ownerFilter.innerHTML = '<option value="all">All Owners</option>' + owners.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
+}
+
+function applyFilters() {
+    const status = document.getElementById('statusFilter').value;
+    const priority = document.getElementById('priorityFilter').value;
+    const owner = document.getElementById('ownerFilter').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    
+    filteredActions = allActions.filter(a => {
+        if (status !== 'all' && a.status !== status) return false;
+        if (priority !== 'all' && a.priority !== priority) return false;
+        if (owner !== 'all' && a.owner !== owner) return false;
+        if (search && !`${a.title} ${a.description} ${a.owner}`.toLowerCase().includes(search)) return false;
+        return true;
+    });
+    renderActions(filteredActions);
+}
+
+function searchActions() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => applyFilters(), 300);
+}
+
+// ============================================
+// MODAL FUNCTIONS
+// ============================================
+function openCreateActionModal() {
+    isEditMode = false; currentEditActionId = null;
+    document.getElementById('modalTitle').textContent = 'Create New Action';
+    document.getElementById('modalIcon').className = 'fas fa-plus-circle';
+    document.getElementById('submitButtonText').textContent = 'Create Action';
+    document.getElementById('createActionForm').reset();
+    document.getElementById('actionId').value = '';
+    
+    const today = new Date().toISOString().split('T')[0];
+    const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth() + 1);
+    document.getElementById('actionStartDate').value = today;
+    document.getElementById('actionDueDate').value = nextMonth.toISOString().split('T')[0];
+    document.getElementById('actionProgress').value = 0;
+    
+    document.getElementById('createActionModal').classList.add('open');
+}
+
+function closeCreateActionModal() { document.getElementById('createActionModal').classList.remove('open'); }
+function closeModal(modalId) { document.getElementById(modalId).classList.remove('open'); }
+
+async function editAction(actionId) {
+    const action = allActions.find(a => (a._id || a.id) === actionId);
+    if (!action) return;
+    
+    isEditMode = true; currentEditActionId = actionId;
+    document.getElementById('modalTitle').textContent = 'Edit Action';
+    document.getElementById('modalIcon').className = 'fas fa-edit';
+    document.getElementById('submitButtonText').textContent = 'Update Action';
+    
+    document.getElementById('actionId').value = actionId;
+    document.getElementById('actionTitle').value = action.title || '';
+    document.getElementById('actionDescription').value = action.description || '';
+    document.getElementById('actionPriority').value = action.priority || 'medium';
+    document.getElementById('actionOwner').value = action.owner || '';
+    document.getElementById('actionRiskId').value = action.riskId || '';
+    document.getElementById('actionSubProject').value = action.subProject || '';
+    document.getElementById('actionStatus').value = action.status || 'pending';
+    document.getElementById('actionStartDate').value = action.startDate ? action.startDate.split('T')[0] : '';
+    document.getElementById('actionDueDate').value = action.dueDate ? action.dueDate.split('T')[0] : '';
+    document.getElementById('actionProgress').value = action.progress || 0;
+    document.getElementById('actionCost').value = action.cost || 0;
+    document.getElementById('actionNotes').value = action.notes || '';
+    
+    document.getElementById('createActionModal').classList.add('open');
+}
+
+async function submitActionForm() {
+    if (isEditMode) await updateAction();
+    else await createAction();
+}
+
+async function createAction() {
+    const title = document.getElementById('actionTitle').value.trim();
+    if (!title) { showToast('Title is required', 'error'); return; }
+    
+    const actionData = {
+        title, description: document.getElementById('actionDescription').value,
+        status: document.getElementById('actionStatus').value,
+        priority: document.getElementById('actionPriority').value,
+        owner: document.getElementById('actionOwner').value,
+        riskId: document.getElementById('actionRiskId').value || null,
+        subProject: document.getElementById('actionSubProject').value,
+        startDate: document.getElementById('actionStartDate').value || null,
+        dueDate: document.getElementById('actionDueDate').value || null,
+        progress: parseInt(document.getElementById('actionProgress').value) || 0,
+        cost: parseFloat(document.getElementById('actionCost').value) || 0,
+        notes: document.getElementById('actionNotes').value
+    };
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/actions`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        showToast('Action created successfully', 'success');
+        closeCreateActionModal();
+        await loadActions();
+    } catch (err) { showToast('Failed to create action: ' + err.message, 'error'); }
+}
+
+async function updateAction() {
+    const actionData = {
+        title: document.getElementById('actionTitle').value.trim(),
+        description: document.getElementById('actionDescription').value,
+        status: document.getElementById('actionStatus').value,
+        priority: document.getElementById('actionPriority').value,
+        owner: document.getElementById('actionOwner').value,
+        riskId: document.getElementById('actionRiskId').value || null,
+        subProject: document.getElementById('actionSubProject').value,
+        startDate: document.getElementById('actionStartDate').value || null,
+        dueDate: document.getElementById('actionDueDate').value || null,
+        progress: parseInt(document.getElementById('actionProgress').value) || 0,
+        cost: parseFloat(document.getElementById('actionCost').value) || 0,
+        notes: document.getElementById('actionNotes').value
+    };
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/actions/${currentEditActionId}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        showToast('Action updated successfully', 'success');
+        closeCreateActionModal();
+        await loadActions();
+    } catch (err) { showToast('Failed to update action: ' + err.message, 'error'); }
+}
+
+async function deleteAction(actionId) {
+    if (!confirm('Delete this action permanently?')) return;
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/actions/${actionId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (selectedActionId === actionId) clearSelectedAction();
+        showToast('Action deleted', 'success');
+        await loadActions();
+    } catch (err) { showToast('Delete failed: ' + err.message, 'error'); }
+}
+
+// ============================================
+// PROGRESS UPDATE
+// ============================================
+function updateProgress(actionId) {
+    const action = allActions.find(a => (a._id || a.id) === actionId);
+    if (!action) return;
+    
+    document.getElementById('progressActionId').value = actionId;
+    const currentProgress = action.progress || 0;
+    document.getElementById('currentProgressDisplay').value = `${currentProgress}%`;
+    
+    const slider = document.getElementById('progressSlider');
+    const label = document.getElementById('sliderValueLabel');
+    slider.value = currentProgress;
+    label.textContent = currentProgress;
+    
+    slider.oninput = () => label.textContent = slider.value;
+    document.getElementById('progressModal').classList.add('open');
+}
+
+async function submitProgressUpdate() {
+    const actionId = document.getElementById('progressActionId').value;
+    const newProgress = parseInt(document.getElementById('progressSlider').value);
+    const action = allActions.find(a => (a._id || a.id) === actionId);
+    if (!action) return;
+    
+    const newStatus = (newProgress === 100) ? 'completed' : action.status;
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/actions/${actionId}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...action, progress: newProgress, status: newStatus })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        showToast(`Progress updated to ${newProgress}%`, 'success');
+        closeModal('progressModal');
+        await loadActions();
+    } catch (err) { showToast('Update failed: ' + err.message, 'error'); }
+}
+
+// ============================================
+// IMPORT/EXPORT
+// ============================================
+function refreshActions() { loadActions(); showToast('Refreshing...', 'success'); }
+
+async function exportActionsToExcel() {
+    if (!filteredActions.length) { showToast('No actions to export', 'warning'); return; }
+    const rows = filteredActions.map(a => ({
+        'Title': a.title, 'Description': a.description || '', 'Status': a.status,
+        'Priority': a.priority, 'Owner': a.owner || '', 'Risk ID': a.riskId || '',
+        'Start Date': a.startDate || '', 'Due Date': a.dueDate || '',
+        'Progress': a.progress || 0, 'Cost': a.cost || 0, 'Notes': a.notes || ''
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Actions');
+    XLSX.writeFile(wb, `actions_${new Date().toISOString().slice(0,10)}.xlsx`);
+    showToast(`Exported ${filteredActions.length} actions`, 'success');
+}
+
+function importActions() { document.getElementById('importFileInput').click(); }
+
+async function handleImportFile(input) {
+    const file = input.files[0]; if (!file) return;
+    showToast(`Reading ${file.name}...`, 'info');
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet);
+            if (!rows.length) throw new Error('No data found');
+            
+            const headers = Object.keys(rows[0]);
+            const getCol = (name) => headers.find(h => h.toLowerCase().includes(name.toLowerCase()));
+            
+            const token = localStorage.getItem('token');
+            let success = 0, fail = 0;
+            
+            for (const row of rows) {
+                try {
+                    const actionData = {
+                        title: row[getCol('title')] || 'Imported Action',
+                        description: row[getCol('description')] || '',
+                        status: row[getCol('status')] || 'pending',
+                        priority: row[getCol('priority')] || 'medium',
+                        owner: row[getCol('owner')] || '',
+                        riskId: row[getCol('risk')] || null,
+                        startDate: row[getCol('start')] || null,
+                        dueDate: row[getCol('due')] || null,
+                        progress: parseInt(row[getCol('progress')]) || 0,
+                        cost: parseFloat(row[getCol('cost')]) || 0
+                    };
+                    const response = await fetch(`${API_BASE}/actions`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(actionData)
+                    });
+                    if (response.ok) success++; else fail++;
+                } catch { fail++; }
+            }
+            showToast(`Imported ${success} actions, ${fail} failed`, success ? 'success' : 'warning');
+            await loadActions();
+        } catch (err) { showToast('Import failed: ' + err.message, 'error'); }
+        finally { input.value = ''; }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login.html'; return; }
+    
+    try {
+        const tokenData = parseJwt(token);
+        currentUser = { id: tokenData.userId || tokenData.sub, name: tokenData.name || 'User', email: tokenData.email };
+    } catch (e) {}
+    
+    await loadRisks();
+    await loadActions();
+    
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open')); });
+});
+
+// Expose globals
+window.switchTab = switchTab;
+window.openCreateActionModal = openCreateActionModal;
+window.closeCreateActionModal = closeCreateActionModal;
+window.submitActionForm = submitActionForm;
+window.editAction = editAction;
+window.deleteAction = deleteAction;
+window.updateProgress = updateProgress;
+window.submitProgressUpdate = submitProgressUpdate;
+window.refreshActions = refreshActions;
+window.exportActionsToExcel = exportActionsToExcel;
+window.importActions = importActions;
+window.handleImportFile = handleImportFile;
+window.applyFilters = applyFilters;
+window.searchActions = searchActions;
+window.closeModal = closeModal;
+window.showQuickActions = showQuickActions;
+window.quickSelectAction = quickSelectAction;
+window.quickViewAction = quickViewAction;
+window.quickEditAction = quickEditAction;
+window.quickUpdateProgress = quickUpdateProgress;
+window.quickDeleteAction = quickDeleteAction;
+window.setSelectedAction = setSelectedAction;
+window.clearSelectedAction = clearSelectedAction;
+</script>
+</body>
+</html>
