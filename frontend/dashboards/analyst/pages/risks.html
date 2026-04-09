@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Risks • RiskMGT Analyst</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+            --focus-ring: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        /* Shimmer Skeleton */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 1.2s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* Top Nav */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 10;
+        }
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 40px;
+            background: rgba(93,161,161,0.08);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary);
+        }
+        .nav-tab.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .nav-tab:hover:not(.active):not(.disabled) { background: rgba(93,161,161,0.15); }
+        .nav-tab .favicon {
+            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+        }
+        .actions-group { display: flex; align-items: center; gap: 12px; }
+        .search-box input {
+            padding: 8px 12.8px; border: 1px solid var(--border); border-radius: 9.6px;
+            width: 320px; font-size: 12px; background: #f9f9f9;
+        }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
+        .btn-primary {
+            padding: 8px 16px; background: var(--primary); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary-outline {
+            padding: 8px 16px; background: transparent; color: var(--primary); border: 1px solid var(--primary);
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-secondary-outline:hover { background: rgba(93,161,161,0.1); }
+        
+        /* Button Loading State */
+        .btn-primary.loading {
+            position: relative;
+            color: transparent;
+        }
+        .btn-primary.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: button-spin 0.8s linear infinite;
+        }
+        
+        @keyframes button-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Main Layout */
+        .main { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+        .content-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .page-content { display: none; height: 100%; overflow: auto; }
+
+        /* Table View */
+        .table-view { display: block; height: 100%; padding: 24px; }
+        .table-container {
+            width: 100%; height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        table { 
+            min-width: 1800px; 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: auto;
+        }
+        thead { 
+            position: sticky; 
+            top: 0; 
+            background: var(--card-bg); 
+            z-index: 8; 
+        }
+        th { 
+            padding: 8px 6px; 
+            font-size: 10.5px; 
+            font-weight: 600; 
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); 
+            text-align: left; 
+            white-space: nowrap;
+            background: var(--card-bg);
+        }
+        td { 
+            padding: 8px 6px; 
+            font-size: 11.5px; 
+            border-bottom: 1px solid var(--border); 
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        /* Column widths */
+        th:nth-child(1), td:nth-child(1) { min-width: 65px; }
+        th:nth-child(2), td:nth-child(2) { min-width: 85px; }
+        th:nth-child(3), td:nth-child(3) { min-width: 220px; }
+        th:nth-child(4), td:nth-child(4) { min-width: 320px; }
+        th:nth-child(5), td:nth-child(5) { min-width: 120px; }
+        th:nth-child(6), td:nth-child(6) { min-width: 85px; }
+        th:nth-child(7), td:nth-child(7) { min-width: 130px; }
+        th:nth-child(8), td:nth-child(8) { min-width: 120px; }
+        th:nth-child(9), td:nth-child(9) { min-width: 130px; }
+        th:nth-child(10), td:nth-child(10) { min-width: 85px; }
+        th:nth-child(11), td:nth-child(11) { min-width: 85px; }
+        th:nth-child(12), td:nth-child(12) { min-width: 85px; }
+        th:nth-child(13), td:nth-child(13) { min-width: 95px; }
+        th:nth-child(14), td:nth-child(14) { min-width: 95px; }
+        th:nth-child(15), td:nth-child(15) { min-width: 95px; }
+        th:nth-child(16), td:nth-child(16) { min-width: 95px; }
+        th:nth-child(17), td:nth-child(17) { min-width: 95px; }
+        th:nth-child(18), td:nth-child(18) { min-width: 75px; }
+        th:nth-child(19), td:nth-child(19) { min-width: 120px; }
+        th:nth-child(20), td:nth-child(20) { min-width: 85px; }
+        th:nth-child(21), td:nth-child(21) { min-width: 85px; }
+        th:nth-child(22), td:nth-child(22) { min-width: 110px; }
+        
+        /* Clickable row */
+        .clickable-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .clickable-row:hover {
+            background: rgba(93,161,161,0.05);
+        }
+        .clickable-row.selected {
+            background: rgba(93,161,161,0.1);
+            border-left: 3px solid var(--primary);
+        }
+        
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+
+        /* Quick Actions Dropdown */
+        .quick-actions-dropdown {
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            z-index: 1000;
+            min-width: 220px;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .quick-action-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+        
+        .quick-action-item:hover {
+            background: rgba(93,161,161,0.08);
+        }
+        
+        .quick-action-item i {
+            width: 20px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        
+        .quick-action-item.danger {
+            color: var(--red);
+        }
+        
+        .quick-action-item.danger i {
+            color: var(--red);
+        }
+        
+        .quick-action-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+
+        /* Mobile Cards */
+        .card-view { display: none; padding: 16px; overflow-y: auto; height: 100%; }
+        .risk-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .risk-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .risk-card.selected {
+            border: 2px solid var(--primary);
+            background: rgba(93,161,161,0.02);
+        }
+        .risk-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .risk-card-title { font-size: 16px; font-weight: 600; cursor: pointer; }
+        .risk-card-title:hover { color: var(--primary); }
+        .risk-card-grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: 13px; }
+        .risk-card-label { color: var(--text-secondary); font-weight: 500; }
+        .risk-card-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 12px 0;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            line-height: 1.5;
+        }
+
+        /* Pills */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .pill-downside { background: rgba(239,68,68,0.1); color: var(--red); }
+        .pill-upside { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-pending { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .status-open { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .status-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .status-rejected { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none;
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .icon-btn.small {
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+        }
+        .icon-btn.danger {
+            color: var(--red);
+        }
+        .icon-btn.danger:hover {
+            background: rgba(239,68,68,0.1);
+        }
+        .icon-btn:hover { background: rgba(93,161,161,0.1); color: var(--primary); }
+
+        /* RAM Pill Styles */
+        .ram-pill { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .ram-very-low { background: rgba(16,185,129,0.1); color: var(--green); }
+        .ram-low { background: rgba(16,185,129,0.1); color: var(--green); }
+        .ram-medium { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .ram-high { background: rgba(239,68,68,0.1); color: var(--red); }
+        .ram-very-high { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .manageability-pill { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .can-control { background: rgba(16,185,129,0.1); color: var(--green); }
+        .can-influence { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .cannot-control { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .threshold-badge {
+            width: 12px;
+            height: 2px;
+            border-radius: 0;
+            display: inline-block;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .threshold-changing { background: var(--red); }
+        .threshold-stable { background: var(--green); border-radius: 50%; width: 8px; height: 8px; }
+
+        /* TECOP badge styles */
+        .tecop-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            background: #e8f0fe;
+            color: #1e4b8c;
+        }
+        .tecop-badge.technical { background: #e8f0fe; color: #1e4b8c; }
+        .tecop-badge.environmental { background: #e6f7e6; color: #2e7d32; }
+        .tecop-badge.commercial { background: #fff3e0; color: #b85c00; }
+        .tecop-badge.operational { background: #f3e5f5; color: #7b1fa2; }
+        .tecop-badge.political { background: #fce4e4; color: #b33939; }
+
+        /* Full Screen Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-overlay.open {
+            display: flex;
+        }
+        
+        .modal-full {
+            background: white;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-close {
+            cursor: pointer;
+            font-size: 28px;
+            color: var(--text-secondary);
+            line-height: 1;
+            transition: var(--transition);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        
+        .modal-close:hover {
+            background: rgba(93,161,161,0.1);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 32px;
+            flex: 1;
+            background: var(--bg);
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .modal-footer {
+            padding: 20px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+
+        .btn-secondary, .btn-success {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 120px;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .btn-success {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Form Styles for Modal */
+        .form-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .form-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .required::after {
+            content: ' *';
+            color: var(--red);
+        }
+        
+        .tecop-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .tecop-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+        
+        .tecop-tag input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            accent-color: var(--primary);
+        }
+
+        /* Selected Risk Indicator */
+        .selected-risk-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .selected-risk-indicator.show {
+            display: flex;
+        }
+        
+        .selected-risk-indicator i {
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        
+        .selected-risk-indicator i:hover {
+            opacity: 1;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .toast.error { border-left-color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+        .toast.warning { border-left-color: var(--amber); }
+
+        /* Responsive */
+        @media (max-width: 1024px) { 
+            table { min-width: 1800px; } 
+            .form-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .form-row .form-group {
+                margin-bottom: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .top-nav { 
+                padding: 0 16px; 
+                flex-direction: column;
+                height: auto;
+                padding: 12px 16px;
+                gap: 12px;
+            }
+            .tabs-group {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+            .actions-group { 
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 8px; 
+            }
+            .search-box input { 
+                width: 100%;
+                min-width: 200px;
+            }
+            .table-view { display: none; }
+            .card-view { display: block; }
+            
+            .modal-body {
+                padding: 20px;
+            }
+            .form-section {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" data-content="risks-content" onclick="switchTab('risks-content')">
+                <div class="favicon">R</div>
+                <span>My Risks</span>
+            </div>
+            <div class="nav-tab" data-content="risk-visual-content" onclick="switchTab('risk-visual-content')">
+                <div class="favicon">V</div>
+                <span>Risk Visual</span>
+            </div>
+            <div class="nav-tab disabled" data-content="bowtie-content" id="bowtieTab" onclick="switchTab('bowtie-content')">
+                <div class="favicon">B</div>
+                <span>Bowtie</span>
+            </div>
+            <div class="nav-tab disabled" data-content="risk-details-content" id="riskDetailsTab" onclick="switchTab('risk-details-content')">
+                <div class="favicon">D</div>
+                <span>Risk Details</span>
+            </div>
+        </div>
+        <div class="actions-group">
+            <div class="search-box">
+                <input type="text" placeholder="Search my risks..." id="searchInput" onkeyup="searchRisks()">
+            </div>
+            <button class="btn-icon" onclick="refreshRisks()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-secondary-outline" onclick="exportRisksToExcel()" title="Export to Excel">
+                <i class="fas fa-file-excel"></i> Export
+            </button>
+            <button class="btn-primary" onclick="openCreateRiskModal()">
+                <i class="fas fa-plus"></i> New Risk
+            </button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="content-wrapper">
+            <div id="risks-content" class="page-content" style="display:block;">
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="risksTable">
+                            <thead>
+                                <tr>
+                                    <th>Risk ID</th>
+                                    <th>Type</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Asset</th>
+                                    <th>Status</th>
+                                    <th>Risk Owner</th>
+                                    <th>Sub Project</th>
+                                    <th>TECOP</th>
+                                    <th>Exp Start</th>
+                                    <th>Exp End</th>
+                                    <th>Next Review</th>
+                                    <th>HSSE RAM C</th>
+                                    <th>HSSE RAM T</th>
+                                    <th>Vis RAM C</th>
+                                    <th>Vis RAM T</th>
+                                    <th>Mgmt</th>
+                                    <th>Thresh</th>
+                                    <th>Created</th>
+                                    <th>Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="risksTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-view" id="mobileRisks"></div>
+            </div>
+            
+            <div id="risk-visual-content" class="page-content">
+                <iframe src="risk-visual.html" style="width:100%;height:100%;border:none;" scrolling="no" title="Risk Visual"></iframe>
+            </div>
+
+            <div id="bowtie-content" class="page-content">
+                <iframe id="bowtieFrame" src="" style="width:100%;height:100%;border:none;" scrolling="no" title="Bowtie Diagram"></iframe>
+            </div>
+
+            <div id="risk-details-content" class="page-content">
+                <iframe id="riskDetailsFrame" src="" style="width:100%;height:100%;border:none;" scrolling="no" title="Risk Details"></iframe>
+            </div>
+        </div>
+    </main>
+
+    <!-- Selected Risk Indicator -->
+    <div class="selected-risk-indicator" id="selectedRiskIndicator">
+        <i class="fas fa-info-circle"></i>
+        <span id="selectedRiskName">No risk selected</span>
+        <i class="fas fa-times-circle" onclick="clearSelectedRisk()" style="cursor: pointer;"></i>
+    </div>
+
+    <!-- Create Risk Modal (Full Screen) -->
+    <div class="modal-overlay" id="createRiskModal">
+        <div class="modal-full">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-plus-circle" style="margin-right: 12px; color: var(--primary);"></i>
+                    Create New Risk
+                </div>
+                <div class="modal-close" onclick="closeCreateRiskModal()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="form-container">
+                    <form id="createRiskForm">
+                        <!-- SECTION 1: Context & Ownership -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-project-diagram"></i>
+                                Context & Ownership
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="assetId" class="required">Asset</label>
+                                    <select id="assetId" required>
+                                        <option value="">Select asset</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="subProject">Sub-Project / Department</label>
+                                    <input type="text" id="subProject" placeholder="e.g., Phase 1, Operations">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="riskType" class="required">Risk Type</label>
+                                    <select id="riskType" required>
+                                        <option value="">Select type</option>
+                                        <option value="Downside">Downside (Threat)</option>
+                                        <option value="Upside">Upside (Opportunity)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="riskCategory" class="required">Risk Category</label>
+                                    <select id="riskCategory" required>
+                                        <option value="">Select category</option>
+                                        <option value="Technical">Technical</option>
+                                        <option value="Environmental">Environmental</option>
+                                        <option value="Operational">Operational</option>
+                                        <option value="Financial">Financial</option>
+                                        <option value="Commercial">Commercial</option>
+                                        <option value="Political">Political</option>
+                                        <option value="Regulatory">Regulatory</option>
+                                        <option value="Safety">Safety</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="riskOwnerId" class="required">Risk Owner</label>
+                                    <select id="riskOwnerId" required>
+                                        <option value="">Select owner</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Functional Area (TECOP)</label>
+                                    <div class="tecop-tags">
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Technical"> Technical
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Environmental"> Environmental
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Commercial"> Commercial
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Operational"> Operational
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Political"> Political
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 2: Risk Definition -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Risk Definition
+                            </h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="riskTitle" class="required">Risk Title</label>
+                                    <input type="text" id="riskTitle" placeholder="Clear, concise risk statement" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="riskDescription" class="required">Description</label>
+                                    <textarea id="riskDescription" placeholder="Describe the risk scenario, background, and context in detail..." required rows="3"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="riskEvent" class="required">Risk Event</label>
+                                <textarea id="riskEvent" placeholder="Single statement describing the central risk event (e.g., 'Equipment failure during operation')" required rows="2"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="exposureStart">Exposure Start Date</label>
+                                    <input type="date" id="exposureStart">
+                                </div>
+                                <div class="form-group">
+                                    <label for="exposureEnd">Exposure End Date</label>
+                                    <input type="date" id="exposureEnd">
+                                </div>
+                                <div class="form-group">
+                                    <label for="nextReview">Next Review Date</label>
+                                    <input type="date" id="nextReview">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 3: RAM Assessment -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-chart-line"></i>
+                                Risk Assessment Matrix (RAM)
+                            </h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="manageability">Manageability</label>
+                                    <select id="manageability">
+                                        <option value="">Select level</option>
+                                        <option value="Can Control">Can Control</option>
+                                        <option value="Can Influence">Can Influence</option>
+                                        <option value="Cannot Control">Cannot Control</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="thresholdChanging">Threshold</label>
+                                    <select id="thresholdChanging">
+                                        <option value="false">Stable</option>
+                                        <option value="true">Changing</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="impact">Impact Description</label>
+                                <textarea id="impact" placeholder="Describe the potential business impact, including financial, operational, and strategic implications..." rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCreateRiskModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-success" onclick="submitRiskForm()">
+                    <i class="fas fa-paper-plane"></i> Submit for Approval
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="importFileInput" accept=".json,.csv" style="display: none;" onchange="handleImportFile(this)">
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // Global variables
+        let allAssets = [];
+        let allUsers = [];
+        let risks = [];
+        let selectedRiskId = null;
+        let selectedRiskTitle = null;
+        let quickActionsDropdown = null;
+        let quickActionsTimeout = null;
+
+        // Helper functions
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function formatShortDate(dateString) {
+            if (!dateString) return '—';
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '—';
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear().toString().slice(-2);
+            return `${day}/${month}/${year}`;
+        }
+
+        function getLastFourDigits(riskId) {
+            if (!riskId) return '—';
+            return String(riskId).slice(-4);
+        }
+
+        function getStatusClass(status) {
+            if (!status) return '';
+            status = status.toLowerCase();
+            if (status === 'pending') return 'pill-pending';
+            if (status === 'approved') return 'status-approved';
+            if (status === 'rejected') return 'status-rejected';
+            if (status === 'open') return 'status-open';
+            return '';
+        }
+
+        function getRamClass(level) {
+            if (!level) return 'ram-pill';
+            level = level.toLowerCase();
+            if (level === 'very low') return 'ram-pill ram-very-low';
+            if (level === 'low') return 'ram-pill ram-low';
+            if (level === 'medium') return 'ram-pill ram-medium';
+            if (level === 'high') return 'ram-pill ram-high';
+            if (level === 'very high') return 'ram-pill ram-very-high';
+            return 'ram-pill';
+        }
+
+        function getManageabilityClass(manageability) {
+            if (!manageability) return '';
+            if (manageability === 'Can Control') return 'manageability-pill can-control';
+            if (manageability === 'Can Influence') return 'manageability-pill can-influence';
+            if (manageability === 'Cannot Control') return 'manageability-pill cannot-control';
+            return '';
+        }
+
+        function formatTecop(tecop) {
+            if (!tecop) return '—';
+            if (typeof tecop === 'string' && tecop.includes(',')) {
+                return tecop.split(',').map(item => `<span class="tecop-badge">${escapeHtml(item.trim())}</span>`).join('');
+            }
+            return escapeHtml(tecop);
+        }
+
+        function getComparisonArrow(current, target) {
+            if (!current || !target || current === '—' || target === '—') {
+                return '<span title="No data"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>';
+            }
+            const ramRank = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
+            const currentRank = ramRank[current] || 0;
+            const targetRank = ramRank[target] || 0;
+            
+            if (currentRank > targetRank) {
+                return `<span title="Current: ${current} | Target: ${target} (Worse)"><i class="fas fa-caret-up" style="color: var(--red); font-size: 20px;"></i></span>`;
+            } else if (currentRank < targetRank) {
+                return `<span title="Current: ${current} | Target: ${target} (Better)"><i class="fas fa-caret-down" style="color: var(--green); font-size: 20px;"></i></span>`;
+            }
+            return `<span title="Current: ${current} | Target: ${target} (Equal)"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>`;
+        }
+
+        function getTargetArrow(target, riskType) {
+            if (!target || target === '—') {
+                return '<span title="No data"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>';
+            }
+            const isDownside = (riskType !== 'Upside');
+            const goodLevels = isDownside ? ['Very Low', 'Low'] : ['High', 'Very High'];
+            const badLevels = isDownside ? ['High', 'Very High'] : ['Very Low', 'Low'];
+            
+            if (goodLevels.includes(target)) {
+                return `<span title="Target: ${target} (Good)"><i class="fas fa-caret-down" style="color: var(--green); font-size: 20px;"></i></span>`;
+            } else if (badLevels.includes(target)) {
+                return `<span title="Target: ${target} (Needs improvement)"><i class="fas fa-caret-up" style="color: var(--red); font-size: 20px;"></i></span>`;
+            }
+            return `<span title="Target: ${target} (Moderate)"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>`;
+        }
+
+        function getManageabilityArrow(manageability) {
+            if (!manageability || manageability === '—') {
+                return '<span title="No data">—</span>';
+            }
+            const mgmtMap = {
+                'Can Control': { icon: 'fa-check-circle', color: 'var(--green)', tooltip: 'Can Control (Optimal)' },
+                'Can Influence': { icon: 'fa-arrow-up', color: 'var(--amber)', tooltip: 'Can Influence (Needs improvement)' },
+                'Cannot Control': { icon: 'fa-times-circle', color: 'var(--red)', tooltip: 'Cannot Control (Critical)' }
+            };
+            const mgmt = mgmtMap[manageability] || { icon: 'fa-question-circle', color: 'var(--neutral)', tooltip: manageability };
+            return `<span title="${mgmt.tooltip}"><i class="fas ${mgmt.icon}" style="color: ${mgmt.color}; font-size: 12px;"></i></span>`;
+        }
+
+        // Toast
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<div class="toast-message">${message}</div>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // Tab switching
+        function switchTab(contentId) {
+            const tab = document.querySelector(`.nav-tab[data-content="${contentId}"]`);
+            if (tab && tab.classList.contains('disabled')) {
+                showToast('Please select a risk first to view this content', 'warning');
+                return;
+            }
+
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            if (tab) tab.classList.add('active');
+
+            document.querySelectorAll('.page-content').forEach(c => c.style.display = 'none');
+            document.getElementById(contentId).style.display = 'block';
+
+            if (contentId === 'bowtie-content' && selectedRiskId) {
+                const frame = document.getElementById('bowtieFrame');
+                if (frame) frame.src = `Bowtie.html?riskId=${selectedRiskId}`;
+            }
+            if (contentId === 'risk-details-content' && selectedRiskId) {
+                const frame = document.getElementById('riskDetailsFrame');
+                if (frame) frame.src = `risk-detail.html?riskId=${selectedRiskId}`;
+            }
+        }
+
+        // Selected risk functions
+        function setSelectedRisk(riskId, riskTitle) {
+            selectedRiskId = riskId;
+            selectedRiskTitle = riskTitle;
+
+            document.getElementById('bowtieTab').classList.remove('disabled');
+            document.getElementById('riskDetailsTab').classList.remove('disabled');
+
+            const indicator = document.getElementById('selectedRiskIndicator');
+            const indicatorName = document.getElementById('selectedRiskName');
+            indicatorName.textContent = riskTitle || `Risk ${getLastFourDigits(riskId)}`;
+            indicator.classList.add('show');
+
+            const bowtieFrame = document.getElementById('bowtieFrame');
+            const riskDetailsFrame = document.getElementById('riskDetailsFrame');
+            if (bowtieFrame) bowtieFrame.src = `Bowtie.html?riskId=${riskId}`;
+            if (riskDetailsFrame) riskDetailsFrame.src = `risk-detail.html?riskId=${riskId}`;
+        }
+
+        function clearSelectedRisk() {
+            selectedRiskId = null;
+            selectedRiskTitle = null;
+
+            document.getElementById('bowtieTab').classList.add('disabled');
+            document.getElementById('riskDetailsTab').classList.add('disabled');
+            document.getElementById('selectedRiskIndicator').classList.remove('show');
+
+            const bowtieFrame = document.getElementById('bowtieFrame');
+            const riskDetailsFrame = document.getElementById('riskDetailsFrame');
+            if (bowtieFrame) bowtieFrame.src = '';
+            if (riskDetailsFrame) riskDetailsFrame.src = '';
+        }
+
+        // Quick actions
+        function clearQuickActionsTimeout() {
+            if (quickActionsTimeout) {
+                clearTimeout(quickActionsTimeout);
+                quickActionsTimeout = null;
+            }
+        }
+
+        function startQuickActionsAutoHide() {
+            clearQuickActionsTimeout();
+            quickActionsTimeout = setTimeout(() => {
+                if (quickActionsDropdown) {
+                    quickActionsDropdown.remove();
+                    quickActionsDropdown = null;
+                }
+            }, 5000);
+        }
+
+        function showQuickActions(event, riskId, riskTitle) {
+            event.stopPropagation();
+            if (quickActionsDropdown) {
+                quickActionsDropdown.remove();
+                clearQuickActionsTimeout();
+            }
+
+            const dropdown = document.createElement('div');
+            dropdown.className = 'quick-actions-dropdown';
+            dropdown.innerHTML = `
+                <div class="quick-action-item" onclick="quickViewRisk('${riskId}')">
+                    <i class="fas fa-eye"></i><span>View Details</span>
+                </div>
+                <div class="quick-action-item" onclick="quickSelectRisk('${riskId}', '${escapeHtml(riskTitle)}')">
+                    <i class="fas fa-check-circle"></i><span>Select Risk</span>
+                </div>
+                <div class="quick-action-divider"></div>
+                <div class="quick-action-item" onclick="quickChangeStatus('${riskId}', 'Open')">
+                    <i class="fas fa-play-circle"></i><span>Set Status: Open</span>
+                </div>
+                <div class="quick-action-item" onclick="quickChangeStatus('${riskId}', 'Pending')">
+                    <i class="fas fa-hourglass-half"></i><span>Set Status: Pending</span>
+                </div>
+                <div class="quick-action-item" onclick="quickChangeStatus('${riskId}', 'Approved')">
+                    <i class="fas fa-check-circle"></i><span>Set Status: Approved</span>
+                </div>
+                <div class="quick-action-item" onclick="quickChangeStatus('${riskId}', 'Rejected')">
+                    <i class="fas fa-times-circle"></i><span>Set Status: Rejected</span>
+                </div>
+                <div class="quick-action-divider"></div>
+                <div class="quick-action-item danger" onclick="quickDeleteRisk('${riskId}')">
+                    <i class="fas fa-trash"></i><span>Delete Risk</span>
+                </div>
+            `;
+
+            document.body.appendChild(dropdown);
+            quickActionsDropdown = dropdown;
+
+            const rect = event.target.getBoundingClientRect();
+            const dropdownRect = dropdown.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+
+            let topPos = rect.bottom + 5;
+            if (rect.bottom + dropdownRect.height > viewportHeight) {
+                topPos = rect.top - dropdownRect.height - 5;
+            }
+
+            let leftPos = rect.left;
+            if (leftPos + dropdownRect.width > viewportWidth) {
+                leftPos = viewportWidth - dropdownRect.width - 10;
+            }
+
+            dropdown.style.top = `${topPos}px`;
+            dropdown.style.left = `${leftPos}px`;
+
+            startQuickActionsAutoHide();
+
+            dropdown.addEventListener('mouseenter', () => clearQuickActionsTimeout());
+            dropdown.addEventListener('mouseleave', () => startQuickActionsAutoHide());
+
+            setTimeout(() => {
+                document.addEventListener('click', function closeDropdown(e) {
+                    if (!dropdown.contains(e.target) && !e.target.closest('.clickable-row')) {
+                        dropdown.remove();
+                        quickActionsDropdown = null;
+                        clearQuickActionsTimeout();
+                        document.removeEventListener('click', closeDropdown);
+                    }
+                });
+            }, 0);
+        }
+
+        function quickSelectRisk(riskId, riskTitle) {
+            if (quickActionsDropdown) quickActionsDropdown.remove();
+            setSelectedRisk(riskId, riskTitle);
+            document.querySelectorAll('#risksTableBody tr').forEach(row => {
+                row.classList.remove('selected');
+                if (row.getAttribute('data-risk-id') === riskId) row.classList.add('selected');
+            });
+            document.querySelectorAll('#mobileRisks .risk-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.getAttribute('data-risk-id') === riskId) card.classList.add('selected');
+            });
+        }
+
+        function quickViewRisk(riskId) {
+            if (quickActionsDropdown) quickActionsDropdown.remove();
+            const risk = risks.find(r => (r._id || r.id) === riskId);
+            if (risk) {
+                setSelectedRisk(riskId, risk.title);
+                switchTab('risk-details-content');
+            }
+        }
+
+        async function quickChangeStatus(riskId, newStatus) {
+            if (quickActionsDropdown) quickActionsDropdown.remove();
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/risks/${riskId}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (response.ok) {
+                    showToast(`Risk status updated to ${newStatus}`, 'success');
+                    loadRisks();
+                } else {
+                    throw new Error('Failed to update status');
+                }
+            } catch (error) {
+                showToast('Failed to update risk status', 'error');
+            }
+        }
+
+        async function quickDeleteRisk(riskId) {
+            if (quickActionsDropdown) quickActionsDropdown.remove();
+            if (confirm('Are you sure you want to delete this risk?')) {
+                await deleteRisk(riskId);
+            }
+        }
+
+        // Load data
+        async function loadAssets() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/analyst/assets', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const assets = await response.json();
+                    allAssets = Array.isArray(assets) ? assets : [];
+                    const select = document.getElementById('assetId');
+                    select.innerHTML = '<option value="">Select asset</option>';
+                    allAssets.forEach(asset => {
+                        const option = document.createElement('option');
+                        option.value = asset._id || asset.id;
+                        option.textContent = asset.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading assets:', error);
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    allUsers = await response.json();
+                    const select = document.getElementById('riskOwnerId');
+                    select.innerHTML = '<option value="">Select owner</option>';
+                    allUsers.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id || user._id;
+                        option.textContent = user.name || user.email;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        function showShimmerLoading() {
+            const tbody = document.getElementById('risksTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const row = document.createElement('tr');
+                row.className = 'skeleton-row';
+                row.innerHTML = `
+                    <td><div class="skeleton-cell" style="width:50px;"></div></td>
+                    <td><div class="skeleton-pill"></div></td>
+                    <td><div class="skeleton-cell" style="width:180px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:280px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:100px;"></div></td>
+                    <td><div class="skeleton-pill"></div></td>
+                    <td><div class="skeleton-cell" style="width:100px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:100px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:100px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:70px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:70px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:70px;"></div></td>
+                    <td><div class="skeleton-pill"></div></td>
+                    <td><div class="skeleton-pill"></div></td>
+                    <td><div class="skeleton-pill"></div></td>
+                    <td><div class="skeleton-pill"></div></td>
+                    <td><div class="skeleton-pill"></div></td>
+                    <td><div class="skeleton-pill"></div></td>
+                    <td><div class="skeleton-cell" style="width:100px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:70px;"></div></td>
+                    <td><div style="width:100px;"><div class="skeleton" style="height:32px;"></div></div></td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        async function loadRisks() {
+            showShimmerLoading();
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/analyst/risks', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    risks = Array.isArray(data) ? data : (data.risks || []);
+                    renderRisks(risks);
+                }
+            } catch (error) {
+                console.error('Error loading risks:', error);
+                showToast('Failed to load risks', 'error');
+            }
+        }
+
+        function renderRisks(risks) {
+            const tbody = document.getElementById('risksTableBody');
+            const mobileContainer = document.getElementById('mobileRisks');
+            if (!tbody || !mobileContainer) return;
+
+            if (!risks || risks.length === 0) {
+                const emptyState = `<tr><td colspan="21" style="text-align:center;padding:80px;"><i class="fas fa-exclamation-triangle" style="font-size:48px;opacity:0.3;"></i><div style="margin-top:16px;">No risks found</div><button class="btn-primary" style="margin-top:16px;" onclick="openCreateRiskModal()">Create First Risk</button></td></td>`;
+                tbody.innerHTML = emptyState;
+                mobileContainer.innerHTML = emptyState;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            mobileContainer.innerHTML = '';
+
+            risks.forEach(risk => {
+                const riskId = risk._id || risk.id;
+                const lastFourId = getLastFourDigits(risk.riskId);
+                const assetName = allAssets.find(a => a._id === risk.assetId)?.name || risk.assetName || '—';
+                const isSelected = selectedRiskId === riskId;
+
+                const row = document.createElement('tr');
+                row.className = `clickable-row ${isSelected ? 'selected' : ''}`;
+                row.setAttribute('data-risk-id', riskId);
+                row.onclick = (e) => {
+                    if (!e.target.closest('.icon-btn') && !e.target.closest('.quick-action-trigger')) {
+                        showQuickActions(e, riskId, risk.title);
+                    }
+                };
+                row.innerHTML = `
+                    <td>${escapeHtml(lastFourId)}</span></td>
+                    <td><span class="pill ${risk.type === 'Upside' ? 'pill-upside' : 'pill-downside'}">${escapeHtml(risk.type || 'Downside')}</span></span></td>
+                    <td><strong>${escapeHtml(risk.title || '—')}</strong></span></td>
+                    <td style="max-width:320px;white-space:normal;">${escapeHtml((risk.description || '—').substring(0, 150))}${(risk.description || '').length > 150 ? '...' : ''}</span></td>
+                    <td>${escapeHtml(assetName)}</span></td>
+                    <td><span class="pill ${getStatusClass(risk.status)}">${escapeHtml(risk.status || 'Open')}</span></span></td>
+                    <td>${escapeHtml(risk.riskOwnerName || '—')}</span></td>
+                    <td>${escapeHtml(risk.subProject || '—')}</span></td>
+                    <td>${formatTecop(risk.functionalAreaTECOP)}</span></td>
+                    <td>${formatShortDate(risk.exposureStartDate)}</span></td>
+                    <td>${formatShortDate(risk.exposureEndDate)}</span></td>
+                    <td>${formatShortDate(risk.nextReviewDate)}</span></td>
+                    <td>${getComparisonArrow(risk.hsseRamCurrent, risk.hsseRamTarget)}</span></td>
+                    <td>${getTargetArrow(risk.hsseRamTarget, risk.type)}</span></td>
+                    <td>${getComparisonArrow(risk.riskVisualRamCurrent, risk.riskVisualRamTarget)}</span></td>
+                    <td>${getTargetArrow(risk.riskVisualRamTarget, risk.type)}</span></td>
+                    <td>${getManageabilityArrow(risk.manageability)}</span></td>
+                    <td>${risk.thresholdChanging ? '<span class="threshold-badge threshold-changing"></span> Changing' : '<span class="threshold-badge threshold-stable"></span> Stable'}</span></td>
+                    <td>${formatShortDate(risk.createdAt)}</span></td>
+                    <td>${formatShortDate(risk.updatedAt)}</span></td>
+                    <td style="white-space:nowrap;">
+                        <button class="icon-btn" onclick="event.stopPropagation(); setSelectedRisk('${riskId}', '${escapeHtml(risk.title)}')" title="Select Risk"><i class="fas fa-check-circle"></i></button>
+                        <button class="icon-btn" onclick="event.stopPropagation(); quickViewRisk('${riskId}')" title="View"><i class="fas fa-eye"></i></button>
+                        <button class="icon-btn" onclick="event.stopPropagation(); openBowtieView('${riskId}')" title="Bowtie View"><i class="fas fa-project-diagram"></i></button>
+                        <button class="icon-btn danger" onclick="event.stopPropagation(); quickDeleteRisk('${riskId}')" title="Delete"><i class="fas fa-trash"></i></button>
+                    </span>
+                `;
+                tbody.appendChild(row);
+
+                // Mobile card
+                const card = document.createElement('div');
+                card.className = `risk-card ${isSelected ? 'selected' : ''}`;
+                card.setAttribute('data-risk-id', riskId);
+                card.onclick = (e) => {
+                    if (!e.target.closest('.icon-btn')) {
+                        showQuickActions(e, riskId, risk.title);
+                    }
+                };
+                card.innerHTML = `
+                    <div class="risk-card-header">
+                        <div class="risk-card-title" onclick="event.stopPropagation(); quickViewRisk('${riskId}')">
+                            ${escapeHtml(lastFourId)}: ${escapeHtml(risk.title || '—')}
+                        </div>
+                        <div style="display:flex;gap:4px;">
+                            <button class="icon-btn small" onclick="event.stopPropagation(); setSelectedRisk('${riskId}', '${escapeHtml(risk.title)}')"><i class="fas fa-check-circle"></i></button>
+                            <button class="icon-btn small" onclick="event.stopPropagation(); openBowtieView('${riskId}')"><i class="fas fa-project-diagram"></i></button>
+                            <button class="icon-btn small" onclick="event.stopPropagation(); quickViewRisk('${riskId}')"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="risk-card-description">
+                        <i class="fas fa-align-left"></i> ${escapeHtml(risk.description || 'No description provided')}
+                    </div>
+                    <div class="risk-card-grid">
+                        <div class="risk-card-label">Type</div><div><span class="pill ${risk.type === 'Upside' ? 'pill-upside' : 'pill-downside'}">${escapeHtml(risk.type || 'Downside')}</span></div>
+                        <div class="risk-card-label">Status</div><div><span class="pill ${getStatusClass(risk.status)}">${escapeHtml(risk.status || 'Open')}</span></div>
+                        <div class="risk-card-label">Asset</div><div>${escapeHtml(assetName)}</div>
+                        <div class="risk-card-label">Owner</div><div>${escapeHtml(risk.riskOwnerName || '—')}</div>
+                        <div class="risk-card-label">Sub Project</div><div>${escapeHtml(risk.subProject || '—')}</div>
+                        <div class="risk-card-label">TECOP</div><div>${formatTecop(risk.functionalAreaTECOP)}</div>
+                    </div>
+                    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+                        <div style="font-weight:600;margin-bottom:8px;color:var(--primary);">HSSE RAM (5x5)</div>
+                        <div class="risk-card-grid">
+                            <div class="risk-card-label">Current</div><div><span class="${getRamClass(risk.hsseRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || '—')}</span></div>
+                            <div class="risk-card-label">Target</div><div><span class="${getRamClass(risk.hsseRamTarget)}">${escapeHtml(risk.hsseRamTarget || '—')}</span></div>
+                        </div>
+                    </div>
+                    <div style="margin-top:16px;display:flex;gap:8px;">
+                        <button class="btn-secondary" onclick="event.stopPropagation(); quickViewRisk('${riskId}')" style="flex:1;padding:8px;"><i class="fas fa-eye"></i> View</button>
+                    </div>
+                `;
+                mobileContainer.appendChild(card);
+            });
+        }
+
+        function searchRisks() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = risks.filter(risk => 
+                (risk.title && risk.title.toLowerCase().includes(term)) ||
+                (risk.description && risk.description.toLowerCase().includes(term)) ||
+                (risk.riskOwnerName && risk.riskOwnerName.toLowerCase().includes(term))
+            );
+            renderRisks(filtered);
+        }
+
+        function refreshRisks() {
+            loadRisks();
+            showToast('Refreshing data...', 'success');
+        }
+
+        // Export to Excel
+        async function exportRisksToExcel() {
+            try {
+                if (!risks || risks.length === 0) {
+                    showToast('No risks to export', 'warning');
+                    return;
+                }
+
+                const rows = [];
+                const headers = [
+                    'Risk ID', 'Type', 'Title', 'Description', 'Asset', 'Status',
+                    'Risk Owner', 'Sub Project', 'TECOP', 'Exp Start', 'Exp End',
+                    'Next Review', 'HSSE RAM C', 'HSSE RAM T', 'Vis RAM C',
+                    'Vis RAM T', 'Mgmt', 'Thresh', 'Created', 'Updated'
+                ];
+                rows.push(headers);
+
+                for (const risk of risks) {
+                    const assetName = allAssets.find(a => a._id === risk.assetId)?.name || risk.assetName || '—';
+                    let tecopText = risk.functionalAreaTECOP || '—';
+                    if (Array.isArray(tecopText)) tecopText = tecopText.join(', ');
+                    const thresholdText = risk.thresholdChanging ? 'Changing' : 'Stable';
+
+                    rows.push([
+                        risk.riskId || '—',
+                        risk.type || 'Downside',
+                        risk.title || '—',
+                        risk.description || '—',
+                        assetName,
+                        risk.status || 'Open',
+                        risk.riskOwnerName || '—',
+                        risk.subProject || '—',
+                        tecopText,
+                        formatShortDate(risk.exposureStartDate),
+                        formatShortDate(risk.exposureEndDate),
+                        formatShortDate(risk.nextReviewDate),
+                        risk.hsseRamCurrent || '—',
+                        risk.hsseRamTarget || '—',
+                        risk.riskVisualRamCurrent || '—',
+                        risk.riskVisualRamTarget || '—',
+                        risk.manageability || '—',
+                        thresholdText,
+                        formatShortDate(risk.createdAt),
+                        formatShortDate(risk.updatedAt)
+                    ]);
+                }
+
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'My Risks');
+                XLSX.writeFile(wb, `my_risks_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+                showToast(`Exported ${risks.length} risks successfully`, 'success');
+            } catch (error) {
+                console.error('Export failed:', error);
+                showToast('Failed to export risks', 'error');
+            }
+        }
+
+        // Import
+        function importRisks() {
+            document.getElementById('importFileInput').click();
+        }
+
+        async function handleImportFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            showToast(`Reading ${file.name}...`, 'info');
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    if (!rows || rows.length === 0) {
+                        showToast('No data found in file', 'error');
+                        return;
+                    }
+
+                    showToast(`Importing ${rows.length} risks...`, 'info');
+                    const token = localStorage.getItem('token');
+                    let successCount = 0;
+
+                    for (const row of rows) {
+                        try {
+                            const response = await fetch('/api/analyst/risks', {
+                                method: 'POST',
+                                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    title: row.Title || row.title || '',
+                                    description: row.Description || row.description || '',
+                                    type: row.Type || row.type || 'Downside',
+                                    assetId: row.AssetId || row.assetId || '',
+                                    riskOwnerName: row.RiskOwner || row.riskOwner || '',
+                                    status: 'pending'
+                                })
+                            });
+                            if (response.ok) successCount++;
+                        } catch (err) {
+                            console.error('Import row error:', err);
+                        }
+                    }
+                    showToast(`Imported ${successCount} risks`, 'success');
+                    loadRisks();
+                } catch (error) {
+                    showToast('Import failed', 'error');
+                } finally {
+                    input.value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Modal functions
+        function openCreateRiskModal() {
+            document.getElementById('createRiskModal').classList.add('open');
+            document.getElementById('createRiskForm').reset();
+            document.getElementById('thresholdChanging').value = 'false';
+        }
+
+        function closeCreateRiskModal() {
+            document.getElementById('createRiskModal').classList.remove('open');
+        }
+
+        function collectTecopAreas() {
+            const tecopAreas = [];
+            const checkboxes = document.querySelectorAll('#createRiskForm .tecop-tag input:checked');
+            checkboxes.forEach(cb => tecopAreas.push(cb.value));
+            return tecopAreas.join(', ');
+        }
+
+        async function submitRiskForm() {
+            const title = document.getElementById('riskTitle').value.trim();
+            const description = document.getElementById('riskDescription').value.trim();
+            const riskEvent = document.getElementById('riskEvent').value.trim();
+            const type = document.getElementById('riskType').value;
+            const category = document.getElementById('riskCategory').value;
+            const assetId = document.getElementById('assetId').value;
+            const riskOwnerId = document.getElementById('riskOwnerId').value;
+            const subProject = document.getElementById('subProject').value;
+            const exposureStart = document.getElementById('exposureStart').value;
+            const exposureEnd = document.getElementById('exposureEnd').value;
+            const nextReview = document.getElementById('nextReview').value;
+            const manageability = document.getElementById('manageability').value;
+            const thresholdChanging = document.getElementById('thresholdChanging').value === 'true';
+            const impact = document.getElementById('impact').value;
+            const functionalAreaTECOP = collectTecopAreas();
+
+            if (!title || !description || !riskEvent || !type || !category || !assetId || !riskOwnerId) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+
+            const submitBtn = document.querySelector('#createRiskModal .btn-success');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/analyst/risks', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title, description, event: riskEvent, type, riskCategory: category,
+                        assetId, riskOwnerId, subProject, functionalAreaTECOP,
+                        exposureStartDate: exposureStart || null, exposureEndDate: exposureEnd || null,
+                        nextReviewDate: nextReview || null, manageability, thresholdChanging, impact,
+                        status: 'pending'
+                    })
+                });
+
+                if (response.ok) {
+                    showToast('Risk created successfully!', 'success');
+                    closeCreateRiskModal();
+                    loadRisks();
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Failed to create risk', 'error');
+                }
+            } catch (error) {
+                showToast('Network error', 'error');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function deleteRisk(riskId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/risks/${riskId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    if (selectedRiskId === riskId) clearSelectedRisk();
+                    showToast('Risk deleted successfully', 'success');
+                    loadRisks();
+                } else {
+                    showToast('Failed to delete risk', 'error');
+                }
+            } catch (error) {
+                showToast('Network error', 'error');
+            }
+        }
+
+        function openBowtieView(riskId) {
+            window.open(`Bowtie.html?riskId=${riskId}`, '_blank');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loadAssets();
+            loadUsers();
+            loadRisks();
+
+            document.getElementById('createRiskModal')?.addEventListener('click', (e) => {
+                if (e.target === document.getElementById('createRiskModal')) closeCreateRiskModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeCreateRiskModal();
+            });
+        });
+
+        // Make functions global
+        window.switchTab = switchTab;
+        window.searchRisks = searchRisks;
+        window.refreshRisks = refreshRisks;
+        window.openCreateRiskModal = openCreateRiskModal;
+        window.closeCreateRiskModal = closeCreateRiskModal;
+        window.submitRiskForm = submitRiskForm;
+        window.setSelectedRisk = setSelectedRisk;
+        window.clearSelectedRisk = clearSelectedRisk;
+        window.quickViewRisk = quickViewRisk;
+        window.quickSelectRisk = quickSelectRisk;
+        window.quickChangeStatus = quickChangeStatus;
+        window.quickDeleteRisk = quickDeleteRisk;
+        window.exportRisksToExcel = exportRisksToExcel;
+        window.importRisks = importRisks;
+        window.handleImportFile = handleImportFile;
+        window.openBowtieView = openBowtieView;
+    </script>
+</body>
+</html>
