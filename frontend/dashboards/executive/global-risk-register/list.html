@@ -1,0 +1,4434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Register • Super Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+            --focus-ring: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        /* Shimmer Skeleton */
+        .skeleton {
+            background: var(--shimmer-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+            animation: shimmer 1.2s infinite linear;
+            transform: skewX(-20deg);
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* Top Nav */
+        .top-nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 10;
+        }
+        .tabs-group { display: flex; align-items: center; gap: 8px; }
+        .nav-tab {
+            padding: 0 20px;
+            height: 40px;
+            background: rgba(93,161,161,0.08);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-tab.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary);
+        }
+        .nav-tab.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .nav-tab:hover:not(.active):not(.disabled) { background: rgba(93,161,161,0.15); }
+        .nav-tab .favicon {
+            width: 16px; height: 16px; background: var(--primary); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+        }
+        .actions-group { display: flex; align-items: center; gap: 12px; }
+        .search-box input {
+            padding: 8px 12.8px; border: 1px solid var(--border); border-radius: 9.6px;
+            width: 320px; font-size: 12px; background: #f9f9f9;
+        }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 9.6px; background: transparent;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon:hover { background: rgba(93,161,161,0.06); color: var(--primary); }
+        .btn-primary {
+            padding: 8px 16px; background: var(--primary); color: white; border: none;
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary-outline {
+            padding: 8px 16px; background: transparent; color: var(--primary); border: 1px solid var(--primary);
+            border-radius: 9.6px; font-size: 12px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .btn-secondary-outline:hover { background: rgba(93,161,161,0.1); }
+        
+        /* Button Loading State */
+        .btn-primary.loading {
+            position: relative;
+            color: transparent;
+        }
+        .btn-primary.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: button-spin 0.8s linear infinite;
+        }
+        
+        @keyframes button-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Main Layout */
+        .main { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+        .content-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .page-content { display: none; height: 100%; overflow: auto; }
+
+        /* Table View - Full content without ellipsis */
+        .table-view { display: block; height: 100%; padding: 24px; }
+        .table-container {
+            width: 100%; height: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: auto;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: rgba(93,161,161,0.05); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        table { 
+            min-width: 1800px; 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: auto;
+        }
+        thead { 
+            position: sticky; 
+            top: 0; 
+            background: var(--card-bg); 
+            z-index: 8; 
+        }
+        th { 
+            padding: 8px 6px; 
+            font-size: 10.5px; 
+            font-weight: 600; 
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border); 
+            text-align: left; 
+            white-space: nowrap;
+            background: var(--card-bg);
+        }
+        td { 
+            padding: 8px 6px; 
+            font-size: 11.5px; 
+            border-bottom: 1px solid var(--border); 
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        /* Column widths - all content shows full without ellipsis */
+        th:nth-child(1), td:nth-child(1) { min-width: 65px; }
+        th:nth-child(2), td:nth-child(2) { min-width: 85px; }
+        th:nth-child(3), td:nth-child(3) { min-width: 220px; cursor: pointer; }
+        th:nth-child(4), td:nth-child(4) { min-width: 320px; }
+        th:nth-child(5), td:nth-child(5) { min-width: 120px; }
+        th:nth-child(6), td:nth-child(6) { min-width: 85px; }
+        th:nth-child(7), td:nth-child(7) { min-width: 130px; }
+        th:nth-child(8), td:nth-child(8) { min-width: 120px; }
+        th:nth-child(9), td:nth-child(9) { min-width: 130px; }
+        th:nth-child(10), td:nth-child(10) { min-width: 85px; }
+        th:nth-child(11), td:nth-child(11) { min-width: 85px; }
+        th:nth-child(12), td:nth-child(12) { min-width: 85px; }
+        th:nth-child(13), td:nth-child(13) { min-width: 95px; }
+        th:nth-child(14), td:nth-child(14) { min-width: 95px; }
+        th:nth-child(15), td:nth-child(15) { min-width: 95px; }
+        th:nth-child(16), td:nth-child(16) { min-width: 95px; }
+        th:nth-child(17), td:nth-child(17) { min-width: 95px; }
+        th:nth-child(18), td:nth-child(18) { min-width: 75px; }
+        th:nth-child(19), td:nth-child(19) { min-width: 120px; }
+        th:nth-child(20), td:nth-child(20) { min-width: 85px; }
+        th:nth-child(21), td:nth-child(21) { min-width: 85px; }
+        th:nth-child(22), td:nth-child(22) { min-width: 110px; }
+        
+        /* Clickable row */
+        .clickable-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .clickable-row:hover {
+            background: rgba(93,161,161,0.05);
+        }
+        .clickable-row.selected {
+            background: rgba(93,161,161,0.1);
+            border-left: 3px solid var(--primary);
+        }
+        
+        td {
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        tbody tr:hover { background: rgba(93,161,161,0.03); }
+
+        /* Quick Actions Dropdown */
+        .quick-actions-dropdown {
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            z-index: 1000;
+            min-width: 220px;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .quick-action-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+        
+        .quick-action-item:hover {
+            background: rgba(93,161,161,0.08);
+        }
+        
+        .quick-action-item i {
+            width: 20px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        
+        .quick-action-item.danger {
+            color: var(--red);
+        }
+        
+        .quick-action-item.danger i {
+            color: var(--red);
+        }
+        
+        .quick-action-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+        
+        /* Skeleton loading styles */
+        .skeleton-row td {
+            padding: 12px 6px;
+        }
+        .skeleton-cell {
+            height: 20px;
+            background: var(--shimmer-bg);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shimmer 1.2s infinite;
+        }
+        .skeleton-pill {
+            height: 24px;
+            width: 80px;
+            background: var(--shimmer-bg);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton-pill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shimmer 1.2s infinite;
+        }
+
+        /* Mobile Cards */
+        .card-view { display: none; padding: 16px; overflow-y: auto; height: 100%; }
+        .risk-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .risk-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .risk-card.selected {
+            border: 2px solid var(--primary);
+            background: rgba(93,161,161,0.02);
+        }
+        .risk-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .risk-card-title { font-size: 16px; font-weight: 600; cursor: pointer; }
+        .risk-card-title:hover { color: var(--primary); }
+        .risk-card-grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: 13px; }
+        .risk-card-label { color: var(--text-secondary); font-weight: 500; }
+        .risk-card-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 12px 0;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            line-height: 1.5;
+        }
+        .risk-card-description i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        /* Pills */
+        .pill { padding: 4px 9.6px; border-radius: 999px; font-size: 10.4px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .pill-downside { background: rgba(239,68,68,0.1); color: var(--red); }
+        .pill-upside { background: rgba(16,185,129,0.1); color: var(--green); }
+        .pill-pending { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .status-open { background: rgba(93,161,161,0.1); color: var(--primary); }
+        .status-approved { background: rgba(16,185,129,0.1); color: var(--green); }
+        .status-rejected { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none;
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .icon-btn.small {
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+        }
+        .icon-btn.danger {
+            color: var(--red);
+        }
+        .icon-btn.danger:hover {
+            background: rgba(239,68,68,0.1);
+        }
+        .icon-btn:hover { background: rgba(93,161,161,0.1); color: var(--primary); }
+
+        /* RAM Pill Styles */
+        .ram-pill { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .ram-very-low { background: rgba(16,185,129,0.1); color: var(--green); }
+        .ram-low { background: rgba(16,185,129,0.1); color: var(--green); }
+        .ram-medium { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .ram-high { background: rgba(239,68,68,0.1); color: var(--red); }
+        .ram-very-high { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .manageability-pill { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .can-control { background: rgba(16,185,129,0.1); color: var(--green); }
+        .can-influence { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .cannot-control { background: rgba(239,68,68,0.1); color: var(--red); }
+
+     /* MODIFIED: Changing threshold indicator now a straight horizontal red line */
+.threshold-badge {
+    width: 12px;
+    height: 2px;          /* flat line instead of a circle */
+    border-radius: 0;    /* no rounding → straight line */
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.threshold-changing { 
+    background: var(--red);   /* red line */
+}
+.threshold-stable { 
+    background: var(--green); /* green circle */
+    border-radius: 50%;       /* keeps stable as a circle */
+    width: 8px;
+    height: 8px;
+}
+
+        /* TECOP badge styles */
+        .tecop-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            background: #e8f0fe;
+            color: #1e4b8c;
+        }
+        .tecop-badge.technical { background: #e8f0fe; color: #1e4b8c; }
+        .tecop-badge.environmental { background: #e6f7e6; color: #2e7d32; }
+        .tecop-badge.commercial { background: #fff3e0; color: #b85c00; }
+        .tecop-badge.operational { background: #f3e5f5; color: #7b1fa2; }
+        .tecop-badge.political { background: #fce4e4; color: #b33939; }
+
+        /* Full Screen Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-overlay.open {
+            display: flex;
+        }
+        
+        .modal-full {
+            background: white;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-close {
+            cursor: pointer;
+            font-size: 28px;
+            color: var(--text-secondary);
+            line-height: 1;
+            transition: var(--transition);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        
+        .modal-close:hover {
+            background: rgba(93,161,161,0.1);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 32px;
+            flex: 1;
+            background: var(--bg);
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .modal-footer {
+            padding: 20px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+        
+        /* Risk Visual Full Page */
+        .risk-visual-container {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .risk-visual-container.active {
+            display: flex;
+        }
+        
+        .risk-visual-header {
+            padding: 16px 24px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .risk-visual-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        
+        .risk-visual-close:hover {
+            background: rgba(93,161,161,0.1);
+            color: var(--text-primary);
+        }
+        
+        .risk-visual-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: white;
+        }
+        
+        .btn-secondary, .btn-success, .btn-danger {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 120px;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .btn-success {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: var(--primary-hover);
+        }
+        
+        .btn-danger {
+            background: var(--red);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-success.loading {
+            position: relative;
+            color: transparent;
+        }
+        
+        .btn-success.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: button-spin 0.8s linear infinite;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        
+        .form-group input:disabled,
+        .form-group select:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .required::after {
+            content: ' *';
+            color: var(--red);
+        }
+        
+        /* Custom Select Dropdown with Search */
+        .custom-select {
+            position: relative;
+            width: 100%;
+        }
+        
+        .select-search {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background-color: white;
+        }
+        
+        .select-search:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93,161,161,0.1);
+        }
+        
+        .select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            display: none;
+            margin-top: 4px;
+        }
+        
+        .select-dropdown.open {
+            display: block;
+        }
+        
+        .select-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .select-option:hover,
+        .select-option.highlighted {
+            background: rgba(93,161,161,0.1);
+        }
+        
+        .select-option.selected {
+            background: rgba(93,161,161,0.15);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .user-avatar-small {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .user-info-dropdown-small {
+            flex: 1;
+            font-size: 12px;
+        }
+        
+        .user-name-dropdown-small {
+            font-weight: 500;
+        }
+        
+        .user-email-dropdown-small {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        
+        .no-results {
+            padding: 12px;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 12px;
+        }
+        
+        /* Form Container */
+        .form-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .form-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Title and Description row styling */
+        .title-description-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .title-description-row .form-group:first-child {
+            flex: 0 0 40%;
+        }
+        
+        .title-description-row .form-group:last-child {
+            flex: 1;
+        }
+        
+        /* TECOP tags */
+        .tecop-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .tecop-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+        
+        .tecop-tag input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            accent-color: var(--primary);
+        }
+        
+        .tecop-tag.selected {
+            background: rgba(93,161,161,0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        /* Subproject container */
+        .subproject-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .subproject-container select {
+            flex: 1;
+        }
+        
+        .btn-add-subproject {
+            padding: 12px 20px;
+            background: white;
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .btn-add-subproject:hover {
+            background: rgba(93,161,161,0.1);
+            border-style: solid;
+        }
+        
+        .subproject-input-container {
+            display: none;
+            margin-top: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .subproject-input-container.show {
+            display: block;
+        }
+        html, body {
+    overflow: hidden;   /* Hides scrollbars on the entire page inside the iframe */
+    height: 100%;
+}
+        .subproject-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .subproject-input-row input {
+            flex: 1;
+        }
+        
+        .btn-save-subproject {
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-cancel-subproject {
+            padding: 12px 20px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        /* Cause/Consequence containers */
+        .item-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+        
+        .item-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .item-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        
+        .item-card-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .item-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(93,161,161,0.05);
+        }
+        
+        .btn-danger-sm {
+            background: transparent;
+            border: 1px solid var(--red);
+            color: var(--red);
+        }
+        
+        .btn-danger-sm:hover {
+            background: rgba(239,68,68,0.1);
+        }
+        
+        .add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: white;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+        
+        .add-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(93,161,161,0.05);
+        }
+        
+        /* RAM Section */
+        .ram-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .ram-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+        
+        .ram-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .ram-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .ram-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .ram-subheader {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .ram-flex {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .ram-flex .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .ram-label {
+            font-size: 12px;
+            color: var(--neutral);
+            margin-bottom: 4px;
+            display: block;
+        }
+        
+        .ram-result {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .ram-result-flex {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .ram-result-flex .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .override-box {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .override-box label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .scoring-row {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .scoring-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .impact-field {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .toast.error { border-left-color: var(--red); }
+        .toast.error .toast-icon { color: var(--red); }
+        .toast.success { border-left-color: var(--green); }
+        .toast.success .toast-icon { color: var(--green); }
+        .toast.warning { border-left-color: var(--amber); }
+        .toast.warning .toast-icon { color: var(--amber); }
+
+        /* File Input */
+        .file-input-hidden {
+            display: none;
+        }
+        
+        /* Selected Risk Indicator */
+        .selected-risk-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .selected-risk-indicator.show {
+            display: flex;
+        }
+        
+        .selected-risk-indicator i {
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        
+        .selected-risk-indicator i:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) { 
+            table { min-width: 1800px; } 
+            .form-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .form-row .form-group {
+                margin-bottom: 0;
+            }
+            .title-description-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .title-description-row .form-group:first-child {
+                flex: 1;
+            }
+            .ram-flex {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .ram-result-flex {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .scoring-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .top-nav { 
+                padding: 0 16px; 
+                flex-direction: column;
+                height: auto;
+                padding: 12px 16px;
+                gap: 12px;
+            }
+            .tabs-group {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+            .actions-group { 
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 8px; 
+            }
+            .search-box input { 
+                width: 100%;
+                min-width: 200px;
+            }
+            .table-view { display: none; }
+            .card-view { display: block; }
+            
+            .modal-body {
+                padding: 20px;
+            }
+            .form-section {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="tabs-group">
+            <div class="nav-tab active" data-content="risks-content" onclick="switchTab('risks-content')">
+                <div class="favicon">R</div>
+                <span>All Risks</span>
+            </div>
+            <div class="nav-tab" data-content="risk-visual-content" onclick="switchTab('risk-visual-content')">
+                <div class="favicon">V</div>
+                <span>Risk Visual</span>
+            </div>
+            <div class="nav-tab disabled" data-content="bowtie-content" id="bowtieTab" onclick="switchTab('bowtie-content')">
+                <div class="favicon">B</div>
+                <span>Bowtie</span>
+            </div>
+            <div class="nav-tab disabled" data-content="risk-details-content" id="riskDetailsTab" onclick="switchTab('risk-details-content')">
+                <div class="favicon">D</div>
+                <span>Risk Details</span>
+            </div>
+        </div>
+        <div class="actions-group">
+            <div class="search-box">
+                <input type="text" placeholder="Search risks..." id="searchInput" onkeyup="searchRisks()">
+            </div>
+            
+            <button class="btn-icon" onclick="refreshRisks()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+               <button class="btn-secondary-outline" onclick="exportRisksToExcel()" title="Export to Excel">
+    <i class="fas fa-file-excel"></i> Export
+</button>
+            <button class="btn-secondary-outline" onclick="importRisks()" title="Import Risks">
+                <i class="fas fa-upload"></i> Import
+            </button>
+            <button class="btn-primary" onclick="openCreateRiskModal()">
+                <i class="fas fa-plus"></i> New Risk
+            </button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="content-wrapper">
+            <div id="risks-content" class="page-content" style="display:block;">
+                <!-- Desktop Table -->
+                <div class="table-view">
+                    <div class="table-container">
+                        <table id="risksTable">
+                            <thead>
+                                <tr>
+                                    <th>Risk ID</th>
+                                    <th>Type</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Asset</th>
+                                    <th>Status</th>
+                                    <th>Risk Owner</th>
+                                    <th>Sub Project</th>
+                                    <th>TECOP</th>
+                                    <th>Exp Start</th>
+                                    <th>Exp End</th>
+                                    <th>Next Review</th>
+                                    <th>HSSE RAM C</th>
+                                    <th>HSSE RAM T</th>
+                                    <th>Vis RAM C</th>
+                                    <th>Vis RAM T</th>
+                                    <th>Mgmt</th>
+                                    <th>Thresh</th>
+                                    <th>Created By</th>
+                                    <th>Created</th>
+                                    <th>Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="risksTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="card-view" id="mobileRisks"></div>
+            </div>
+            
+           <div id="risk-visual-content" class="page-content">
+    <iframe src="risk-visual.html" style="width:100%;height:100%;border:none;" scrolling="no" title="Risk Visual"></iframe>
+</div>
+
+<div id="bowtie-content" class="page-content">
+    <iframe id="bowtieFrame" src="" style="width:100%;height:100%;border:none;" scrolling="no" title="Bowtie Diagram"></iframe>
+</div>
+
+<div id="risk-details-content" class="page-content">
+    <iframe id="riskDetailsFrame" src="" style="width:100%;height:100%;border:none;" scrolling="no" title="Risk Details"></iframe>
+</div>
+        </div>
+    </main>
+
+    <!-- Selected Risk Indicator -->
+    <div class="selected-risk-indicator" id="selectedRiskIndicator">
+        <i class="fas fa-info-circle"></i>
+        <span id="selectedRiskName">No risk selected</span>
+        <i class="fas fa-times-circle" onclick="clearSelectedRisk()" style="cursor: pointer;"></i>
+    </div>
+
+    <!-- Risk Visual Container (Full Page with Iframe) - Kept for backward compatibility -->
+    <div class="risk-visual-container" id="riskVisualContainer">
+        <div class="risk-visual-header">
+            <div class="risk-visual-close" onclick="closeRiskVisual()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <iframe src="risk-visual.html" class="risk-visual-frame" id="riskVisualFrame" title="Risk Visual"></iframe>
+    </div>
+
+    <!-- Create/Edit Risk Modal (Full Screen) -->
+    <div class="modal-overlay" id="createRiskModal">
+        <div class="modal-full">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-plus-circle" style="margin-right: 12px; color: var(--primary);" id="modalIcon"></i>
+                    <span id="modalTitle">Create New Risk</span>
+                </div>
+                <div class="modal-close" onclick="closeCreateRiskModal()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="form-container">
+                    <form id="createRiskForm">
+                        <input type="hidden" id="riskId" name="riskId">
+                        
+                        <!-- SECTION 1: Context & Ownership -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-project-diagram"></i>
+                                Context & Ownership
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="assetId_create" class="required">Asset</label>
+                                    <select id="assetId_create" class="asset-selector-input" required>
+                                        <option value="">Select asset</option>
+                                        <!-- Assets loaded dynamically -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="subProject_create" class="required">Sub-Project / Department</label>
+                                    <div class="subproject-container">
+                                        <select id="subProject_create" required>
+                                            <option value="">Select sub-project</option>
+                                            <option value="Phase 1 Construction">Phase 1 Construction</option>
+                                            <option value="Phase 2 Construction">Phase 2 Construction</option>
+                                            <option value="Operations">Operations</option>
+                                            <option value="Maintenance">Maintenance</option>
+                                            <option value="Engineering">Engineering</option>
+                                            <option value="Finance">Finance</option>
+                                            <option value="HR">HR</option>
+                                            <option value="IT">IT</option>
+                                            <option value="Legal">Legal</option>
+                                            <option value="Procurement">Procurement</option>
+                                        </select>
+                                        <button type="button" class="btn-add-subproject" onclick="showAddSubproject()">
+                                            <i class="fas fa-plus"></i> Add New
+                                        </button>
+                                    </div>
+                                    <div class="subproject-input-container" id="subprojectInput">
+                                        <div class="subproject-input-row">
+                                            <input type="text" id="newSubprojectName" placeholder="Enter new sub-project name" maxlength="50">
+                                            <button type="button" class="btn-save-subproject" onclick="addNewSubproject()">Save</button>
+                                            <button type="button" class="btn-cancel-subproject" onclick="hideAddSubproject()">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="riskType_create" class="required">Risk Type</label>
+                                    <select id="riskType_create" required>
+                                        <option value="">Select type</option>
+                                        <option value="Downside">Downside (Threat)</option>
+                                        <option value="Upside">Upside (Opportunity)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="riskCategory_create" class="required">Risk Category</label>
+                                    <select id="riskCategory_create" required>
+                                        <option value="">Select category</option>
+                                        <option value="Technical">Technical</option>
+                                        <option value="Environmental">Environmental</option>
+                                        <option value="Operational">Operational</option>
+                                        <option value="Financial">Financial</option>
+                                        <option value="Commercial">Commercial</option>
+                                        <option value="Political">Political</option>
+                                        <option value="Regulatory">Regulatory</option>
+                                        <option value="Safety">Safety</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="riskOwner_create" class="required">Risk Owner</label>
+                                    <div class="custom-select">
+                                        <input type="text" 
+                                               class="select-search" 
+                                               id="riskOwnerSearch" 
+                                               placeholder="Search users by name or email..."
+                                               autocomplete="off"
+                                               required>
+                                        <input type="hidden" id="riskOwnerId" name="riskOwnerId">
+                                        <div class="select-dropdown" id="riskOwnerDropdown">
+                                            <div class="no-results">Loading users...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="functionalArea_create">Functional Area (TECOP)</label>
+                                    <div class="tecop-tags" id="tecopTags">
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Technical"> Technical
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Environmental"> Environmental
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Commercial"> Commercial
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Operational"> Operational
+                                        </label>
+                                        <label class="tecop-tag">
+                                            <input type="checkbox" value="Political"> Political
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 2: Risk Definition -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Risk Definition
+                            </h3>
+                            
+                            <!-- Title and Description on same row -->
+                            <div class="title-description-row">
+                                <div class="form-group">
+                                    <label for="riskTitle_create" class="required">Risk Title</label>
+                                    <input type="text" id="riskTitle_create" placeholder="Clear, concise risk statement" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="description_create" class="required">Description</label>
+                                    <textarea id="description_create" placeholder="Describe the risk scenario, background, and context in detail..." required rows="3"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="event_create" class="required">Risk Event</label>
+                                    <textarea id="event_create" placeholder="Single statement describing the central risk event (e.g., 'Equipment failure during operation')" required rows="2"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="exposureStart_create">Exposure Start Date</label>
+                                    <input type="date" id="exposureStart_create">
+                                </div>
+                                <div class="form-group">
+                                    <label for="exposureEnd_create">Exposure End Date</label>
+                                    <input type="date" id="exposureEnd_create">
+                                </div>
+                                <div class="form-group">
+                                    <label for="nextReviewDate_create">Next Review Date</label>
+                                    <input type="date" id="nextReviewDate_create">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 3: Causes -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Causes
+                            </h3>
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">
+                                Define root causes that could lead to the risk event.
+                            </p>
+                            
+                            <div id="causes-container">
+                                <!-- Dynamic causes will be added here -->
+                                <div class="item-card" data-cause-index="0">
+                                    <div class="item-card-header">
+                                        <div class="item-card-title">Cause #1</div>
+                                        <div class="item-card-actions">
+                                            <button type="button" class="btn-sm btn-danger-sm" onclick="removeCause(0)">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required">Cause Description</label>
+                                        <textarea class="cause-description" placeholder="Describe the root cause (e.g., 'Lack of preventive maintenance')" required rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="add-btn" onclick="addCause()">
+                                <i class="fas fa-plus-circle"></i> Add Another Cause
+                            </button>
+                        </div>
+
+                        <!-- SECTION 4: Consequences -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-ambulance"></i>
+                                Consequences
+                            </h3>
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">
+                                Define potential impacts if the risk occurs.
+                            </p>
+                            
+                            <div id="consequences-container">
+                                <!-- Dynamic consequences will be added here -->
+                                <div class="item-card" data-consequence-index="0">
+                                    <div class="item-card-header">
+                                        <div class="item-card-title">Consequence #1</div>
+                                        <div class="item-card-actions">
+                                            <button type="button" class="btn-sm btn-danger-sm" onclick="removeConsequence(0)">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required">Consequence Description</label>
+                                        <textarea class="consequence-description" placeholder="Describe the impact (e.g., 'Production downtime of 48 hours')" required rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="add-btn" onclick="addConsequence()">
+                                <i class="fas fa-plus-circle"></i> Add Another Consequence
+                            </button>
+                        </div>
+
+                        <!-- SECTION 5: Risk Assessment Matrix (RAM) -->
+                        <div class="form-section ram-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-chart-line"></i>
+                                Risk Assessment Matrix (RAM)
+                            </h3>
+                            
+                            <!-- HSSE RAM (5x5) -->
+                            <div class="ram-card">
+                                <div class="ram-card-header">
+                                    <span class="ram-card-title">HSSE RAM (5x5)</span>
+                                </div>
+                                
+                                <!-- Impact Row -->
+                                <div class="ram-row">
+                                    <span class="ram-subheader">Impact</span>
+                                    <div class="ram-flex">
+                                        <div class="form-group">
+                                            <label class="ram-label">Current</label>
+                                            <select id="hsseImpactCurrent_create" class="form-control" onchange="calculateHSSERAM()">
+                                                <option value="">Select impact level</option>
+                                                <option value="Very Low">Very Low - No disruption to operation</option>
+                                                <option value="Low">Low - Brief disruption to operation</option>
+                                                <option value="Medium">Medium - Partial shutdown of operation (can be restarted)</option>
+                                                <option value="High">High - Partial or temporary loss of operation</option>
+                                                <option value="Very High">Very High - Substantial or total loss of operation</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="ram-label">Target</label>
+                                            <select id="hsseImpactTarget_create" class="form-control" onchange="calculateHSSERAM()">
+                                                <option value="">Select target level</option>
+                                                <option value="Very Low">Very Low</option>
+                                                <option value="Low">Low</option>
+                                                <option value="Medium">Medium</option>
+                                                <option value="High">High</option>
+                                                <option value="Very High">Very High</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Likelihood Row -->
+                                <div class="ram-row">
+                                    <span class="ram-subheader">Likelihood</span>
+                                    <div class="ram-flex">
+                                        <div class="form-group">
+                                            <label class="ram-label">Current</label>
+                                            <select id="hsseLikelihoodCurrent_create" class="form-control" onchange="calculateHSSERAM()">
+                                                <option value="">Select likelihood level</option>
+                                                <option value="Very Low">Very Low - Never happened in the industry (less than once in 25+ years)</option>
+                                                <option value="Low">Low - Has happened rarely in the industry (about once in 10-25 years)</option>
+                                                <option value="Medium">Medium - Has happened occasionally in the industry (about once in 5-10 years)</option>
+                                                <option value="High">High - Has happened multiple times in the industry (about once in 1-5 years)</option>
+                                                <option value="Very High">Very High - Happens frequently in the industry (multiple times per year)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="ram-label">Target</label>
+                                            <select id="hsseLikelihoodTarget_create" class="form-control" onchange="calculateHSSERAM()">
+                                                <option value="">Select target level</option>
+                                                <option value="Very Low">Very Low</option>
+                                                <option value="Low">Low</option>
+                                                <option value="Medium">Medium</option>
+                                                <option value="High">High</option>
+                                                <option value="Very High">Very High</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Calculated HSSE RAM Levels -->
+                                <div class="ram-result">
+                                    <div class="ram-result-flex">
+                                        <div class="form-group">
+                                            <label>Calculated HSSE RAM Level (Current)</label>
+                                            <input type="text" id="hsseRamCurrent_create" readonly placeholder="Auto-calculated from Impact × Likelihood" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Calculated HSSE RAM Level (Target)</label>
+                                            <input type="text" id="hsseRamTarget_create" readonly placeholder="Auto-calculated from Impact × Likelihood" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Risk Visual RAM (3x3) -->
+                            <div class="ram-card">
+                                <div class="ram-card-header">
+                                    <span class="ram-card-title">Risk Visual RAM (3x3)</span>
+                                    <span style="font-size: 12px; color: var(--neutral);">Auto-populated from HSSE RAM</span>
+                                </div>
+                                
+                                <!-- Impact Row -->
+                                <div class="ram-row">
+                                    <span class="ram-subheader">Impact</span>
+                                    <div class="ram-flex">
+                                        <div class="form-group">
+                                            <label class="ram-label">Current</label>
+                                            <select id="riskVisualImpactCurrent_create" class="form-control" disabled>
+                                                <option value="">Select impact level</option>
+                                                <option value="Low">Low - Minor disruption to operations</option>
+                                                <option value="Medium">Medium - Partial shutdown or temporary interruption of operations</option>
+                                                <option value="High">High - Major disruption resulting in significant, prolonged, or total loss of operations</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="ram-label">Target</label>
+                                            <select id="riskVisualImpactTarget_create" class="form-control" onchange="calculateRiskVisualRAMTarget()">
+                                                <option value="">Select target level</option>
+                                                <option value="Low">Low</option>
+                                                <option value="Medium">Medium</option>
+                                                <option value="High">High</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Likelihood Row -->
+                                <div class="ram-row">
+                                    <span class="ram-subheader">Likelihood</span>
+                                    <div class="ram-flex">
+                                        <div class="form-group">
+                                            <label class="ram-label">Current</label>
+                                            <select id="riskVisualLikelihoodCurrent_create" class="form-control" disabled>
+                                                <option value="">Select likelihood level</option>
+                                                <option value="Low">Low - Has rarely or never happened in the industry (less than once in 10+ years)</option>
+                                                <option value="Medium">Medium - Has happened occasionally in the industry (about once in 3-10 years)</option>
+                                                <option value="High">High - Has happened multiple times in the industry or occurs frequently (about once every 1-3 years or more)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="ram-label">Target</label>
+                                            <select id="riskVisualLikelihoodTarget_create" class="form-control" onchange="calculateRiskVisualRAMTarget()">
+                                                <option value="">Select target level</option>
+                                                <option value="Low">Low</option>
+                                                <option value="Medium">Medium</option>
+                                                <option value="High">High</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Calculated Risk Visual RAM Levels -->
+                                <div class="ram-result">
+                                    <div class="ram-result-flex">
+                                        <div class="form-group">
+                                            <label>Calculated Risk Visual RAM Level (Current)</label>
+                                            <input type="text" id="riskVisualRamCurrent_create" readonly placeholder="Auto-populated from HSSE RAM" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Calculated Risk Visual RAM Level (Target)</label>
+                                            <input type="text" id="riskVisualRamTarget_create" readonly placeholder="Auto-calculated from Impact × Likelihood" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Override Option -->
+                                <div class="override-box">
+                                    <label>
+                                        <input type="checkbox" id="overrideRamCheckbox" onchange="toggleRamOverride()"> 
+                                        Override Risk Visual RAM (manual entry)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional scoring fields -->
+                            <div class="scoring-row">
+                                <div class="form-group">
+                                    <label for="manageability_create">Manageability</label>
+                                    <select id="manageability_create">
+                                        <option value="">Select level</option>
+                                        <option value="Can Control">Can Control</option>
+                                        <option value="Can Influence">Can Influence</option>
+                                        <option value="Cannot Control">Cannot Control</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="thresholdChanging_create">Threshold</label>
+                                    <select id="thresholdChanging_create">
+                                        <option value="false">Stable</option>
+                                        <option value="true">Changing</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Impact field -->
+                            <div class="impact-field">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label for="impact_create">Impact Description</label>
+                                    <textarea id="impact_create" placeholder="Describe the potential business impact, including financial, operational, and strategic implications..." rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCreateRiskModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-success" onclick="submitRiskForm()">
+                    <i class="fas fa-paper-plane"></i> <span id="submitButtonText">Create Risk</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="importFileInput" accept=".json,.csv" style="display: none;" onchange="handleImportFile(this)">
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+<script>
+// Global variables
+let allAssets = [];
+let risks = [];
+let allUsers = [];
+let causeCount = 1;
+let consequenceCount = 1;
+let selectedRiskOwner = null;
+let customSubprojects = [];
+let isEditMode = false;
+let currentEditRiskId = null;
+let currentQuickActionsRisk = null;
+let quickActionsDropdown = null;
+let selectedRiskId = null;
+let selectedRiskTitle = null;
+
+// Helper functions
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function getRamClass(ramLevel) {
+    if (!ramLevel) return '';
+    ramLevel = ramLevel.toLowerCase();
+    if (ramLevel === 'very low') return 'ram-pill ram-very-low';
+    if (ramLevel === 'low') return 'ram-pill ram-low';
+    if (ramLevel === 'medium') return 'ram-pill ram-medium';
+    if (ramLevel === 'high') return 'ram-pill ram-high';
+    if (ramLevel === 'very high') return 'ram-pill ram-very-high';
+    return 'ram-pill';
+}
+
+function getManageabilityClass(manageability) {
+    if (!manageability) return '';
+    if (manageability === 'Can Control') return 'manageability-pill can-control';
+    if (manageability === 'Can Influence') return 'manageability-pill can-influence';
+    if (manageability === 'Cannot Control') return 'manageability-pill cannot-control';
+    return 'manageability-pill';
+}
+
+function getStatusClass(status) {
+    if (!status) return '';
+    status = status.toLowerCase();
+    if (status === 'pending') return 'pill-pending';
+    if (status === 'approved') return 'status-approved';
+    if (status === 'rejected') return 'status-rejected';
+    if (status === 'open') return 'status-open';
+    return '';
+}
+
+function formatTecop(tecop) {
+    if (!tecop) return '—';
+    
+    if (typeof tecop === 'string' && tecop.includes(',')) {
+        const items = tecop.split(',').map(item => item.trim());
+        let html = '';
+        items.forEach(item => {
+            const itemLower = item.toLowerCase();
+            let tecopClass = '';
+            if (itemLower.includes('tech')) tecopClass = 'technical';
+            else if (itemLower.includes('env')) tecopClass = 'environmental';
+            else if (itemLower.includes('comm')) tecopClass = 'commercial';
+            else if (itemLower.includes('oper')) tecopClass = 'operational';
+            else if (itemLower.includes('pol')) tecopClass = 'political';
+            
+            html += `<span class="tecop-badge ${tecopClass}">${escapeHtml(item)}</span>`;
+        });
+        return html;
+    }
+    
+    if (Array.isArray(tecop)) {
+        let html = '';
+        tecop.forEach(item => {
+            const itemLower = String(item).toLowerCase();
+            let tecopClass = '';
+            if (itemLower.includes('tech')) tecopClass = 'technical';
+            else if (itemLower.includes('env')) tecopClass = 'environmental';
+            else if (itemLower.includes('comm')) tecopClass = 'commercial';
+            else if (itemLower.includes('oper')) tecopClass = 'operational';
+            else if (itemLower.includes('pol')) tecopClass = 'political';
+            
+            html += `<span class="tecop-badge ${tecopClass}">${escapeHtml(item)}</span>`;
+        });
+        return html;
+    }
+    
+    return escapeHtml(tecop);
+}
+
+function formatShortDate(dateString) {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '—';
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString().slice(-2);
+    
+    return `${day}/${month}/${year}`;
+}
+
+function getLastFourDigits(riskId) {
+    if (!riskId || riskId === '—') return '—';
+    const idStr = String(riskId);
+    return idStr.slice(-4);
+}
+
+function truncateDescription(desc, maxLength = 200) {
+    if (!desc) return '—';
+    if (desc.length <= maxLength) return desc;
+    return desc.substring(0, maxLength) + '...';
+}
+
+// Format date for backend
+function formatDateForBackend(dateString) {
+    if (!dateString) return null;
+    return dateString;
+}
+
+// Show empty state
+function showEmptyState() {
+    const tbody = document.getElementById('risksTableBody');
+    const mobileContainer = document.getElementById('mobileRisks');
+    
+    if (!tbody || !mobileContainer) return;
+    
+    const emptyStateHTML = `
+        <tr>
+            <td colspan="22" style="text-align:center;padding:80px 20px;">
+                <i class="fas fa-exclamation-triangle" style="font-size:48px;opacity:0.3;margin-bottom:16px;"></i>
+                <div style="font-size:16px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">
+                    No risks found
+                </div>
+                <div style="font-size:13px;color:var(--neutral);margin-bottom:24px;">
+                    Create your first risk to get started
+                </div>
+                <button class="btn-primary" onclick="openCreateRiskModal()">
+                    <i class="fas fa-plus"></i> Create First Risk
+                </button>
+            </td>
+        </tr>`;
+    
+    tbody.innerHTML = emptyStateHTML;
+    mobileContainer.innerHTML = emptyStateHTML;
+}
+
+// Update disabled tabs based on selected risk
+function updateDisabledTabs() {
+    const bowtieTab = document.getElementById('bowtieTab');
+    const riskDetailsTab = document.getElementById('riskDetailsTab');
+    
+    if (selectedRiskId) {
+        bowtieTab.classList.remove('disabled');
+        riskDetailsTab.classList.remove('disabled');
+        
+        // Update iframe sources if they haven't been set
+        const bowtieFrame = document.getElementById('bowtieFrame');
+        const riskDetailsFrame = document.getElementById('riskDetailsFrame');
+        
+        if (bowtieFrame && !bowtieFrame.src) {
+            bowtieFrame.src = `Bowtie.html?riskId=${encodeURIComponent(selectedRiskId)}`;
+        }
+        if (riskDetailsFrame && !riskDetailsFrame.src) {
+            riskDetailsFrame.src = `risk-detail.html?riskId=${encodeURIComponent(selectedRiskId)}`;
+        }
+        
+        // Show selected risk indicator
+        const indicator = document.getElementById('selectedRiskIndicator');
+        const indicatorName = document.getElementById('selectedRiskName');
+        indicatorName.textContent = selectedRiskTitle || `Risk ${getLastFourDigits(selectedRiskId)}`;
+        indicator.classList.add('show');
+    } else {
+        bowtieTab.classList.add('disabled');
+        riskDetailsTab.classList.add('disabled');
+        
+        // Hide selected risk indicator
+        const indicator = document.getElementById('selectedRiskIndicator');
+        indicator.classList.remove('show');
+    }
+}
+
+// Clear selected risk
+function clearSelectedRisk() {
+    selectedRiskId = null;
+    selectedRiskTitle = null;
+    updateDisabledTabs();
+    
+    // Remove highlight from table rows
+    document.querySelectorAll('#risksTableBody tr').forEach(row => {
+        row.classList.remove('selected');
+    });
+    
+    // Remove highlight from mobile cards
+    document.querySelectorAll('#mobileRisks .risk-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Clear iframe contents
+    const bowtieFrame = document.getElementById('bowtieFrame');
+    const riskDetailsFrame = document.getElementById('riskDetailsFrame');
+    if (bowtieFrame) bowtieFrame.src = '';
+    if (riskDetailsFrame) riskDetailsFrame.src = '';
+    
+    showToast('Risk selection cleared', 'info');
+}
+
+// Set selected risk
+function setSelectedRisk(riskId, riskTitle) {
+    selectedRiskId = riskId;
+    selectedRiskTitle = riskTitle;
+    updateDisabledTabs();
+    
+    // Update iframe sources
+    const bowtieFrame = document.getElementById('bowtieFrame');
+    const riskDetailsFrame = document.getElementById('riskDetailsFrame');
+    
+    if (bowtieFrame) {
+        bowtieFrame.src = `Bowtie.html?riskId=${encodeURIComponent(riskId)}`;
+    }
+    if (riskDetailsFrame) {
+        riskDetailsFrame.src = `risk-detail.html?riskId=${encodeURIComponent(riskId)}`;
+    }
+    
+    // Update iframe sources for existing content if currently on those tabs
+    if (document.getElementById('bowtie-content').style.display === 'block') {
+        if (bowtieFrame) bowtieFrame.src = `Bowtie.html?riskId=${encodeURIComponent(riskId)}`;
+    }
+    if (document.getElementById('risk-details-content').style.display === 'block') {
+        if (riskDetailsFrame) riskDetailsFrame.src = `risk-detail.html?riskId=${encodeURIComponent(riskId)}`;
+    }
+    
+}
+
+// Tab switching function with disabled tab handling
+function switchTab(contentId) {
+    const tab = document.querySelector(`.nav-tab[data-content="${contentId}"]`);
+    
+    // Check if tab is disabled
+    if (tab && tab.classList.contains('disabled')) {
+        showToast('Please select a risk first to view this content', 'warning');
+        return;
+    }
+    
+    // Update tab active states
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('data-content') === contentId) {
+            tab.classList.add('active');
+        }
+    });
+    
+    // Show selected content, hide others
+    document.querySelectorAll('.page-content').forEach(content => {
+        content.style.display = 'none';
+    });
+    document.getElementById(contentId).style.display = 'block';
+    
+    // If switching to bowtie or risk details, ensure the iframe has the correct risk ID
+    if (contentId === 'bowtie-content' && selectedRiskId) {
+        const bowtieFrame = document.getElementById('bowtieFrame');
+        if (bowtieFrame && !bowtieFrame.src.includes(selectedRiskId)) {
+            bowtieFrame.src = `Bowtie.html?riskId=${encodeURIComponent(selectedRiskId)}`;
+        }
+    }
+    
+    if (contentId === 'risk-details-content' && selectedRiskId) {
+        const riskDetailsFrame = document.getElementById('riskDetailsFrame');
+        if (riskDetailsFrame && !riskDetailsFrame.src.includes(selectedRiskId)) {
+            riskDetailsFrame.src = `risk-detail.html?riskId=${encodeURIComponent(selectedRiskId)}`;
+        }
+    }
+    
+    // If switching to risk visual, ensure the iframe loads properly
+    if (contentId === 'risk-visual-content') {
+        const iframe = document.querySelector('#risk-visual-content iframe');
+        if (iframe) {
+            iframe.src = iframe.src;
+        }
+    }
+}
+
+// Risk Visual functions
+function openRiskVisual() {
+    switchTab('risk-visual-content');
+}
+
+function closeRiskVisual() {
+    const container = document.getElementById('riskVisualContainer');
+    if (container) {
+        container.classList.remove('active');
+    }
+    // Switch back to risks tab
+    switchTab('risks-content');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    // Close quick actions dropdown
+    if (quickActionsDropdown && !quickActionsDropdown.contains(e.target) && !e.target.closest('.clickable-row') && !e.target.closest('.quick-action-item')) {
+        quickActionsDropdown.remove();
+        quickActionsDropdown = null;
+    }
+});
+
+// Show shimmer loading
+function showShimmerLoading() {
+    const tbody = document.getElementById('risksTableBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+        const row = document.createElement('tr');
+        row.className = 'skeleton-row';
+        row.innerHTML = `
+            <td><div class="skeleton-cell" style="width: 50px;"></div></td>
+            <td><div class="skeleton-pill"></div></td>
+            <td><div class="skeleton-cell" style="width: 180px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 280px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 100px;"></div></td>
+            <td><div class="skeleton-pill"></div></td>
+            <td><div class="skeleton-cell" style="width: 100px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 100px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 100px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 100px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 70px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 70px;"></div></td>
+            <td><div class="skeleton-pill"></div></td>
+            <td><div class="skeleton-pill"></div></td>
+            <td><div class="skeleton-pill"></div></td>
+            <td><div class="skeleton-pill"></div></td>
+            <td><div class="skeleton-pill"></div></td>
+            <td><div class="skeleton-pill"></div></td>
+            <td><div class="skeleton-cell" style="width: 60px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 100px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 70px;"></div></td>
+            <td><div class="skeleton-cell" style="width: 70px;"></div></td>
+        `;
+        tbody.appendChild(row);
+    }
+    
+    const mobileContainer = document.getElementById('mobileRisks');
+    if (mobileContainer) {
+        mobileContainer.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            const card = document.createElement('div');
+            card.className = 'risk-card';
+            card.innerHTML = `
+                <div class="risk-card-header">
+                    <div class="skeleton" style="height: 24px; width: 70%;"></div>
+                    <div class="skeleton" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                </div>
+                <div class="skeleton" style="height: 60px; width: 100%; margin: 12px 0;"></div>
+                <div class="risk-card-grid">
+                    <div class="skeleton" style="height: 16px; width: 60%;"></div><div class="skeleton" style="height: 20px; width: 85%;"></div>
+                    <div class="skeleton" style="height: 16px; width: 60%;"></div><div class="skeleton" style="height: 20px; width: 85%;"></div>
+                    <div class="skeleton" style="height: 16px; width: 60%;"></div><div class="skeleton" style="height: 20px; width: 85%;"></div>
+                    <div class="skeleton" style="height: 16px; width: 60%;"></div><div class="skeleton" style="height: 20px; width: 85%;"></div>
+                </div>
+            `;
+            mobileContainer.appendChild(card);
+        }
+    }
+}
+
+// Load all assets
+async function loadAllAssets() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        const response = await fetch('/api/assets', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                allAssets = data;
+            } else if (data.data && Array.isArray(data.data)) {
+                allAssets = data.data;
+            } else {
+                allAssets = [];
+            }
+            updateAssetDropdown();
+        } else {
+            console.error('Failed to load assets');
+            allAssets = [];
+        }
+    } catch (error) {
+        console.error('Error loading assets:', error);
+        allAssets = [];
+    }
+}
+
+function updateAssetDropdown() {
+    const assetSelect = document.getElementById('assetId_create');
+    if (!assetSelect) return;
+    
+    // Clear existing options except first one
+    assetSelect.innerHTML = '<option value="">Select asset</option>';
+    
+    // Add asset options
+    allAssets.forEach(asset => {
+        const option = document.createElement('option');
+        option.value = asset._id || asset.id;
+        option.textContent = asset.name || `Asset ${asset._id}`;
+        assetSelect.appendChild(option);
+    });
+}
+
+// Load all users
+async function loadAllUsers() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/users', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            allUsers = await response.json();
+            return allUsers;
+        } else {
+            console.error('Failed to load users');
+            allUsers = [];
+            return [];
+        }
+    } catch (err) {
+        console.error('Failed to load users:', err);
+        allUsers = [];
+        return [];
+    }
+}
+
+// Load users for Risk Owner dropdown
+async function loadUsersForRiskOwner() {
+    const dropdown = document.getElementById('riskOwnerDropdown');
+    dropdown.innerHTML = '<div class="no-results">Loading users...</div>';
+
+    await loadAllUsers();
+
+    if (!allUsers.length) {
+        dropdown.innerHTML = '<div class="no-results">No users found in organization</div>';
+        return;
+    }
+
+    populateRiskOwnerDropdown('');
+}
+
+// Populate Risk Owner dropdown
+function populateRiskOwnerDropdown(searchTerm = '') {
+    const dropdown = document.getElementById('riskOwnerDropdown');
+    
+    if (!allUsers.length) {
+        dropdown.innerHTML = '<div class="no-results">No users found in organization</div>';
+        return;
+    }
+
+    let filteredUsers = allUsers;
+    
+    if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        filteredUsers = allUsers.filter(user => 
+            (user.firstName && user.firstName.toLowerCase().includes(term)) ||
+            (user.lastName && user.lastName.toLowerCase().includes(term)) ||
+            (user.email && user.email.toLowerCase().includes(term)) ||
+            (user.name && user.name.toLowerCase().includes(term))
+        );
+    }
+
+    if (filteredUsers.length === 0) {
+        dropdown.innerHTML = '<div class="no-results">No users match your search</div>';
+        return;
+    }
+
+    let dropdownHTML = '';
+    
+    filteredUsers.forEach(user => {
+        const firstName = user.firstName || (user.name ? user.name.split(' ')[0] : '');
+        const lastName = user.lastName || (user.name ? user.name.split(' ').slice(1).join(' ') : '');
+        const fullName = `${firstName} ${lastName}`.trim() || user.name || user.email || 'Unknown User';
+        const email = user.email || '';
+        const initials = (firstName[0] || '') + (lastName[0] || '') || fullName[0] || '?';
+        const userId = user.id || user._id;
+        const isSelected = selectedRiskOwner && selectedRiskOwner.id === userId;
+        
+        dropdownHTML += `
+            <div class="select-option ${isSelected ? 'selected' : ''}" 
+                 data-user-id="${userId}" 
+                 data-user-name="${fullName}"
+                 data-user-email="${email}">
+                <div class="user-avatar-small">${initials.toUpperCase()}</div>
+                <div class="user-info-dropdown-small">
+                    <div class="user-name-dropdown-small">${fullName}</div>
+                    <div class="user-email-dropdown-small">${email}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    dropdown.innerHTML = dropdownHTML;
+
+    dropdown.querySelectorAll('.select-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            
+            selectedRiskOwner = {
+                id: userId,
+                name: userName
+            };
+            
+            document.getElementById('riskOwnerSearch').value = userName;
+            document.getElementById('riskOwnerId').value = userId;
+            
+            dropdown.querySelectorAll('.select-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            
+            toggleRiskOwnerDropdown(false);
+        });
+    });
+}
+
+// Toggle Risk Owner dropdown
+function toggleRiskOwnerDropdown(show) {
+    const dropdown = document.getElementById('riskOwnerDropdown');
+    if (show) {
+        dropdown.classList.add('open');
+        if (dropdown.innerHTML.includes('Loading')) {
+            loadUsersForRiskOwner();
+        }
+    } else {
+        setTimeout(() => {
+            dropdown.classList.remove('open');
+        }, 200);
+    }
+}
+
+// Load risks
+async function loadRisks() {
+    showShimmerLoading();
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/risks', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        risks = Array.isArray(data) ? data : (data.risks || []);
+        renderRisks(risks);
+        
+    } catch (error) {
+        console.error('Error loading risks:', error);
+        showToast('Failed to load risks', 'error');
+        showEmptyState();
+    }
+}
+
+// Quick actions dropdown with auto-hide after 5 seconds
+let quickActionsTimeout = null;
+
+function clearQuickActionsTimeout() {
+    if (quickActionsTimeout) {
+        clearTimeout(quickActionsTimeout);
+        quickActionsTimeout = null;
+    }
+}
+
+function startQuickActionsAutoHide() {
+    clearQuickActionsTimeout();
+    quickActionsTimeout = setTimeout(() => {
+        if (quickActionsDropdown) {
+            quickActionsDropdown.remove();
+            quickActionsDropdown = null;
+        }
+        clearQuickActionsTimeout();
+    }, 5000); // 5 seconds
+}
+
+function showQuickActions(event, riskId, riskTitle) {
+    event.stopPropagation();
+    
+    // Remove existing dropdown and clear timeout
+    if (quickActionsDropdown) {
+        quickActionsDropdown.remove();
+        quickActionsDropdown = null;
+        clearQuickActionsTimeout();
+    }
+    
+    currentQuickActionsRisk = riskId;
+    
+    const dropdown = document.createElement('div');
+    dropdown.className = 'quick-actions-dropdown';
+    dropdown.innerHTML = `
+        <div class="quick-action-item" onclick="quickViewRisk('${riskId}')">
+            <i class="fas fa-eye"></i>
+            <span>View Details</span>
+        </div>
+        <div class="quick-action-item" onclick="quickEditRisk('${riskId}')">
+            <i class="fas fa-edit"></i>
+            <span>Edit Risk</span>
+        </div>
+        <div class="quick-action-item" onclick="quickOpenBowtie('${riskId}')">
+            <i class="fas fa-project-diagram"></i>
+            <span>Open Bowtie Diagram</span>
+        </div>
+        <div class="quick-action-divider"></div>
+        <div class="quick-action-item" onclick="quickSelectRisk('${riskId}', '${escapeHtml(riskTitle)}')">
+            <i class="fas fa-check-circle"></i>
+            <span>Select Risk</span>
+        </div>
+        <div class="quick-action-divider"></div>
+        <div class="quick-action-item" onclick="quickChangeStatus('${riskId}', 'Open')">
+            <i class="fas fa-play-circle"></i>
+            <span>Set Status: Open</span>
+        </div>
+        <div class="quick-action-item" onclick="quickChangeStatus('${riskId}', 'Pending')">
+            <i class="fas fa-hourglass-half"></i>
+            <span>Set Status: Pending</span>
+        </div>
+        <div class="quick-action-item" onclick="quickChangeStatus('${riskId}', 'Approved')">
+            <i class="fas fa-check-circle"></i>
+            <span>Set Status: Approved</span>
+        </div>
+        <div class="quick-action-item" onclick="quickChangeStatus('${riskId}', 'Rejected')">
+            <i class="fas fa-times-circle"></i>
+            <span>Set Status: Rejected</span>
+        </div>
+        <div class="quick-action-divider"></div>
+        <div class="quick-action-item danger" onclick="quickDeleteRisk('${riskId}')">
+            <i class="fas fa-trash"></i>
+            <span>Delete Risk</span>
+        </div>
+    `;
+    
+    document.body.appendChild(dropdown);
+    quickActionsDropdown = dropdown;
+    
+    // Get click position and dropdown dimensions
+    const rect = event.target.getBoundingClientRect();
+    const dropdownRect = dropdown.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    
+    // Calculate vertical position (below or above)
+    let topPos;
+    const spaceBelow = viewportHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    
+    if (spaceBelow < dropdownRect.height && spaceAbove > dropdownRect.height) {
+        topPos = rect.top - dropdownRect.height - 5;
+    } else {
+        topPos = rect.bottom + 5;
+    }
+    
+    // Calculate horizontal position (prevent off right edge)
+    let leftPos = rect.left;
+    if (leftPos + dropdownRect.width > viewportWidth) {
+        leftPos = viewportWidth - dropdownRect.width - 10;
+    }
+    if (leftPos < 10) leftPos = 10;
+    
+    dropdown.style.top = `${topPos}px`;
+    dropdown.style.left = `${leftPos}px`;
+    
+    // Start auto-hide timer
+    startQuickActionsAutoHide();
+    
+    // Hover events: clear timer on mouse enter, restart on mouse leave
+    dropdown.addEventListener('mouseenter', () => {
+        clearQuickActionsTimeout();
+    });
+    
+    dropdown.addEventListener('mouseleave', () => {
+        startQuickActionsAutoHide();
+    });
+    
+    // Close dropdown when clicking outside (also clears timer)
+    setTimeout(() => {
+        document.addEventListener('click', function closeDropdown(e) {
+            if (!dropdown.contains(e.target) && !e.target.closest('.quick-action-item') && !e.target.closest('.clickable-row')) {
+                dropdown.remove();
+                quickActionsDropdown = null;
+                clearQuickActionsTimeout();
+                document.removeEventListener('click', closeDropdown);
+            }
+        });
+    }, 0);
+}
+// Triangle arrow comparing current vs target
+function getComparisonArrow(current, target) {
+    if (!current || !target || current === '—' || target === '—') {
+        return '<span class="arrow-only" title="No data"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>';
+    }
+    const ramRank = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
+    const currentRank = ramRank[current] || 0;
+    const targetRank = ramRank[target] || 0;
+    
+    if (currentRank > targetRank) {
+        return `<span class="arrow-only" title="Current: ${current} | Target: ${target} (Worse)"><i class="fas fa-caret-up" style="color: var(--red); font-size: 20px;"></i></span>`;
+    } else if (currentRank < targetRank) {
+        return `<span class="arrow-only" title="Current: ${current} | Target: ${target} (Better)"><i class="fas fa-caret-down" style="color: var(--green); font-size: 20px;"></i></span>`;
+    }
+    return `<span class="arrow-only" title="Current: ${current} | Target: ${target} (Equal)"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>`;
+}
+
+// Triangle arrow for target columns (good/bad assessment)
+function getTargetArrow(target, riskType) {
+    if (!target || target === '—') {
+        return '<span class="arrow-only" title="No data"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>';
+    }
+    const isDownside = (riskType !== 'Upside');
+    const goodLevels = isDownside ? ['Very Low', 'Low'] : ['High', 'Very High'];
+    const badLevels = isDownside ? ['High', 'Very High'] : ['Very Low', 'Low'];
+    
+    if (goodLevels.includes(target)) {
+        return `<span class="arrow-only" title="Target: ${target} (Good)"><i class="fas fa-caret-down" style="color: var(--green); font-size: 20px;"></i></span>`;
+    } else if (badLevels.includes(target)) {
+        return `<span class="arrow-only" title="Target: ${target} (Needs improvement)"><i class="fas fa-caret-up" style="color: var(--red); font-size: 20px;"></i></span>`;
+    } else {
+        return `<span class="arrow-only" title="Target: ${target} (Moderate)"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>`;
+    }
+}
+
+// Triangle arrow for Manageability (Mgmt) – now using triangles!
+function getManageabilityArrow(manageability) {
+    if (!manageability || manageability === '—') {
+        return '<span class="arrow-only" title="No data"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>';
+    }
+    
+    if (manageability === 'Can Control') {
+        // Best: green down triangle
+        return `<span class="arrow-only" title="Can Control (Optimal)"><i class="fas fa-caret-down" style="color: var(--green); font-size: 20px;"></i></span>`;
+    } else if (manageability === 'Can Influence') {
+        // Middle: grey circle (neutral)
+        return `<span class="arrow-only" title="Can Influence (Moderate)"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>`;
+    } else if (manageability === 'Cannot Control') {
+        // Worst: red up triangle
+        return `<span class="arrow-only" title="Cannot Control (Critical)"><i class="fas fa-caret-up" style="color: var(--red); font-size: 20px;"></i></span>`;
+    }
+    return `<span class="arrow-only" title="${manageability}"><i class="fas fa-circle" style="color: var(--neutral); font-size: 8px;"></i></span>`;
+}
+
+// Get manageability icon (no visible text)
+function getManageabilityArrow(manageability) {
+    if (!manageability || manageability === '—') {
+        return '<span class="arrow-only" style="display: inline-block; width: 16px; text-align: center; font-size: 12px; color: var(--neutral);" title="No data">—</span>';
+    }
+    
+    const mgmtMap = {
+        'Can Control': { icon: 'fa-check-circle', color: 'var(--green)', tooltip: 'Can Control (Optimal)' },
+        'Can Influence': { icon: 'fa-arrow-up', color: 'var(--amber)', tooltip: 'Can Influence (Needs improvement)' },
+        'Cannot Control': { icon: 'fa-times-circle', color: 'var(--red)', tooltip: 'Cannot Control (Critical)' }
+    };
+    const mgmt = mgmtMap[manageability] || { icon: 'fa-question-circle', color: 'var(--neutral)', tooltip: manageability };
+    
+    return `<span class="arrow-only" style="display: inline-block; cursor: help;" title="${mgmt.tooltip}"><i class="fas ${mgmt.icon}" style="color: ${mgmt.color}; font-size: 12px;"></i></span>`;
+}
+// Quick action functions
+function quickSelectRisk(riskId, riskTitle) {
+    if (quickActionsDropdown) {
+        quickActionsDropdown.remove();
+        quickActionsDropdown = null;
+    }
+    setSelectedRisk(riskId, riskTitle);
+    
+    // Add visual highlight to selected row
+    document.querySelectorAll('#risksTableBody tr').forEach(row => {
+        row.classList.remove('selected');
+        if (row.getAttribute('data-risk-id') === riskId) {
+            row.classList.add('selected');
+        }
+    });
+    
+    document.querySelectorAll('#mobileRisks .risk-card').forEach(card => {
+        card.classList.remove('selected');
+        if (card.getAttribute('data-risk-id') === riskId) {
+            card.classList.add('selected');
+        }
+    });
+}
+
+function quickViewRisk(riskId) {
+    if (quickActionsDropdown) {
+        quickActionsDropdown.remove();
+        quickActionsDropdown = null;
+    }
+    viewRiskDetail(riskId);
+}
+
+function quickEditRisk(riskId) {
+    if (quickActionsDropdown) {
+        quickActionsDropdown.remove();
+        quickActionsDropdown = null;
+    }
+    editRisk(riskId);
+}
+
+function quickOpenBowtie(riskId) {
+    if (quickActionsDropdown) {
+        quickActionsDropdown.remove();
+        quickActionsDropdown = null;
+    }
+    openBowtieView(riskId);
+}
+
+async function quickChangeStatus(riskId, newStatus) {
+    if (quickActionsDropdown) {
+        quickActionsDropdown.remove();
+        quickActionsDropdown = null;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/risks/${riskId}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        if (response.ok) {
+            showToast(`Risk status updated to ${newStatus}`, 'success');
+            loadRisks();
+        } else {
+            throw new Error('Failed to update status');
+        }
+    } catch (error) {
+        console.error('Error updating status:', error);
+        showToast('Failed to update risk status', 'error');
+    }
+}
+
+async function quickDeleteRisk(riskId) {
+    if (quickActionsDropdown) {
+        quickActionsDropdown.remove();
+        quickActionsDropdown = null;
+    }
+    
+    if (confirm('Are you sure you want to delete this risk?')) {
+        await deleteRisk(riskId);
+    }
+}
+
+// Render risks
+function renderRisks(risks) {
+    const tbody = document.getElementById('risksTableBody');
+    const mobileContainer = document.getElementById('mobileRisks');
+    
+    if (!tbody || !mobileContainer) return;
+    
+    if (!risks || risks.length === 0) {
+        showEmptyState();
+        return;
+    }
+    
+    tbody.innerHTML = '';
+    mobileContainer.innerHTML = '';
+    
+    risks.forEach(risk => {
+        const riskId = risk._id || risk.id;
+        if (!riskId) {
+            console.warn('Risk missing ID:', risk);
+            return;
+        }
+        
+        const lastFourId = getLastFourDigits(risk.riskId);
+        
+        const asset = allAssets.find(a => a._id === risk.assetId || a.id === risk.assetId);
+        const assetName = asset ? asset.name : (risk.assetName || '—');
+        
+        let createdByName = '—';
+        if (risk.createdBy) {
+            const user = allUsers.find(u => u._id === risk.createdBy || u.id === risk.createdBy);
+            createdByName = user ? (user.name || user.email || '—') : risk.createdBy;
+        }
+        
+        const isSelected = selectedRiskId === riskId;
+        
+        const row = document.createElement('tr');
+        row.className = `clickable-row ${isSelected ? 'selected' : ''}`;
+        row.setAttribute('data-risk-id', riskId);
+        row.onclick = (e) => {
+            if (!e.target.closest('.icon-btn') && !e.target.closest('.quick-action-trigger')) {
+                showQuickActions(e, riskId, risk.title);
+            }
+        };
+      row.innerHTML = `
+    <td>${escapeHtml(lastFourId)}</span></td>
+    <td><span class="pill ${risk.type?.toLowerCase() === 'upside' ? 'pill-upside' : 'pill-downside'}">
+        ${escapeHtml(risk.type || 'Downside')}
+    </span></span></td>
+    <td><strong>${escapeHtml(risk.title || '—')}</strong></span></td>
+    <td>${escapeHtml(risk.description || '—')}</span></td>
+    <td>${escapeHtml(assetName)}</span></td>
+    <td><span class="pill ${getStatusClass(risk.status)}">${escapeHtml(risk.status || 'Open')}</span></span></td>
+    <td>${escapeHtml(risk.riskOwnerName || '—')}</span></td>
+    <td>${escapeHtml(risk.subProject || '—')}</span></td>
+    <td>${formatTecop(risk.functionalAreaTECOP)}</span></td>
+    <td>${formatShortDate(risk.exposureStartDate)}</span></td>
+    <td>${formatShortDate(risk.exposureEndDate)}</span></td>
+    <td>${formatShortDate(risk.nextReviewDate)}</span></td>
+    <td>${getComparisonArrow(risk.hsseRamCurrent, risk.hsseRamTarget)}</span></td>
+    <td>${getTargetArrow(risk.hsseRamTarget, risk.type)}</span></td>
+    <td>${getComparisonArrow(risk.riskVisualRamCurrent, risk.riskVisualRamTarget)}</span></td>
+    <td>${getTargetArrow(risk.riskVisualRamTarget, risk.type)}</span></td>
+  <td>${getManageabilityArrow(risk.manageability)}</span></span></td>
+      <td>${risk.thresholdChanging ? '<span class="threshold-badge threshold-changing"></span> Changing' : '<span class="threshold-badge threshold-stable"></span> Stable'}</span></td>
+    <td>${escapeHtml(createdByName)}</span></td>
+    <td>${formatShortDate(risk.createdAt)}</span></td>
+    <td>${formatShortDate(risk.updatedAt)}</span></td>
+    <td style="white-space: nowrap;">
+        <button class="icon-btn" onclick="event.stopPropagation(); setSelectedRisk('${riskId}', '${escapeHtml(risk.title)}')" title="Select Risk">
+            <i class="fas fa-check-circle"></i>
+        </button>
+        <button class="icon-btn" onclick="event.stopPropagation(); viewRiskDetail('${riskId}')" title="View">
+            <i class="fas fa-eye"></i>
+        </button>
+        <button class="icon-btn" onclick="event.stopPropagation(); openBowtieView('${riskId}')" title="Bowtie View">
+            <i class="fas fa-project-diagram"></i>
+        </button>
+        <button class="icon-btn" onclick="event.stopPropagation(); editRisk('${riskId}')" title="Edit">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button class="icon-btn danger" onclick="event.stopPropagation(); deleteRisk('${riskId}')" title="Delete">
+            <i class="fas fa-trash"></i>
+        </button>
+    </span>
+`;
+        tbody.appendChild(row);
+        
+        // Mobile card view
+        const card = document.createElement('div');
+        card.className = `risk-card ${isSelected ? 'selected' : ''}`;
+        card.setAttribute('data-risk-id', riskId);
+        card.onclick = (e) => {
+            if (!e.target.closest('.icon-btn')) {
+                showQuickActions(e, riskId, risk.title);
+            }
+        };
+        card.innerHTML = `
+            <div class="risk-card-header">
+                <div>
+                    <div class="risk-card-title" onclick="event.stopPropagation(); viewRiskDetail('${riskId}')">
+                        ${escapeHtml(lastFourId)}: ${escapeHtml(risk.title || '—')}
+                    </div>
+                    <div class="risk-card-description">
+                        <i class="fas fa-align-left"></i>
+                        ${escapeHtml(risk.description || 'No description provided')}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 4px;">
+                    <button class="icon-btn small" onclick="event.stopPropagation(); setSelectedRisk('${riskId}', '${escapeHtml(risk.title)}')" title="Select Risk">
+                        <i class="fas fa-check-circle"></i>
+                    </button>
+                    <button class="icon-btn small" onclick="event.stopPropagation(); openBowtieView('${riskId}')" title="Bowtie View">
+                        <i class="fas fa-project-diagram"></i>
+                    </button>
+                    <button class="icon-btn small" onclick="event.stopPropagation(); viewRiskDetail('${riskId}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="risk-card-grid">
+                <div class="risk-card-label">Type</div>
+                <div><span class="pill ${risk.type?.toLowerCase() === 'upside' ? 'pill-upside' : 'pill-downside'}">
+                    ${escapeHtml(risk.type || 'Downside')}
+                </span></div>
+                
+                <div class="risk-card-label">Status</div>
+                <div><span class="pill ${getStatusClass(risk.status)}">${escapeHtml(risk.status || 'Open')}</span></div>
+                
+                <div class="risk-card-label">Asset</div>
+                <div>${escapeHtml(assetName)}</div>
+                
+                <div class="risk-card-label">Owner</div>
+                <div>${escapeHtml(risk.riskOwnerName || '—')}</div>
+                
+                <div class="risk-card-label">Sub Project</div>
+                <div>${escapeHtml(risk.subProject || '—')}</div>
+                
+                <div class="risk-card-label">TECOP</div>
+                <div>${formatTecop(risk.functionalAreaTECOP)}</div>
+                
+                <div class="risk-card-label">Created By</div>
+                <div>${escapeHtml(createdByName)}</div>
+            </div>
+            
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <div style="font-weight: 600; margin-bottom: 8px; color: var(--primary);">HSSE RAM (5x5)</div>
+                <div class="risk-card-grid">
+                    <div class="risk-card-label">Current</div>
+                    <div><span class="${getRamClass(risk.hsseRamCurrent)}">${escapeHtml(risk.hsseRamCurrent || '—')}</span></div>
+                    <div class="risk-card-label">Target</div>
+                    <div><span class="${getRamClass(risk.hsseRamTarget)}">${escapeHtml(risk.hsseRamTarget || '—')}</span></div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <div style="font-weight: 600; margin-bottom: 8px; color: var(--amber);">Risk Visual RAM (3x3)</div>
+                <div class="risk-card-grid">
+                    <div class="risk-card-label">Current</div>
+                    <div><span class="${getRamClass(risk.riskVisualRamCurrent)}">${escapeHtml(risk.riskVisualRamCurrent || '—')}</span></div>
+                    <div class="risk-card-label">Target</div>
+                    <div><span class="${getRamClass(risk.riskVisualRamTarget)}">${escapeHtml(risk.riskVisualRamTarget || '—')}</span></div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button class="btn-secondary" onclick="event.stopPropagation(); viewRiskDetail('${riskId}')" style="flex: 1; padding: 8px;">
+                    <i class="fas fa-eye"></i> View
+                </button>
+                <button class="btn-primary" onclick="event.stopPropagation(); editRisk('${riskId}')" style="flex: 1; padding: 8px;">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            </div>
+        `;
+        mobileContainer.appendChild(card);
+    });
+}
+
+// Search functionality
+let searchTimeout;
+function searchRisks() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        
+        if (searchTerm === '') {
+            renderRisks(risks);
+            return;
+        }
+        
+        const filteredRisks = risks.filter(risk => {
+            return (
+                (risk.title && risk.title.toLowerCase().includes(searchTerm)) ||
+                (risk.description && risk.description.toLowerCase().includes(searchTerm)) ||
+                (risk.riskId && risk.riskId.toLowerCase().includes(searchTerm)) ||
+                (risk.riskOwnerName && risk.riskOwnerName.toLowerCase().includes(searchTerm)) ||
+                (risk.subProject && risk.subProject.toLowerCase().includes(searchTerm)) ||
+                (risk.functionalAreaTECOP && risk.functionalAreaTECOP.toLowerCase().includes(searchTerm)) ||
+                (risk.type && risk.type.toLowerCase().includes(searchTerm)) ||
+                (risk.status && risk.status.toLowerCase().includes(searchTerm))
+            );
+        });
+        
+        renderRisks(filteredRisks);
+    }, 300);
+}
+
+// RAM Calculation Functions
+function calculateHSSERAM() {
+    const impactCurrent = document.getElementById('hsseImpactCurrent_create').value;
+    const likelihoodCurrent = document.getElementById('hsseLikelihoodCurrent_create').value;
+    const impactTarget = document.getElementById('hsseImpactTarget_create').value;
+    const likelihoodTarget = document.getElementById('hsseLikelihoodTarget_create').value;
+    
+    if (impactCurrent && likelihoodCurrent) {
+        const hsseCurrent = calculate5x5RAM(impactCurrent, likelihoodCurrent);
+        document.getElementById('hsseRamCurrent_create').value = hsseCurrent;
+        
+        const overrideCheck = document.getElementById('overrideRamCheckbox');
+        if (!overrideCheck || !overrideCheck.checked) {
+            const visualCurrent = convert5x5To3x3(impactCurrent, likelihoodCurrent);
+            document.getElementById('riskVisualImpactCurrent_create').value = visualCurrent.impact;
+            document.getElementById('riskVisualLikelihoodCurrent_create').value = visualCurrent.likelihood;
+            
+            const visualRamCurrent = calculate3x3RAM(visualCurrent.impact, visualCurrent.likelihood);
+            document.getElementById('riskVisualRamCurrent_create').value = visualRamCurrent;
+        }
+    }
+    
+    if (impactTarget && likelihoodTarget) {
+        const hsseTarget = calculate5x5RAM(impactTarget, likelihoodTarget);
+        document.getElementById('hsseRamTarget_create').value = hsseTarget;
+    }
+    
+    if (impactTarget && likelihoodTarget) {
+        const visualTargetImpact = convertImpact5x5To3x3(impactTarget);
+        const visualTargetLikelihood = convertLikelihood5x5To3x3(likelihoodTarget);
+        
+        document.getElementById('riskVisualImpactTarget_create').value = visualTargetImpact;
+        document.getElementById('riskVisualLikelihoodTarget_create').value = visualTargetLikelihood;
+        
+        calculateRiskVisualRAMTarget();
+    }
+}
+
+function calculateRiskVisualRAMTarget() {
+    const impactTarget = document.getElementById('riskVisualImpactTarget_create').value;
+    const likelihoodTarget = document.getElementById('riskVisualLikelihoodTarget_create').value;
+    
+    if (impactTarget && likelihoodTarget) {
+        const visualRamTarget = calculate3x3RAM(impactTarget, likelihoodTarget);
+        document.getElementById('riskVisualRamTarget_create').value = visualRamTarget;
+    }
+}
+
+function calculate5x5RAM(impact, likelihood) {
+    const impactMap = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
+    const likelihoodMap = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
+    
+    const imp = impactMap[impact] || 0;
+    const like = likelihoodMap[likelihood] || 0;
+    const product = imp * like;
+    
+    if (product <= 4) return 'Very Low';
+    if (product <= 9) return 'Low';
+    if (product <= 16) return 'Medium';
+    if (product <= 25) return 'High';
+    return 'Very High';
+}
+
+function calculate3x3RAM(impact, likelihood) {
+    const impactMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
+    const likelihoodMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
+    
+    const imp = impactMap[impact] || 0;
+    const like = likelihoodMap[likelihood] || 0;
+    const product = imp * like;
+    
+    if (product <= 3) return 'Low';
+    if (product <= 6) return 'Medium';
+    return 'High';
+}
+
+function convert5x5To3x3(impact, likelihood) {
+    return {
+        impact: convertImpact5x5To3x3(impact),
+        likelihood: convertLikelihood5x5To3x3(likelihood)
+    };
+}
+
+function convertImpact5x5To3x3(impact) {
+    if (impact === 'Very Low' || impact === 'Low') return 'Low';
+    if (impact === 'Medium') return 'Medium';
+    if (impact === 'High' || impact === 'Very High') return 'High';
+    return '';
+}
+
+function convertLikelihood5x5To3x3(likelihood) {
+    if (likelihood === 'Very Low' || likelihood === 'Low') return 'Low';
+    if (likelihood === 'Medium') return 'Medium';
+    if (likelihood === 'High' || likelihood === 'Very High') return 'High';
+    return '';
+}
+
+function toggleRamOverride() {
+    const overrideCheck = document.getElementById('overrideRamCheckbox');
+    const impactCurrent = document.getElementById('riskVisualImpactCurrent_create');
+    const likelihoodCurrent = document.getElementById('riskVisualLikelihoodCurrent_create');
+    
+    if (overrideCheck.checked) {
+        impactCurrent.removeAttribute('disabled');
+        likelihoodCurrent.removeAttribute('disabled');
+    } else {
+        impactCurrent.setAttribute('disabled', 'disabled');
+        likelihoodCurrent.setAttribute('disabled', 'disabled');
+        calculateHSSERAM();
+    }
+}
+
+// Cause functions
+function addCause() {
+    const container = document.getElementById('causes-container');
+    const causeIndex = causeCount++;
+    
+    const causeCard = document.createElement('div');
+    causeCard.className = 'item-card';
+    causeCard.dataset.causeIndex = causeIndex;
+    causeCard.innerHTML = `
+        <div class="item-card-header">
+            <div class="item-card-title">Cause #${causeIndex + 1}</div>
+            <div class="item-card-actions">
+                <button type="button" class="btn-sm btn-danger-sm" onclick="removeCause(${causeIndex})">
+                    <i class="fas fa-trash"></i> Remove
+                </button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="required">Cause Description</label>
+            <textarea class="cause-description" placeholder="Describe the root cause" required rows="2"></textarea>
+        </div>
+    `;
+    
+    container.appendChild(causeCard);
+}
+
+function removeCause(index) {
+    const container = document.getElementById('causes-container');
+    const causeCard = container.querySelector(`[data-cause-index="${index}"]`);
+    if (causeCard && container.children.length > 1) {
+        causeCard.remove();
+        const causes = container.querySelectorAll('.item-card');
+        causes.forEach((cause, i) => {
+            cause.dataset.causeIndex = i;
+            const title = cause.querySelector('.item-card-title');
+            if (title) title.textContent = `Cause #${i + 1}`;
+        });
+        causeCount = causes.length;
+    }
+}
+
+function collectCauses() {
+    const causes = [];
+    const causeCards = document.querySelectorAll('#causes-container .item-card');
+    
+    causeCards.forEach((card) => {
+        const description = card.querySelector('.cause-description').value.trim();
+        if (description) {
+            causes.push(description);
+        }
+    });
+    
+    return causes;
+}
+
+// Consequence functions
+function addConsequence() {
+    const container = document.getElementById('consequences-container');
+    const consequenceIndex = consequenceCount++;
+    
+    const consequenceCard = document.createElement('div');
+    consequenceCard.className = 'item-card';
+    consequenceCard.dataset.consequenceIndex = consequenceIndex;
+    consequenceCard.innerHTML = `
+        <div class="item-card-header">
+            <div class="item-card-title">Consequence #${consequenceIndex + 1}</div>
+            <div class="item-card-actions">
+                <button type="button" class="btn-sm btn-danger-sm" onclick="removeConsequence(${consequenceIndex})">
+                    <i class="fas fa-trash"></i> Remove
+                </button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="required">Consequence Description</label>
+            <textarea class="consequence-description" placeholder="Describe the impact" required rows="2"></textarea>
+        </div>
+    `;
+    
+    container.appendChild(consequenceCard);
+}
+
+function removeConsequence(index) {
+    const container = document.getElementById('consequences-container');
+    const consequenceCard = container.querySelector(`[data-consequence-index="${index}"]`);
+    if (consequenceCard && container.children.length > 1) {
+        consequenceCard.remove();
+        const consequences = container.querySelectorAll('.item-card');
+        consequences.forEach((consequence, i) => {
+            consequence.dataset.consequenceIndex = i;
+            const title = consequence.querySelector('.item-card-title');
+            if (title) title.textContent = `Consequence #${i + 1}`;
+        });
+        consequenceCount = consequences.length;
+    }
+}
+
+function collectConsequences() {
+    const consequences = [];
+    const consequenceCards = document.querySelectorAll('#consequences-container .item-card');
+    
+    consequenceCards.forEach((card) => {
+        const description = card.querySelector('.consequence-description').value.trim();
+        if (description) {
+            consequences.push(description);
+        }
+    });
+    
+    return consequences;
+}
+
+// TECOP collection
+function collectTecopAreas() {
+    const tecopAreas = [];
+    const checkboxes = document.querySelectorAll('#tecopTags input[type="checkbox"]:checked');
+    checkboxes.forEach(cb => {
+        tecopAreas.push(cb.value);
+    });
+    return tecopAreas.join(', ');
+}
+
+// Subproject functions
+function showAddSubproject() {
+    document.getElementById('subprojectInput').classList.add('show');
+}
+
+function hideAddSubproject() {
+    document.getElementById('subprojectInput').classList.remove('show');
+    document.getElementById('newSubprojectName').value = '';
+}
+
+function addNewSubproject() {
+    const newName = document.getElementById('newSubprojectName').value.trim();
+    if (!newName) {
+        showToast('Please enter a sub-project name', 'error');
+        return;
+    }
+    
+    const select = document.getElementById('subProject_create');
+    const existingOptions = Array.from(select.options).map(opt => opt.value);
+    
+    if (existingOptions.includes(newName)) {
+        showToast('This sub-project already exists', 'error');
+        return;
+    }
+    
+    const option = document.createElement('option');
+    option.value = newName;
+    option.textContent = newName;
+    select.appendChild(option);
+    
+    select.value = newName;
+    customSubprojects.push(newName);
+    hideAddSubproject();
+    showToast('Sub-project added successfully', 'success');
+}
+
+// Function to populate causes and consequences from risk data
+function populateCausesAndConsequences(risk) {
+    // Clear existing causes
+    const causesContainer = document.getElementById('causes-container');
+    causesContainer.innerHTML = '';
+    
+    // Add causes
+    if (risk.causes && risk.causes.length > 0) {
+        causeCount = risk.causes.length;
+        risk.causes.forEach((cause, index) => {
+            const causeCard = document.createElement('div');
+            causeCard.className = 'item-card';
+            causeCard.dataset.causeIndex = index;
+            causeCard.innerHTML = `
+                <div class="item-card-header">
+                    <div class="item-card-title">Cause #${index + 1}</div>
+                    <div class="item-card-actions">
+                        <button type="button" class="btn-sm btn-danger-sm" onclick="removeCause(${index})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="required">Cause Description</label>
+                    <textarea class="cause-description" placeholder="Describe the root cause" required rows="2">${escapeHtml(cause)}</textarea>
+                </div>
+            `;
+            causesContainer.appendChild(causeCard);
+        });
+    } else {
+        // Add default empty cause
+        causeCount = 1;
+        causesContainer.innerHTML = `
+            <div class="item-card" data-cause-index="0">
+                <div class="item-card-header">
+                    <div class="item-card-title">Cause #1</div>
+                    <div class="item-card-actions">
+                        <button type="button" class="btn-sm btn-danger-sm" onclick="removeCause(0)">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="required">Cause Description</label>
+                    <textarea class="cause-description" placeholder="Describe the root cause" required rows="2"></textarea>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Clear existing consequences
+    const consequencesContainer = document.getElementById('consequences-container');
+    consequencesContainer.innerHTML = '';
+    
+    // Add consequences
+    if (risk.consequences && risk.consequences.length > 0) {
+        consequenceCount = risk.consequences.length;
+        risk.consequences.forEach((consequence, index) => {
+            const consequenceCard = document.createElement('div');
+            consequenceCard.className = 'item-card';
+            consequenceCard.dataset.consequenceIndex = index;
+            consequenceCard.innerHTML = `
+                <div class="item-card-header">
+                    <div class="item-card-title">Consequence #${index + 1}</div>
+                    <div class="item-card-actions">
+                        <button type="button" class="btn-sm btn-danger-sm" onclick="removeConsequence(${index})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="required">Consequence Description</label>
+                    <textarea class="consequence-description" placeholder="Describe the impact" required rows="2">${escapeHtml(consequence)}</textarea>
+                </div>
+            `;
+            consequencesContainer.appendChild(consequenceCard);
+        });
+    } else {
+        // Add default empty consequence
+        consequenceCount = 1;
+        consequencesContainer.innerHTML = `
+            <div class="item-card" data-consequence-index="0">
+                <div class="item-card-header">
+                    <div class="item-card-title">Consequence #1</div>
+                    <div class="item-card-actions">
+                        <button type="button" class="btn-sm btn-danger-sm" onclick="removeConsequence(0)">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="required">Consequence Description</label>
+                    <textarea class="consequence-description" placeholder="Describe the impact" required rows="2"></textarea>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Function to populate TECOP checkboxes
+function populateTecopCheckboxes(tecopString) {
+    // Uncheck all first
+    document.querySelectorAll('#tecopTags input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+    
+    if (tecopString) {
+        const tecopItems = tecopString.split(',').map(item => item.trim());
+        tecopItems.forEach(item => {
+            const checkbox = document.querySelector(`#tecopTags input[value="${item}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    }
+}
+
+// Import risks function
+function importRisks() {
+    document.getElementById('importFileInput').click();
+}
+
+// Replace the existing handleImportFile function with this complete implementation
+async function handleImportFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    // Show loading toast
+    showToast(`Reading ${file.name}...`, 'info');
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet);
+            
+            if (!rows || rows.length === 0) {
+                showToast('No data found in file', 'error');
+                return;
+            }
+            
+            // Map columns (case-insensitive)
+            const headers = Object.keys(rows[0]);
+            const columnMap = {
+                title: headers.find(h => h.toLowerCase().includes('title')) || 'Title',
+                description: headers.find(h => h.toLowerCase().includes('description')) || 'Description',
+                type: headers.find(h => h.toLowerCase().includes('type')) || 'Type',
+                riskOwnerName: headers.find(h => h.toLowerCase().includes('risk owner')) || 'Risk Owner',
+                status: headers.find(h => h.toLowerCase().includes('status')) || 'Status',
+                subProject: headers.find(h => h.toLowerCase().includes('sub project')) || 'Sub Project',
+                functionalAreaTECOP: headers.find(h => h.toLowerCase().includes('tecop')) || 'TECOP',
+                event: headers.find(h => h.toLowerCase().includes('event')) || 'Event',
+                causes: headers.find(h => h.toLowerCase().includes('cause')) || 'Causes',
+                consequences: headers.find(h => h.toLowerCase().includes('consequence')) || 'Consequences',
+                exposureStartDate: headers.find(h => h.toLowerCase().includes('exp start')) || 'Exp Start',
+                exposureEndDate: headers.find(h => h.toLowerCase().includes('exp end')) || 'Exp End',
+                nextReviewDate: headers.find(h => h.toLowerCase().includes('next review')) || 'Next Review',
+                hsseRamCurrent: headers.find(h => h.toLowerCase().includes('hsse ram c')) || 'HSSE RAM C',
+                hsseRamTarget: headers.find(h => h.toLowerCase().includes('hsse ram t')) || 'HSSE RAM T',
+                riskVisualRamCurrent: headers.find(h => h.toLowerCase().includes('vis ram c')) || 'Vis RAM C',
+                riskVisualRamTarget: headers.find(h => h.toLowerCase().includes('vis ram t')) || 'Vis RAM T',
+                manageability: headers.find(h => h.toLowerCase().includes('mgmt')) || 'Mgmt',
+                thresholdChanging: headers.find(h => h.toLowerCase().includes('thresh')) || 'Thresh',
+                assetName: headers.find(h => h.toLowerCase().includes('asset')) || 'Asset'
+            };
+            
+            // Build asset name -> ID map
+            const assetMap = new Map();
+            allAssets.forEach(asset => {
+                assetMap.set((asset.name || '').toLowerCase(), asset._id || asset.id);
+            });
+            
+            // Prepare risks for import
+            const risksToCreate = [];
+            const errors = [];
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const assetNameValue = row[columnMap.assetName] || '';
+                const assetId = assetMap.get(assetNameValue.toLowerCase());
+                
+                if (!assetId && assetNameValue) {
+                    errors.push(`Row ${i+1}: Asset "${assetNameValue}" not found`);
+                    continue;
+                }
+                
+                // Parse causes and consequences (support semicolon or comma separated)
+                const causesStr = row[columnMap.causes] || '';
+                const consequencesStr = row[columnMap.consequences] || '';
+                
+                const causes = causesStr ? causesStr.split(/[;,]/).map(c => c.trim()).filter(c => c) : [];
+                const consequences = consequencesStr ? consequencesStr.split(/[;,]/).map(c => c.trim()).filter(c => c) : [];
+                
+                // Parse dates
+                const parseDate = (val) => {
+                    if (!val) return null;
+                    // Try to parse Excel serial number or string
+                    if (typeof val === 'number') {
+                        const date = XLSX.SSF.parse_date_code(val);
+                        if (date) {
+                            return `${date.y}-${String(date.m).padStart(2,'0')}-${String(date.d).padStart(2,'0')}`;
+                        }
+                    }
+                    const d = new Date(val);
+                    if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+                    return null;
+                };
+                
+                // Determine threshold changing (boolean)
+                const thresholdVal = row[columnMap.thresholdChanging] || '';
+                const thresholdChanging = typeof thresholdVal === 'string' 
+                    ? thresholdVal.toLowerCase().includes('changing') 
+                    : Boolean(thresholdVal);
+                
+                const riskData = {
+                    title: row[columnMap.title] || '',
+                    description: row[columnMap.description] || '',
+                    type: row[columnMap.type] || 'Downside',
+                    riskOwnerName: row[columnMap.riskOwnerName] || 'Unassigned',
+                    status: row[columnMap.status] || 'pending',
+                    subProject: row[columnMap.subProject] || '',
+                    functionalAreaTECOP: row[columnMap.functionalAreaTECOP] || '',
+                    event: row[columnMap.event] || '',
+                    causes: causes,
+                    consequences: consequences,
+                    exposureStartDate: parseDate(row[columnMap.exposureStartDate]),
+                    exposureEndDate: parseDate(row[columnMap.exposureEndDate]),
+                    nextReviewDate: parseDate(row[columnMap.nextReviewDate]),
+                    hsseRamCurrent: row[columnMap.hsseRamCurrent] || '',
+                    hsseRamTarget: row[columnMap.hsseRamTarget] || '',
+                    riskVisualRamCurrent: row[columnMap.riskVisualRamCurrent] || '',
+                    riskVisualRamTarget: row[columnMap.riskVisualRamTarget] || '',
+                    manageability: row[columnMap.manageability] || '',
+                    thresholdChanging: thresholdChanging,
+                    assetId: assetId || (allAssets.length > 0 ? allAssets[0]._id : null),
+                    linkedAssets: assetId ? [assetId] : []
+                };
+                
+                // Basic validation
+                if (!riskData.title) {
+                    errors.push(`Row ${i+1}: Title is required`);
+                    continue;
+                }
+                if (!riskData.assetId) {
+                    errors.push(`Row ${i+1}: Valid Asset is required`);
+                    continue;
+                }
+                
+                risksToCreate.push(riskData);
+            }
+            
+            if (errors.length > 0) {
+                showToast(`Found ${errors.length} errors. First error: ${errors[0]}`, 'error');
+                console.error('Import errors:', errors);
+                if (confirm(`Found ${errors.length} validation errors. Continue with valid rows?`)) {
+                    // Continue with valid risks only
+                } else {
+                    input.value = '';
+                    return;
+                }
+            }
+            
+            if (risksToCreate.length === 0) {
+                showToast('No valid risks to import', 'error');
+                input.value = '';
+                return;
+            }
+            
+            // Show progress
+            showToast(`Importing ${risksToCreate.length} risks...`, 'info');
+            
+            const token = localStorage.getItem('token');
+            let successCount = 0;
+            let failCount = 0;
+            const failDetails = [];
+            
+            // Import sequentially to avoid overwhelming server
+            for (let i = 0; i < risksToCreate.length; i++) {
+                const risk = risksToCreate[i];
+                try {
+                    const response = await fetch('/api/risks', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(risk)
+                    });
+                    
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                        const errorText = await response.text();
+                        failDetails.push(`Risk ${i+1}: ${errorText}`);
+                    }
+                } catch (err) {
+                    failCount++;
+                    failDetails.push(`Risk ${i+1}: ${err.message}`);
+                }
+                
+                // Update progress every 5 risks
+                if ((i + 1) % 5 === 0 || i === risksToCreate.length - 1) {
+                    showToast(`Imported ${successCount}/${risksToCreate.length} risks...`, 'info');
+                }
+            }
+            
+            // Final summary
+            if (failCount === 0) {
+                showToast(`Successfully imported ${successCount} risks!`, 'success');
+            } else {
+                showToast(`Imported ${successCount} risks, ${failCount} failed. Check console for details.`, 'warning');
+                console.error('Import failures:', failDetails);
+            }
+            
+            // Refresh the risk list
+            loadRisks();
+            
+        } catch (error) {
+            console.error('Import error:', error);
+            showToast('Failed to parse file: ' + error.message, 'error');
+        } finally {
+            input.value = '';
+        }
+    };
+    
+    reader.readAsArrayBuffer(file);
+}
+// Get triangle arrow comparing current vs target
+function getComparisonArrow(current, target) {
+    if (!current || !target || current === '—' || target === '—') {
+        return '<span class="arrow-only" title="No data">—</span>';
+    }
+    const ramRank = { 'Very Low': 1, 'Low': 2, 'Medium': 3, 'High': 4, 'Very High': 5 };
+    const currentRank = ramRank[current] || 0;
+    const targetRank = ramRank[target] || 0;
+    
+    if (currentRank > targetRank) {
+        return `<span class="arrow-only" title="Current: ${current} | Target: ${target} (Worse)"><i class="fas fa-caret-up" style="color: var(--red); font-size: 14px;"></i></span>`;
+    } else if (currentRank < targetRank) {
+        return `<span class="arrow-only" title="Current: ${current} | Target: ${target} (Better)"><i class="fas fa-caret-down" style="color: var(--green); font-size: 14px;"></i></span>`;
+    }
+    return `<span class="arrow-only" title="Current: ${current} | Target: ${target} (Equal)">—</span>`;
+}
+
+// Get triangle arrow for target columns (based on risk type and target level)
+function getTargetArrow(target, riskType) {
+    if (!target || target === '—') {
+        return '<span class="arrow-only" title="No data">—</span>';
+    }
+    const isDownside = (riskType !== 'Upside');
+    const goodLevels = isDownside ? ['Very Low', 'Low'] : ['High', 'Very High'];
+    const badLevels = isDownside ? ['High', 'Very High'] : ['Very Low', 'Low'];
+    
+    if (goodLevels.includes(target)) {
+        return `<span class="arrow-only" title="Target: ${target} (Good)"><i class="fas fa-caret-down" style="color: var(--green); font-size: 14px;"></i></span>`;
+    } else if (badLevels.includes(target)) {
+        return `<span class="arrow-only" title="Target: ${target} (Needs improvement)"><i class="fas fa-caret-up" style="color: var(--red); font-size: 14px;"></i></span>`;
+    } else {
+        return `<span class="arrow-only" title="Target: ${target} (Moderate)">—</span>`;
+    }
+}
+
+// Manageability icons (keep as is, not triangles)
+function getManageabilityArrow(manageability) {
+    if (!manageability || manageability === '—') {
+        return '<span class="arrow-only" title="No data">—</span>';
+    }
+    const mgmtMap = {
+        'Can Control': { icon: 'fa-check-circle', color: 'var(--green)', tooltip: 'Can Control (Optimal)' },
+        'Can Influence': { icon: 'fa-arrow-up', color: 'var(--amber)', tooltip: 'Can Influence (Needs improvement)' },
+        'Cannot Control': { icon: 'fa-times-circle', color: 'var(--red)', tooltip: 'Cannot Control (Critical)' }
+    };
+    const mgmt = mgmtMap[manageability] || { icon: 'fa-question-circle', color: 'var(--neutral)', tooltip: manageability };
+    return `<span class="arrow-only" title="${mgmt.tooltip}"><i class="fas ${mgmt.icon}" style="color: ${mgmt.color}; font-size: 12px;"></i></span>`;
+}
+// Export all risks to Excel using SheetJS
+async function exportRisksToExcel() {
+    try {
+        if (!risks || risks.length === 0) {
+            showToast('No risks to export', 'warning');
+            return;
+        }
+
+        // Prepare data rows
+        const rows = [];
+        
+        // Header row (exactly as in the table)
+        const headers = [
+            'Risk ID', 'Type', 'Title', 'Description', 'Asset', 'Status',
+            'Risk Owner', 'Sub Project', 'TECOP', 'Exp Start', 'Exp End',
+            'Next Review', 'HSSE RAM C', 'HSSE RAM T', 'Vis RAM C',
+            'Vis RAM T', 'Mgmt', 'Thresh', 'Created By', 'Created', 'Updated'
+        ];
+        rows.push(headers);
+
+        // Helper to get asset name
+        const getAssetName = (assetId) => {
+            if (!assetId) return '—';
+            const asset = allAssets.find(a => a._id === assetId || a.id === assetId);
+            return asset ? (asset.name || '—') : '—';
+        };
+
+        // Helper to get created by name
+        const getCreatedByName = (createdBy) => {
+            if (!createdBy) return '—';
+            const user = allUsers.find(u => u._id === createdBy || u.id === createdBy);
+            return user ? (user.name || user.email || '—') : createdBy;
+        };
+
+        // Process each risk
+        for (const risk of risks) {
+            const assetName = getAssetName(risk.assetId);
+            const createdByName = getCreatedByName(risk.createdBy);
+            
+            // Format TECOP as plain text (join array or string)
+            let tecopText = risk.functionalAreaTECOP || '—';
+            if (Array.isArray(tecopText)) tecopText = tecopText.join(', ');
+            
+            // Threshold display
+            const thresholdText = risk.thresholdChanging ? 'Changing' : 'Stable';
+
+            rows.push([
+                risk.riskId || '—',
+                risk.type || 'Downside',
+                risk.title || '—',
+                risk.description || '—',
+                assetName,
+                risk.status || 'Open',
+                risk.riskOwnerName || '—',
+                risk.subProject || '—',
+                tecopText,
+                formatShortDate(risk.exposureStartDate),
+                formatShortDate(risk.exposureEndDate),
+                formatShortDate(risk.nextReviewDate),
+                risk.hsseRamCurrent || '—',
+                risk.hsseRamTarget || '—',
+                risk.riskVisualRamCurrent || '—',
+                risk.riskVisualRamTarget || '—',
+                risk.manageability || '—',
+                thresholdText,
+                createdByName,
+                formatShortDate(risk.createdAt),
+                formatShortDate(risk.updatedAt)
+            ]);
+        }
+
+        // Create worksheet and workbook
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'All Risks');
+        
+        // Auto-size columns (basic approach: set column widths)
+        const colWidths = headers.map(() => ({ wch: 15 }));
+        ws['!cols'] = colWidths;
+
+        // Generate Excel file and trigger download
+        XLSX.writeFile(wb, `risk_register_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+        
+        showToast(`Exported ${risks.length} risks successfully`, 'success');
+    } catch (error) {
+        console.error('Export failed:', error);
+        showToast('Failed to export risks', 'error');
+    }
+}
+// Edit risk function
+async function editRisk(riskId) {
+    if (!riskId) {
+        showToast('Cannot edit risk: Invalid ID', 'error');
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/risks/${riskId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const risk = await response.json();
+        
+        // Set edit mode
+        isEditMode = true;
+        currentEditRiskId = risk._id || risk.id;
+        
+        // Update modal UI for edit mode
+        document.getElementById('modalTitle').textContent = 'Edit Risk';
+        document.getElementById('modalIcon').className = 'fas fa-edit';
+        document.getElementById('submitButtonText').textContent = 'Update Risk';
+        
+        // Populate form with risk data
+        document.getElementById('riskId').value = risk._id || risk.id;
+        document.getElementById('riskTitle_create').value = risk.title || '';
+        document.getElementById('description_create').value = risk.description || '';
+        document.getElementById('riskType_create').value = risk.type || '';
+        document.getElementById('riskCategory_create').value = risk.riskCategory || '';
+        
+        // Set asset
+        if (risk.assetId) {
+            document.getElementById('assetId_create').value = risk.assetId;
+        }
+        
+        // Set subproject
+        if (risk.subProject) {
+            document.getElementById('subProject_create').value = risk.subProject;
+        }
+        
+        // Set risk owner
+        if (risk.riskOwnerName) {
+            document.getElementById('riskOwnerSearch').value = risk.riskOwnerName;
+            const user = allUsers.find(u => u.name === risk.riskOwnerName || u.email === risk.riskOwnerName);
+            if (user) {
+                document.getElementById('riskOwnerId').value = user._id || user.id;
+                selectedRiskOwner = { id: user._id || user.id, name: risk.riskOwnerName };
+            }
+        }
+        
+        // Set TECOP checkboxes
+        if (risk.functionalAreaTECOP) {
+            populateTecopCheckboxes(risk.functionalAreaTECOP);
+        }
+        
+        // Set event
+        document.getElementById('event_create').value = risk.event || '';
+        
+        // Set dates
+        if (risk.exposureStartDate) {
+            const date = new Date(risk.exposureStartDate);
+            document.getElementById('exposureStart_create').value = date.toISOString().split('T')[0];
+        }
+        if (risk.exposureEndDate) {
+            const date = new Date(risk.exposureEndDate);
+            document.getElementById('exposureEnd_create').value = date.toISOString().split('T')[0];
+        }
+        if (risk.nextReviewDate) {
+            const date = new Date(risk.nextReviewDate);
+            document.getElementById('nextReviewDate_create').value = date.toISOString().split('T')[0];
+        }
+        
+        // Set causes and consequences
+        populateCausesAndConsequences(risk);
+        
+        // Set RAM fields
+        document.getElementById('hsseImpactCurrent_create').value = risk.hsseImpactCurrent || '';
+        document.getElementById('hsseLikelihoodCurrent_create').value = risk.hsseLikelihoodCurrent || '';
+        document.getElementById('hsseImpactTarget_create').value = risk.hsseImpactTarget || '';
+        document.getElementById('hsseLikelihoodTarget_create').value = risk.hsseLikelihoodTarget || '';
+        document.getElementById('hsseRamCurrent_create').value = risk.hsseRamCurrent || '';
+        document.getElementById('hsseRamTarget_create').value = risk.hsseRamTarget || '';
+        document.getElementById('riskVisualImpactCurrent_create').value = risk.riskVisualImpactCurrent || '';
+        document.getElementById('riskVisualLikelihoodCurrent_create').value = risk.riskVisualLikelihoodCurrent || '';
+        document.getElementById('riskVisualImpactTarget_create').value = risk.riskVisualImpactTarget || '';
+        document.getElementById('riskVisualLikelihoodTarget_create').value = risk.riskVisualLikelihoodTarget || '';
+        document.getElementById('riskVisualRamCurrent_create').value = risk.riskVisualRamCurrent || '';
+        document.getElementById('riskVisualRamTarget_create').value = risk.riskVisualRamTarget || '';
+        
+        // Set other fields
+        document.getElementById('manageability_create').value = risk.manageability || '';
+        document.getElementById('thresholdChanging_create').value = risk.thresholdChanging ? 'true' : 'false';
+        document.getElementById('impact_create').value = risk.impact || '';
+        
+        // Open modal
+        document.getElementById('createRiskModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        
+    } catch (error) {
+        console.error('Error fetching risk for edit:', error);
+        showToast('Failed to load risk for editing', 'error');
+    }
+}
+
+// Submit risk form (create or update)
+async function submitRiskForm() {
+    if (isEditMode) {
+        await updateRisk();
+    } else {
+        await createNewRisk();
+    }
+}
+
+// Update risk function
+async function updateRisk() {
+    const form = document.getElementById('createRiskForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    if (!document.getElementById('riskOwnerId').value) {
+        showToast('Please select a risk owner', 'error');
+        return;
+    }
+
+    const assetId = document.getElementById('assetId_create').value;
+    if (!assetId) {
+        showToast('Please select an asset', 'error');
+        return;
+    }
+
+    const riskOwnerName = document.getElementById('riskOwnerSearch').value;
+    const event = document.getElementById('event_create').value.trim();
+    if (!event) {
+        showToast('Risk event is required', 'error');
+        return;
+    }
+
+    const causes = collectCauses();
+    const consequences = collectConsequences();
+
+    if (causes.length === 0) {
+        showToast('At least one cause is required', 'error');
+        return;
+    }
+
+    if (consequences.length === 0) {
+        showToast('At least one consequence is required', 'error');
+        return;
+    }
+
+    const functionalAreaTECOP = collectTecopAreas();
+
+    const submitBtn = document.querySelector('.modal-footer .btn-success');
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    const riskData = {
+        title: document.getElementById('riskTitle_create').value.trim(),
+        description: document.getElementById('description_create').value.trim(),
+        type: document.getElementById('riskType_create').value,
+        riskOwnerName: riskOwnerName,
+        status: 'pending',
+        subProject: document.getElementById('subProject_create').value || '',
+        
+        causes: causes,
+        consequences: consequences,
+        event: event,
+        
+        exposureStartDate: document.getElementById('exposureStart_create').value || null,
+        exposureEndDate: document.getElementById('exposureEnd_create').value || null,
+        nextReviewDate: document.getElementById('nextReviewDate_create').value || null,
+        
+        projectRamCurrent: document.getElementById('hsseRamCurrent_create').value || '',
+        projectRamTarget: document.getElementById('hsseRamTarget_create').value || '',
+        riskVisualRamCurrent: document.getElementById('riskVisualRamCurrent_create').value || '',
+        riskVisualRamTarget: document.getElementById('riskVisualRamTarget_create').value || '',
+        hsseRamCurrent: document.getElementById('hsseRamCurrent_create').value || '',
+        hsseRamTarget: document.getElementById('hsseRamTarget_create').value || '',
+        
+        manageability: document.getElementById('manageability_create').value || '',
+        functionalAreaTECOP: functionalAreaTECOP,
+        thresholdChanging: document.getElementById('thresholdChanging_create').value === 'true',
+        occurrenceLevel: '',
+        linkedAssets: [assetId],
+        assetId: assetId
+    };
+
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Please login to update risk', 'error');
+            return;
+        }
+
+        const response = await fetch(`/api/risks/${currentEditRiskId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(riskData)
+        });
+
+        let responseData;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            responseData = await response.json();
+        } else {
+            const textResponse = await response.text();
+            console.error('Non-JSON response:', textResponse);
+            throw new Error(`Server returned ${response.status}`);
+        }
+
+        if (!response.ok) {
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            if (responseData && responseData.error) {
+                errorMessage = responseData.error;
+            } else if (responseData && responseData.message) {
+                errorMessage = responseData.message;
+            }
+            throw new Error(errorMessage);
+        }
+
+        console.log('Risk updated successfully:', responseData);
+        
+        closeCreateRiskModal();
+        showToast('Risk updated successfully!', 'success');
+        loadRisks();
+        
+    } catch (error) {
+        console.error('Error updating risk:', error);
+        showToast(`Failed to update risk: ${error.message}`, 'error');
+    } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
+}
+
+// Create new risk function
+async function createNewRisk() {
+    const form = document.getElementById('createRiskForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    if (!document.getElementById('riskOwnerId').value) {
+        showToast('Please select a risk owner', 'error');
+        return;
+    }
+
+    const assetId = document.getElementById('assetId_create').value;
+    if (!assetId) {
+        showToast('Please select an asset', 'error');
+        return;
+    }
+
+    const riskOwnerName = document.getElementById('riskOwnerSearch').value;
+    const event = document.getElementById('event_create').value.trim();
+    if (!event) {
+        showToast('Risk event is required', 'error');
+        return;
+    }
+
+    const causes = collectCauses();
+    const consequences = collectConsequences();
+
+    if (causes.length === 0) {
+        showToast('At least one cause is required', 'error');
+        return;
+    }
+
+    if (consequences.length === 0) {
+        showToast('At least one consequence is required', 'error');
+        return;
+    }
+
+    const functionalAreaTECOP = collectTecopAreas();
+
+    const submitBtn = document.querySelector('.modal-footer .btn-success');
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    const riskData = {
+        title: document.getElementById('riskTitle_create').value.trim(),
+        description: document.getElementById('description_create').value.trim(),
+        type: document.getElementById('riskType_create').value,
+        riskOwnerName: riskOwnerName,
+        status: 'pending',
+        subProject: document.getElementById('subProject_create').value || '',
+        
+        causes: causes,
+        consequences: consequences,
+        event: event,
+        
+        exposureStartDate: document.getElementById('exposureStart_create').value || null,
+        exposureEndDate: document.getElementById('exposureEnd_create').value || null,
+        nextReviewDate: document.getElementById('nextReviewDate_create').value || null,
+        
+        projectRamCurrent: document.getElementById('hsseRamCurrent_create').value || '',
+        projectRamTarget: document.getElementById('hsseRamTarget_create').value || '',
+        riskVisualRamCurrent: document.getElementById('riskVisualRamCurrent_create').value || '',
+        riskVisualRamTarget: document.getElementById('riskVisualRamTarget_create').value || '',
+        hsseRamCurrent: document.getElementById('hsseRamCurrent_create').value || '',
+        hsseRamTarget: document.getElementById('hsseRamTarget_create').value || '',
+        
+        manageability: document.getElementById('manageability_create').value || '',
+        functionalAreaTECOP: functionalAreaTECOP,
+        thresholdChanging: document.getElementById('thresholdChanging_create').value === 'true',
+        occurrenceLevel: '',
+        linkedAssets: [assetId],
+        assetId: assetId
+    };
+
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Please login to create a risk', 'error');
+            return;
+        }
+
+        const response = await fetch('/api/risks', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(riskData)
+        });
+
+        let responseData;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            responseData = await response.json();
+        } else {
+            const textResponse = await response.text();
+            console.error('Non-JSON response:', textResponse);
+            throw new Error(`Server returned ${response.status}`);
+        }
+
+        if (!response.ok) {
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            if (responseData && responseData.error) {
+                errorMessage = responseData.error;
+            } else if (responseData && responseData.message) {
+                errorMessage = responseData.message;
+            }
+            throw new Error(errorMessage);
+        }
+
+        console.log('Risk created successfully:', responseData);
+        
+        closeCreateRiskModal();
+        showToast('Risk created successfully!', 'success');
+        loadRisks();
+        
+    } catch (error) {
+        console.error('Error creating risk:', error);
+        showToast(`Failed to create risk: ${error.message}`, 'error');
+    } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
+}
+
+// Modal functions
+function openCreateRiskModal() {
+    isEditMode = false;
+    currentEditRiskId = null;
+    
+    document.getElementById('modalTitle').textContent = 'Create New Risk';
+    document.getElementById('modalIcon').className = 'fas fa-plus-circle';
+    document.getElementById('submitButtonText').textContent = 'Create Risk';
+    document.getElementById('riskId').value = '';
+    
+    document.getElementById('createRiskModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    
+    document.getElementById('createRiskForm').reset();
+    
+    document.getElementById('riskOwnerSearch').value = '';
+    document.getElementById('riskOwnerId').value = '';
+    selectedRiskOwner = null;
+    
+    document.querySelectorAll('#tecopTags input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+    
+    hideAddSubproject();
+    
+    document.getElementById('causes-container').innerHTML = `
+        <div class="item-card" data-cause-index="0">
+            <div class="item-card-header">
+                <div class="item-card-title">Cause #1</div>
+                <div class="item-card-actions">
+                    <button type="button" class="btn-sm btn-danger-sm" onclick="removeCause(0)">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="required">Cause Description</label>
+                <textarea class="cause-description" placeholder="Describe the root cause" required rows="2"></textarea>
+            </div>
+        </div>`;
+    
+    document.getElementById('consequences-container').innerHTML = `
+        <div class="item-card" data-consequence-index="0">
+            <div class="item-card-header">
+                <div class="item-card-title">Consequence #1</div>
+                <div class="item-card-actions">
+                    <button type="button" class="btn-sm btn-danger-sm" onclick="removeConsequence(0)">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="required">Consequence Description</label>
+                <textarea class="consequence-description" placeholder="Describe the impact" required rows="2"></textarea>
+            </div>
+        </div>`;
+    
+    causeCount = 1;
+    consequenceCount = 1;
+    
+    const today = new Date().toISOString().split('T')[0];
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const nextMonthStr = nextMonth.toISOString().split('T')[0];
+    
+    document.getElementById('exposureStart_create').value = today;
+    document.getElementById('exposureEnd_create').value = nextMonthStr;
+    document.getElementById('nextReviewDate_create').value = nextMonthStr;
+    
+    document.getElementById('hsseImpactCurrent_create').value = '';
+    document.getElementById('hsseLikelihoodCurrent_create').value = '';
+    document.getElementById('hsseImpactTarget_create').value = '';
+    document.getElementById('hsseLikelihoodTarget_create').value = '';
+    document.getElementById('hsseRamCurrent_create').value = '';
+    document.getElementById('hsseRamTarget_create').value = '';
+    document.getElementById('riskVisualImpactCurrent_create').value = '';
+    document.getElementById('riskVisualLikelihoodCurrent_create').value = '';
+    document.getElementById('riskVisualImpactTarget_create').value = '';
+    document.getElementById('riskVisualLikelihoodTarget_create').value = '';
+    document.getElementById('riskVisualRamCurrent_create').value = '';
+    document.getElementById('riskVisualRamTarget_create').value = '';
+    document.getElementById('overrideRamCheckbox').checked = false;
+    document.getElementById('riskVisualImpactCurrent_create').setAttribute('disabled', 'disabled');
+    document.getElementById('riskVisualLikelihoodCurrent_create').setAttribute('disabled', 'disabled');
+    
+    document.getElementById('impact_create').value = '';
+    
+    if (allAssets.length === 0) {
+        loadAllAssets();
+    }
+    
+    loadAllUsers().then(() => {
+        loadUsersForRiskOwner();
+    });
+    
+    setTimeout(() => {
+        const titleInput = document.getElementById('riskTitle_create');
+        if (titleInput) titleInput.focus();
+    }, 100);
+}
+
+function closeCreateRiskModal() {
+    document.getElementById('createRiskModal').classList.remove('open');
+    document.body.style.overflow = 'auto';
+}
+
+// Replace the viewRiskDetail function
+async function viewRiskDetail(riskId) {
+    if (!riskId) {
+        showToast('Cannot view risk: Invalid ID', 'error');
+        return;
+    }
+    
+    // Instead of opening new tab, set the selected risk and switch to Risk Details tab
+    const risk = risks.find(r => (r._id || r.id) === riskId);
+    if (risk) {
+        setSelectedRisk(riskId, risk.title);
+        // Switch to risk-details-content tab
+        switchTab('risk-details-content');
+    } else {
+        // Fallback: try to fetch risk
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/risks/${riskId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const riskData = await response.json();
+                setSelectedRisk(riskId, riskData.title);
+                switchTab('risk-details-content');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Failed to load risk details', 'error');
+        }
+    }
+}
+
+// Replace the openBowtieView function
+function openBowtieView(riskId) {
+    if (!riskId) {
+        showToast('Cannot open diagram: Invalid risk ID', 'error');
+        return;
+    }
+    
+    // Instead of opening new tab, set the selected risk and switch to Bowtie tab
+    const risk = risks.find(r => (r._id || r.id) === riskId);
+    if (risk) {
+        setSelectedRisk(riskId, risk.title);
+        switchTab('bowtie-content');
+    } else {
+        setSelectedRisk(riskId, 'Risk');
+        switchTab('bowtie-content');
+    }
+}
+// Delete risk
+async function deleteRisk(riskId) {
+    if (!riskId) {
+        showToast('Cannot delete risk: Invalid ID', 'error');
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this risk? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/risks/${riskId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // If the deleted risk was selected, clear selection
+        if (selectedRiskId === riskId) {
+            clearSelectedRisk();
+        }
+
+        showToast('Risk deleted successfully', 'success');
+        loadRisks();
+        
+    } catch (error) {
+        console.error('Error deleting risk:', error);
+        showToast('Failed to delete risk', 'error');
+    }
+}
+
+// Refresh all data
+function refreshRisks() {
+    showShimmerLoading();
+    Promise.all([loadAllAssets(), loadAllUsers()]).then(() => {
+        loadRisks();
+    });
+    showToast('Refreshing data...', 'success');
+}
+
+// Bowtie view
+function openBowtieView(riskId) {
+    if (!riskId) {
+        console.error('Cannot open bowtie view: No risk ID provided');
+        showToast('Cannot open diagram: Invalid risk ID', 'error');
+        return;
+    }
+    
+    const id = String(riskId).trim();
+    
+    if (!id || id === '' || id === 'undefined' || id === 'null') {
+        console.error('Cannot open bowtie view: Invalid risk ID:', riskId);
+        showToast('Cannot open diagram: Invalid risk ID', 'error');
+        return;
+    }
+    
+    console.log('Opening bowtie view for risk ID:', id);
+    window.open(`Bowtie.html?riskId=${encodeURIComponent(id)}`, '_blank');
+}
+
+// Toast notification
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} toast-icon"></i>
+        <div class="toast-message">${message}</div>
+    `;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Super Admin risks page loaded');
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login.html';
+        return;
+    }
+    
+    showShimmerLoading();
+    
+    Promise.all([loadAllAssets(), loadAllUsers()]).then(() => {
+        loadRisks();
+    });
+    
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', searchRisks);
+    }
+    
+    document.getElementById('createRiskModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCreateRiskModal();
+        }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeCreateRiskModal();
+            closeRiskVisual();
+        }
+    });
+    
+    const riskOwnerSearch = document.getElementById('riskOwnerSearch');
+    const riskOwnerDropdown = document.getElementById('riskOwnerDropdown');
+    
+    if (riskOwnerSearch) {
+        riskOwnerSearch.addEventListener('focus', () => {
+            toggleRiskOwnerDropdown(true);
+        });
+
+        riskOwnerSearch.addEventListener('input', (e) => {
+            populateRiskOwnerDropdown(e.target.value);
+            toggleRiskOwnerDropdown(true);
+        });
+    }
+
+    // Global click handler to close dropdowns
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select')) {
+            toggleRiskOwnerDropdown(false);
+        }
+        if (quickActionsDropdown && !e.target.closest('.quick-actions-dropdown') && !e.target.closest('.clickable-row')) {
+            quickActionsDropdown.remove();
+            quickActionsDropdown = null;
+        }
+    });
+
+    if (riskOwnerSearch) {
+        riskOwnerSearch.addEventListener('keydown', (e) => {
+            const dropdown = document.getElementById('riskOwnerDropdown');
+            const options = dropdown.querySelectorAll('.select-option');
+            
+            if (!dropdown.classList.contains('open')) return;
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const current = dropdown.querySelector('.select-option.highlighted') || options[0];
+                const next = current.nextElementSibling || options[0];
+                
+                options.forEach(opt => opt.classList.remove('highlighted'));
+                next.classList.add('highlighted');
+                next.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const current = dropdown.querySelector('.select-option.highlighted') || options[options.length - 1];
+                const prev = current.previousElementSibling || options[options.length - 1];
+                
+                options.forEach(opt => opt.classList.remove('highlighted'));
+                prev.classList.add('highlighted');
+                prev.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const highlighted = dropdown.querySelector('.select-option.highlighted');
+                if (highlighted) {
+                    highlighted.click();
+                }
+            } else if (e.key === 'Escape') {
+                toggleRiskOwnerDropdown(false);
+            }
+        });
+    }
+    
+    const visualImpactCurrent = document.getElementById('riskVisualImpactCurrent_create');
+    const visualLikelihoodCurrent = document.getElementById('riskVisualLikelihoodCurrent_create');
+    if (visualImpactCurrent && visualLikelihoodCurrent) {
+        visualImpactCurrent.setAttribute('disabled', 'disabled');
+        visualLikelihoodCurrent.setAttribute('disabled', 'disabled');
+    }
+});
+
+// Make functions globally available
+window.exportRisksToExcel = exportRisksToExcel;
+window.openCreateRiskModal = openCreateRiskModal;
+window.closeCreateRiskModal = closeCreateRiskModal;
+window.createNewRisk = createNewRisk;
+window.updateRisk = updateRisk;
+window.submitRiskForm = submitRiskForm;
+window.editRisk = editRisk;
+window.viewRiskDetail = viewRiskDetail;
+window.deleteRisk = deleteRisk;
+window.refreshRisks = refreshRisks;
+window.openRiskVisual = openRiskVisual;
+window.closeRiskVisual = closeRiskVisual;
+window.openBowtieView = openBowtieView;
+window.searchRisks = searchRisks;
+window.addCause = addCause;
+window.removeCause = removeCause;
+window.addConsequence = addConsequence;
+window.removeConsequence = removeConsequence;
+window.calculateHSSERAM = calculateHSSERAM;
+window.calculateRiskVisualRAMTarget = calculateRiskVisualRAMTarget;
+window.toggleRamOverride = toggleRamOverride;
+window.showAddSubproject = showAddSubproject;
+window.hideAddSubproject = hideAddSubproject;
+window.addNewSubproject = addNewSubproject;
+window.switchTab = switchTab;
+window.importRisks = importRisks;
+window.handleImportFile = handleImportFile;
+window.quickViewRisk = quickViewRisk;
+window.quickEditRisk = quickEditRisk;
+window.quickOpenBowtie = quickOpenBowtie;
+window.quickChangeStatus = quickChangeStatus;
+window.quickDeleteRisk = quickDeleteRisk;
+window.quickSelectRisk = quickSelectRisk;
+window.setSelectedRisk = setSelectedRisk;
+window.clearSelectedRisk = clearSelectedRisk;
+</script>
+</body>
+</html>

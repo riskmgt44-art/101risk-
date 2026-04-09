@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Visual · Super Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- html2canvas for matrix/image export, jspdf for PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --radius-sm: 8px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --transition: all 0.3s ease;
+            --shimmer-bg: #f6f7f8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        .risk-visual-container {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .risk-visual-header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            height: 48px;
+            flex-shrink: 0;
+        }
+
+        .risk-visual-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .btn-icon:hover {
+            background: rgba(93,161,161,0.06);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .main { 
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 24px;
+        }
+
+        .matrix-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            padding: 16px 16px;
+            margin-bottom: 16px;
+        }
+
+        .matrix-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .matrix-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+
+        .view-toggle-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .matrix-toggle, .size-toggle {
+            display: flex; gap: 4px; background: var(--shimmer-bg); padding: 2px; border-radius: var(--radius-md);
+        }
+        .toggle-btn, .size-btn {
+            padding: 4px 10px; font-size: 11px; font-weight: 500; border: none;
+            background: transparent; border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer;
+            white-space: nowrap; transition: var(--transition);
+        }
+        .toggle-btn.active, .size-btn.active { background: white; color: var(--text-primary); box-shadow: var(--shadow-sm); }
+
+        .matrix-wrapper { display: flex; margin-top: 8px; }
+
+        /* Y-axis labels in correct order (Very High at top for 5x5) */
+        .y-axis-labels {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-right: 12px;
+            padding: 2px 0;
+            height: auto;
+            gap: 4px;
+        }
+        .y-axis-label, .x-axis-label { 
+            font-size: 13px;
+            font-weight: 600; 
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* COMPACT GRID - 5x5 */
+        .matrix-grid-5x5 {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 6px;
+            background: #F6F5F7;
+            padding: 6px;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            aspect-ratio: 5 / 3;
+        }
+
+        /* COMPACT GRID - 3x3 */
+        .matrix-grid-3x3 {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 6px;
+            background: #F6F5F7;
+            padding: 6px;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            aspect-ratio: 3 / 2;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+
+        .matrix-cell {
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255,255,255,0.6);
+            padding: 6px 4px;
+            overflow-y: auto;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--shimmer-bg);
+            max-height: 100%;
+        }
+        .matrix-cell::-webkit-scrollbar {
+            width: 4px;
+        }
+        .matrix-cell::-webkit-scrollbar-track {
+            background: var(--shimmer-bg);
+            border-radius: 4px;
+        }
+        .matrix-cell::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* VIBRANT CELL COLORS based on risk level */
+        .matrix-cell[data-risk-level="veryhigh"] { background: #FF0000; }  /* Bright red */
+        .matrix-cell[data-risk-level="high"]      { background: #FFC107; }  /* Bright orange/amber */
+        .matrix-cell[data-risk-level="medium"]    { background: #FFFF00; }  /* Bright yellow */
+        .matrix-cell[data-risk-level="low"]       { background: #00FF00; }  /* Bright green */
+
+        .matrix-cell:hover {
+            transform: scale(1.01);
+            box-shadow: var(--shadow-md);
+            z-index: 10;
+        }
+
+        /* Compact badge styling - NO WHITE BACKGROUND */
+        .risk-badge {
+            background: transparent;
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(0,0,0,0.3);
+            box-shadow: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            flex-shrink: 0;
+            line-height: 1.3;
+            height: auto;
+            min-height: 26px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Default text color for badges - dark for light backgrounds */
+        .risk-badge {
+            color: #000000;
+            text-shadow: 0 0 1px rgba(255,255,255,0.5);
+        }
+        
+        /* White text for red (very high risk) cells */
+        .matrix-cell[data-risk-level="veryhigh"] .risk-badge {
+            color: #FFFFFF;
+            text-shadow: 0 0 2px rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        .matrix-cell[data-risk-level="veryhigh"] .risk-title {
+            color: #FFFFFF;
+        }
+        
+        .matrix-cell[data-risk-level="veryhigh"] .risk-dot {
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        /* Dark text for other cells */
+        .matrix-cell[data-risk-level="high"] .risk-badge,
+        .matrix-cell[data-risk-level="medium"] .risk-badge,
+        .matrix-cell[data-risk-level="low"] .risk-badge {
+            color: #000000;
+            text-shadow: 0 0 1px rgba(255,255,255,0.5);
+            border-color: rgba(0,0,0,0.3);
+        }
+        
+        .risk-badge:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        
+        .matrix-cell[data-risk-level="veryhigh"] .risk-badge:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.8);
+        }
+        
+        .risk-badge:active {
+            transform: translateY(0);
+        }
+
+        .risk-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+        .risk-dot.critical { background: #FF0000; }
+        .risk-dot.high     { background: #FFC107; }
+        .risk-dot.medium   { background: #FFFF00; }
+        .risk-dot.low      { background: #00FF00; }
+
+        .risk-title {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 0;
+        }
+        
+        /* Default title color */
+        .risk-title {
+            color: #000000;
+        }
+
+        .risk-trend {
+            margin-left: auto;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        /* FIXED: improving (up) = green, declining (down) = red */
+        .trend-up { color: #00FF00; }
+        .trend-down { color: #FF0000; }
+        .trend-stable { color: var(--neutral); }
+
+        .risk-change-indicator {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #0288D1;
+            border: 1.5px solid rgba(255,255,255,0.8);
+        }
+        .risk-change-indicator.orange { background: #ED6C02; }
+
+        .x-axis-labels-5x5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-top: 8px;
+            margin-left: 60px;
+            text-align: center;
+        }
+        .x-axis-labels-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 8px;
+            margin-left: 60px;
+            text-align: center;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .x-axis-labels-5x5 .x-axis-label, .x-axis-labels-3x3 .x-axis-label { 
+            text-align: center;
+            font-size: 13px;
+        }
+
+        /* Filter sections moved below matrix */
+        .filters-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            min-width: 180px;
+        }
+        .filter-group h3 {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .filter-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+        .filter-color { 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 4px; 
+            flex-shrink: 0; 
+        }
+        .filter-color.acceptable { background: #00FF00; }
+        .filter-color.needs-improvement { background: #FFC107; }
+        .filter-color.major-improvement { background: #FF0000; }
+        .filter-color.under-review { background: #9C27B0; }
+        .filter-color.removed { background: #94A3B8; }
+        .filter-label { 
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+        /* Hide scrollbar but keep scrolling functionality */
+.main {
+    overflow-y: auto;
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* Internet Explorer/Edge */
+}
+.main::-webkit-scrollbar {
+    display: none;              /* Chrome, Safari, Opera */
+}
+        .filter-count { 
+            margin-left: auto; 
+            color: var(--neutral); 
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 24px;
+            text-align: right;
+        }
+
+        .legend-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex; gap: 32px; flex-wrap: wrap;
+        }
+        .legend-group h4 { 
+            font-size: 12px; 
+            font-weight: 600; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            margin-bottom: 8px; 
+        }
+        .legend-items { display: flex; gap: 16px; flex-wrap: wrap; }
+        .legend-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        .legend-color.veryhigh { background: #FF0000; }
+        .legend-color.high     { background: #FFC107; }
+        .legend-color.medium   { background: #FFFF00; }
+        .legend-color.low      { background: #00FF00; }
+
+        /* Triangular arrow styles - FIXED: up arrow green (improving), down arrow red (declining) */
+        .trend-arrow-up {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 8px solid #00FF00;
+            display: inline-block;
+        }
+        .trend-arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #FF0000;
+            display: inline-block;
+        }
+        .trend-circle {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--neutral);
+            display: inline-block;
+        }
+
+        .loading-matrix {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            font-size: 14px;
+            color: var(--neutral);
+            background: var(--shimmer-bg);
+            border-radius: var(--radius);
+        }
+
+        #riskTooltip {
+            position: absolute; background: white; border-radius: var(--radius-md); padding: 12px 16px;
+            box-shadow: var(--shadow-md); border: 1px solid var(--border); z-index: 9999;
+            pointer-events: none; max-width: 280px; font-size: 12px; transition: opacity 0.15s; opacity: 0;
+        }
+        #riskTooltip.show { opacity: 1; }
+        .tooltip-title { 
+            font-weight: 700; 
+            color: var(--text-primary); 
+            margin-bottom: 8px; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 4px; 
+            font-size: 13px; 
+        }
+        .tooltip-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-top: 4px; 
+            font-size: 11px; 
+        }
+        .tooltip-label { color: var(--neutral); font-weight: 500; }
+        .tooltip-value { color: var(--text-primary); font-weight: 600; }
+
+        @media (max-width: 1200px) {
+            .x-axis-labels-5x5 { margin-left: 50px; }
+        }
+        @media (max-width: 768px) {
+            .risk-visual-header { 
+                padding: 0 16px; 
+                height: 44px;
+            }
+            .main { padding: 12px; }
+            .view-toggle-group { flex-direction: column; align-items: flex-start; }
+            .filters-container { flex-direction: column; gap: 16px; }
+            .risk-badge {
+                padding: 3px 4px;
+                font-size: 9px;
+            }
+            .risk-title {
+                font-size: 9px;
+            }
+            .y-axis-label, .x-axis-label {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="risk-visual-container">
+        <main class="main">
+            <div class="matrix-container">
+                <div class="matrix-header">
+                    <div class="matrix-title">Risk Matrix</div>
+                    <div class="view-toggle-group">
+                        <div class="size-toggle">
+                            <button class="size-btn active" onclick="switchSize('5x5', this)">5x5</button>
+                            <button class="size-btn" onclick="switchSize('3x3', this)">3x3 RAM</button>
+                        </div>
+                        <div class="matrix-toggle">
+                            <button class="toggle-btn active" onclick="switchView('current', this)">Current</button>
+                            <button class="toggle-btn" onclick="switchView('target', this)">Target</button>
+                            <button class="toggle-btn" onclick="switchView('residual', this)">Residual</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="matrixLoading" class="loading-matrix">
+                    <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Loading real risk data...
+                </div>
+
+                <div id="matrixContent" style="display: none;">
+                    <div class="matrix-wrapper">
+                        <div class="y-axis-labels" id="yAxisLabels">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div id="matrixGrid" class="matrix-grid-5x5"></div>
+                    </div>
+                    <div id="xAxisLabels" class="x-axis-labels-5x5"></div>
+                </div>
+            </div>
+
+            <!-- FILTERS MOVED BELOW MATRIX -->
+            <div class="filters-container">
+                <div class="filter-group">
+                    <h3>ACCEPTABILITY</h3>
+                    <div class="filter-items">
+                        <div class="filter-item">
+                            <span class="filter-color acceptable"></span>
+                            <span class="filter-label">Risk Level Acceptable</span>
+                            <span class="filter-count" id="count-acceptable">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="filter-color needs-improvement"></span>
+                            <span class="filter-label">Needs Improvement</span>
+                            <span class="filter-count" id="count-needs">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="filter-color major-improvement"></span>
+                            <span class="filter-label">Major Improvement</span>
+                            <span class="filter-count" id="count-major">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="filter-color under-review"></span>
+                            <span class="filter-label">Under Review</span>
+                            <span class="filter-count" id="count-review">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="filter-color removed"></span>
+                            <span class="filter-label">Removed / Delegated</span>
+                            <span class="filter-count" id="count-removed">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <h3>TREND</h3>
+                    <div class="filter-items">
+                        <div class="filter-item">
+                            <span class="trend-arrow-up" style="margin-right: 2px;"></span>
+                            <span class="filter-label">Improving</span>
+                            <span class="filter-count" id="count-up">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="trend-circle" style="margin-right: 2px;"></span>
+                            <span class="filter-label">Stable</span>
+                            <span class="filter-count" id="count-stable">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <span class="trend-arrow-down" style="margin-right: 2px;"></span>
+                            <span class="filter-label">Declining</span>
+                            <span class="filter-count" id="count-down">0</span>
+                        </div>
+                        <div class="filter-item">
+                            <i class="fas fa-times-circle" style="color:#94A3B8; width: 14px;"></i>
+                            <span class="filter-label">Removed</span>
+                            <span class="filter-count" id="count-removed3">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend-container">
+                <div class="legend-group">
+                    <h4>LEGEND</h4>
+                    <div class="legend-items">
+                        <div class="legend-item"><span class="legend-color veryhigh"></span> Critical</div>
+                        <div class="legend-item"><span class="legend-color high"></span> High</div>
+                        <div class="legend-item"><span class="legend-color medium"></span> Moderate</div>
+                        <div class="legend-item"><span class="legend-color low"></span> Low</div>
+                    </div>
+                </div>
+                <div class="legend-group">
+                    <h4>TREND</h4>
+                    <div class="legend-items">
+                        <div class="legend-item"><span class="trend-arrow-up" style="margin-right: 2px;"></span> Improving</div>
+                        <div class="legend-item"><span class="trend-circle" style="margin-right: 2px;"></span> Stable</div>
+                        <div class="legend-item"><span class="trend-arrow-down" style="margin-right: 2px;"></span> Declining</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="riskTooltip"></div>
+
+    <script>
+        (function() {
+            let currentView = 'current';
+            let currentSize = '5x5'; // '5x5' or '3x3'
+            let risks = [];
+            const tooltip = document.getElementById('riskTooltip');
+
+            function toNumber(value) {
+                if (value === null || value === undefined) return 3;
+                if (typeof value === 'number') {
+                    if (value >= 1 && value <= 5) return value;
+                    return 3;
+                }
+                if (typeof value === 'string') {
+                    const str = value.trim().toLowerCase();
+                    const map = {
+                        'very low': 1, 'low': 2, 'medium': 3, 'high': 4, 'very high': 5,
+                        '1': 1, '2': 2, '3': 3, '4': 4, '5': 5
+                    };
+                    return map[str] || 3;
+                }
+                return 3;
+            }
+
+            // Convert 1-5 scale to 1-3 scale for 3x3 view
+            function toThreeScale(value) {
+                if (value <= 2) return 1; // Low
+                if (value <= 4) return 2; // Medium
+                return 3; // High
+            }
+
+            // Map HSSE RAM levels to impact/probability values
+            function getImpactFromHSSE(ramLevel) {
+                if (!ramLevel) return 3;
+                const level = ramLevel.toLowerCase();
+                if (level.includes('very high')) return 5;
+                if (level.includes('high')) return 4;
+                if (level.includes('medium')) return 3;
+                if (level.includes('low')) return 2;
+                if (level.includes('very low')) return 1;
+                return 3;
+            }
+
+            function getImpactForView(risk) {
+                let value;
+                if (currentView === 'target') {
+                    // For target view, use HSSE RAM Target
+                    value = getImpactFromHSSE(risk.hsseRamTarget);
+                } else if (currentView === 'residual') {
+                    // For residual, use Risk Visual RAM Target (post-mitigation)
+                    value = getImpactFromHSSE(risk.riskVisualRamTarget);
+                } else {
+                    // Current view - use HSSE RAM Current
+                    value = getImpactFromHSSE(risk.hsseRamCurrent);
+                }
+                
+                if (currentSize === '3x3') {
+                    return toThreeScale(value);
+                }
+                return value;
+            }
+
+            function getProbabilityForView(risk) {
+                let value;
+                if (currentView === 'target') {
+                    // For target view, use HSSE RAM Target likelihood
+                    value = getImpactFromHSSE(risk.hsseRamTarget);
+                } else if (currentView === 'residual') {
+                    // For residual, use Risk Visual RAM Target
+                    value = getImpactFromHSSE(risk.riskVisualRamTarget);
+                } else {
+                    // Current view - use HSSE RAM Current
+                    value = getImpactFromHSSE(risk.hsseRamCurrent);
+                }
+                
+                if (currentSize === '3x3') {
+                    return toThreeScale(value);
+                }
+                return value;
+            }
+
+            function getRiskLevel(impact, probability) {
+                let score = impact * probability;
+                if (currentSize === '5x5') {
+                    if (score >= 17) return 'veryhigh';
+                    if (score >= 10) return 'high';
+                    if (score >= 5) return 'medium';
+                    return 'low';
+                } else {
+                    // 3x3 scoring
+                    if (score >= 9) return 'veryhigh';
+                    if (score >= 6) return 'high';
+                    if (score >= 3) return 'medium';
+                    return 'low';
+                }
+            }
+
+            function getAxisLabels() {
+                if (currentSize === '5x5') {
+                    return {
+                        y: ['Very High', 'High', 'Medium', 'Low', 'Very Low'],
+                        x: ['Very Low', 'Low', 'Medium', 'High', 'Very High']
+                    };
+                } else {
+                    return {
+                        y: ['High', 'Medium', 'Low'],
+                        x: ['Low', 'Medium', 'High']
+                    };
+                }
+            }
+
+            function updateAxisLabels() {
+                const labels = getAxisLabels();
+                const yAxis = document.getElementById('yAxisLabels');
+                const xAxis = document.getElementById('xAxisLabels');
+                
+                // Update Y-axis
+                yAxis.innerHTML = '';
+                labels.y.forEach(label => {
+                    const span = document.createElement('span');
+                    span.className = 'y-axis-label';
+                    span.textContent = label;
+                    yAxis.appendChild(span);
+                });
+
+                // Update X-axis
+                xAxis.innerHTML = '';
+                labels.x.forEach(label => {
+                    const span = document.createElement('span');
+                    span.className = 'x-axis-label';
+                    span.textContent = label;
+                    xAxis.appendChild(span);
+                });
+
+                // Update grid class
+                const grid = document.getElementById('matrixGrid');
+                grid.className = currentSize === '5x5' ? 'matrix-grid-5x5' : 'matrix-grid-3x3';
+                
+                // Update x-axis container class
+                xAxis.className = currentSize === '5x5' ? 'x-axis-labels-5x5' : 'x-axis-labels-3x3';
+            }
+
+            async function loadRisks() {
+                try {
+                    document.getElementById('matrixLoading').style.display = 'flex';
+                    document.getElementById('matrixContent').style.display = 'none';
+                    
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        window.parent.location.href = '/login.html';
+                        return;
+                    }
+
+                    const response = await fetch('/api/risks', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    risks = Array.isArray(data) ? data : (data.risks || []);
+                    
+                    buildMatrix();
+                    updateFilterCounts();
+                    
+                    document.getElementById('matrixLoading').style.display = 'none';
+                    document.getElementById('matrixContent').style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error loading risks:', error);
+                    document.getElementById('matrixLoading').innerHTML = `
+                        <i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 8px;"></i>
+                        Failed to load risks. Using mock data for demo.
+                        <button class="btn-icon" onclick="refreshMatrix()" style="margin-left: 8px;"><i class="fas fa-sync-alt"></i></button>
+                    `;
+                    
+                    // Generate mock data for demo
+                    risks = generateMockRisks(25);
+                    buildMatrix();
+                    updateFilterCounts();
+                    document.getElementById('matrixLoading').style.display = 'none';
+                    document.getElementById('matrixContent').style.display = 'block';
+                }
+            }
+
+            function generateMockRisks(count) {
+                const mockRisks = [];
+                const titles = ['Security Breach', 'Data Loss', 'Compliance Violation', 'System Downtime', 'Budget Overrun', 
+                              'Missed Deadline', 'Resource Shortage', 'Technical Debt', 'Integration Failure', 'Performance Issue'];
+                const statuses = ['open', 'in-progress', 'monitoring', 'mitigated'];
+                const trends = ['up', 'down', 'stable'];
+                const owners = ['John Smith', 'Sarah Johnson', 'Mike Chen', 'Lisa Wong', 'David Kim'];
+                const ramLevels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
+                
+                for (let i = 1; i <= count; i++) {
+                    const hsseCurrent = ramLevels[Math.floor(Math.random() * ramLevels.length)];
+                    const hsseTarget = ramLevels[Math.floor(Math.random() * ramLevels.length)];
+                    const visualCurrent = ramLevels[Math.floor(Math.random() * ramLevels.length)];
+                    const visualTarget = ramLevels[Math.floor(Math.random() * ramLevels.length)];
+                    
+                    mockRisks.push({
+                        _id: `risk-${i}`,
+                        riskId: `RISK-${1000 + i}`,
+                        title: titles[Math.floor(Math.random() * titles.length)] + ' ' + i,
+                        description: 'Sample risk description for demonstration purposes',
+                        hsseRamCurrent: hsseCurrent,
+                        hsseRamTarget: hsseTarget,
+                        riskVisualRamCurrent: visualCurrent,
+                        riskVisualRamTarget: visualTarget,
+                        status: statuses[Math.floor(Math.random() * statuses.length)],
+                        trend: trends[Math.floor(Math.random() * trends.length)],
+                        riskOwnerName: owners[Math.floor(Math.random() * owners.length)],
+                        isNew: Math.random() > 0.8,
+                        hasChange: Math.random() > 0.7,
+                        acceptability: ['acceptable', 'needs-improvement', 'major-improvement', 'under-review'][Math.floor(Math.random() * 4)],
+                        actionSummary: 'Review and update risk response plan',
+                        subProject: ['Phase 1', 'Phase 2', 'Operations'][Math.floor(Math.random() * 3)],
+                        functionalAreaTECOP: 'Technical, Operational'
+                    });
+                }
+                return mockRisks;
+            }
+
+            function getRamLevel(risk) {
+                if (currentView === 'current') return risk.hsseRamCurrent || 'Medium';
+                if (currentView === 'target') return risk.hsseRamTarget || 'Medium';
+                return risk.riskVisualRamTarget || 'Medium';
+            }
+
+            function updateFilterCounts() {
+                const acceptable = risks.filter(r => {
+                    const level = getRamLevel(r).toLowerCase();
+                    return level.includes('low') || level.includes('very low');
+                }).length;
+                
+                const needs = risks.filter(r => {
+                    const level = getRamLevel(r).toLowerCase();
+                    return level.includes('medium');
+                }).length;
+                
+                const major = risks.filter(r => {
+                    const level = getRamLevel(r).toLowerCase();
+                    return level.includes('high');
+                }).length;
+                
+                const review = risks.filter(r => {
+                    const level = getRamLevel(r).toLowerCase();
+                    return level.includes('very high');
+                }).length;
+                
+                const removed = risks.filter(r => 
+                    r.status?.toLowerCase() === 'closed' || 
+                    r.status?.toLowerCase() === 'rejected'
+                ).length;
+
+                const up = risks.filter(r => (r.trend || '').toLowerCase() === 'up').length;
+                const down = risks.filter(r => (r.trend || '').toLowerCase() === 'down').length;
+                const stable = risks.filter(r => !r.trend || (r.trend || '').toLowerCase() === 'stable').length;
+
+                const set = (id, val) => { 
+                    const el = document.getElementById(id); 
+                    if (el) el.innerText = String(val); 
+                };
+
+                set('count-acceptable', acceptable);
+                set('count-needs', needs);
+                set('count-major', major);
+                set('count-review', review);
+                set('count-removed', removed);
+                set('count-up', up);
+                set('count-down', down);
+                set('count-stable', stable);
+                set('count-removed3', removed);
+            }
+
+            function showTooltip(event, risk) {
+                const trend = risk.trend || 'stable';
+                let trendIcon = '';
+                if (trend === 'up') trendIcon = '<span class="trend-arrow-up"></span>';
+                else if (trend === 'down') trendIcon = '<span class="trend-arrow-down"></span>';
+                else trendIcon = '<span class="trend-circle"></span>';
+                
+                const isNew = risk.isNew || false;
+                const hasChange = risk.hasChange || false;
+                const changeText = isNew ? 'New' : (hasChange ? 'Shows change' : 'No change');
+                
+                const imp = getImpactForView(risk);
+                const prob = getProbabilityForView(risk);
+                const score = imp * prob;
+                const level = getRiskLevel(imp, prob);
+                
+                // Get the appropriate RAM value based on view
+                let ramDisplay = '—';
+                if (currentView === 'current') ramDisplay = risk.hsseRamCurrent || '—';
+                else if (currentView === 'target') ramDisplay = risk.hsseRamTarget || '—';
+                else ramDisplay = risk.riskVisualRamTarget || '—';
+                
+                tooltip.innerHTML = `
+                    <div class="tooltip-title">${escapeHtml(risk.riskId || 'N/A')} · ${escapeHtml(risk.title || '').substring(0,40)}</div>
+                    <div class="tooltip-row"><span class="tooltip-label">Impact/Prob (${currentSize})</span><span class="tooltip-value">${imp} / ${prob}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Score / Level</span><span class="tooltip-value">${score} · ${level}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">RAM ${currentView}</span><span class="tooltip-value">${escapeHtml(ramDisplay)}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Owner</span><span class="tooltip-value">${escapeHtml(risk.riskOwnerName || '—')}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Status</span><span class="tooltip-value">${escapeHtml(risk.status || '—')}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Sub Project</span><span class="tooltip-value">${escapeHtml(risk.subProject || '—')}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Trend</span><span class="tooltip-value">${trendIcon} ${trend}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Change</span><span class="tooltip-value">${changeText}</span></div>
+                `;
+                tooltip.classList.add('show');
+                positionTooltip(event);
+            }
+
+            function positionTooltip(event) {
+                const x = event.clientX + 15;
+                const y = event.clientY + 10;
+                
+                // Ensure tooltip stays within viewport
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const maxX = window.innerWidth - tooltipRect.width - 20;
+                const maxY = window.innerHeight - tooltipRect.height - 20;
+                
+                tooltip.style.left = Math.min(x, maxX) + 'px';
+                tooltip.style.top = Math.min(y, maxY) + 'px';
+            }
+
+            function hideTooltip() {
+                tooltip.classList.remove('show');
+            }
+
+            function escapeHtml(unsafe) {
+                if (typeof unsafe !== 'string') return unsafe;
+                return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            }
+
+            function handleRiskClick(risk) {
+                // Open risk detail view
+                if (risk._id) {
+                    localStorage.setItem('viewingRisk', JSON.stringify(risk));
+                    window.open('risk-detail.html', '_blank');
+                } else {
+                    alert(`
+Risk ID: ${risk.riskId || 'N/A'}
+Title: ${risk.title || 'Untitled'}
+RAM Current: ${risk.hsseRamCurrent || 'N/A'}
+RAM Target: ${risk.hsseRamTarget || 'N/A'}
+Status: ${risk.status || 'N/A'}
+Owner: ${risk.riskOwnerName || 'N/A'}
+Trend: ${risk.trend || 'stable'}
+                    `);
+                }
+            }
+
+            function createBadge(risk) {
+                const div = document.createElement('div');
+                div.className = 'risk-badge';
+                div.dataset.id = risk._id || risk.id;
+                div.setAttribute('role', 'button');
+                div.setAttribute('tabindex', '0');
+                div.setAttribute('aria-label', `Risk: ${risk.title || risk.riskId || 'Untitled'}`);
+
+                const dot = document.createElement('span');
+                const ramLevel = getRamLevel(risk).toLowerCase();
+                dot.className = 'risk-dot';
+                if (ramLevel.includes('very high')) dot.classList.add('critical');
+                else if (ramLevel.includes('high')) dot.classList.add('high');
+                else if (ramLevel.includes('medium')) dot.classList.add('medium');
+                else dot.classList.add('low');
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'risk-title';
+                titleSpan.textContent = risk.title || risk.riskId || 'Untitled';
+
+                const trendSpan = document.createElement('span');
+                const trend = risk.trend || 'stable';
+                trendSpan.className = `risk-trend trend-${trend}`;
+                
+                if (trend === 'up') {
+                    trendSpan.innerHTML = '<span class="trend-arrow-up"></span>';
+                } else if (trend === 'down') {
+                    trendSpan.innerHTML = '<span class="trend-arrow-down"></span>';
+                } else {
+                    trendSpan.innerHTML = '<span class="trend-circle"></span>';
+                }
+
+                div.appendChild(dot);
+                div.appendChild(titleSpan);
+                div.appendChild(trendSpan);
+
+                if (risk.isNew) {
+                    let ind = document.createElement('span');
+                    ind.className = 'risk-change-indicator';
+                    ind.style.background = '#0288D1';
+                    div.appendChild(ind);
+                } else if (risk.hasChange) {
+                    let ind = document.createElement('span');
+                    ind.className = 'risk-change-indicator orange';
+                    ind.style.background = '#ED6C02';
+                    div.appendChild(ind);
+                }
+
+                div.addEventListener('mouseenter', (e) => showTooltip(e, risk));
+                div.addEventListener('mousemove', positionTooltip);
+                div.addEventListener('mouseleave', hideTooltip);
+                div.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRiskClick(risk);
+                });
+                div.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRiskClick(risk);
+                    }
+                });
+                return div;
+            }
+
+            function buildMatrix() {
+                const grid = document.getElementById('matrixGrid');
+                if (!grid) return;
+                
+                grid.innerHTML = '';
+                
+                const size = currentSize === '5x5' ? 5 : 3;
+                
+                // For 5x5: impact from 5 down to 1, prob from 1 to 5
+                // For 3x3: impact from 3 down to 1, prob from 1 to 3
+                for (let impact = size; impact >= 1; impact--) {
+                    for (let prob = 1; prob <= size; prob++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'matrix-cell';
+                        const level = getRiskLevel(impact, prob);
+                        cell.dataset.riskLevel = level;
+                        
+                        const cellRisks = risks.filter(r => {
+                            const rImpact = getImpactForView(r);
+                            const rProb = getProbabilityForView(r);
+                            return rImpact === impact && rProb === prob;
+                        });
+                        
+                        // Sort risks by priority (higher risk level first)
+                        cellRisks.sort((a, b) => {
+                            const aLevel = getRamLevel(a);
+                            const bLevel = getRamLevel(b);
+                            return bLevel.localeCompare(aLevel);
+                        });
+                        
+                        cellRisks.forEach(r => cell.appendChild(createBadge(r)));
+                        grid.appendChild(cell);
+                    }
+                }
+            }
+
+            function switchView(view, btn) {
+                currentView = view;
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if (risks.length > 0) {
+                    buildMatrix();
+                    updateFilterCounts();
+                }
+            }
+
+            function switchSize(size, btn) {
+                currentSize = size;
+                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateAxisLabels();
+                if (risks.length > 0) {
+                    buildMatrix();
+                    updateFilterCounts();
+                }
+            }
+
+            function refreshMatrix() {
+                loadRisks();
+            }
+
+            // ---------- EXPORT FUNCTIONS ----------
+            window.exportMatrixImage = function() {
+                const matrixDiv = document.querySelector('.matrix-container');
+                if (!matrixDiv) return;
+                html2canvas(matrixDiv, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `risk-matrix-${currentSize}-${currentView}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            };
+
+            window.exportFullPDF = function() {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                let y = 10;
+
+                pdf.setFontSize(16);
+                pdf.text('Risk Profile - Super Admin View', 10, y);
+                y += 10;
+                pdf.setFontSize(10);
+                pdf.text('Generated: ' + new Date().toLocaleString(), 10, y);
+                y += 10;
+
+                pdf.setFontSize(12);
+                pdf.text(`Risk Matrix (${currentView} view, ${currentSize})`, 10, y);
+                y += 8;
+
+                const matrixDiv = document.querySelector('.matrix-container');
+                if (matrixDiv) {
+                    return html2canvas(matrixDiv, { scale: 2 }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgWidth = 180;
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
+                        y += imgHeight + 10;
+
+                        pdf.setFontSize(12);
+                        pdf.text('Risk Summary', 10, y);
+                        y += 6;
+                        pdf.setFontSize(9);
+                        
+                        // Add risk summary table
+                        const headers = [['ID', 'Title', 'RAM Current', 'RAM Target', 'Status', 'Owner']];
+                        const data = risks.slice(0, 15).map(r => [
+                            r.riskId || 'N/A',
+                            (r.title || 'Untitled').substring(0, 20),
+                            r.hsseRamCurrent || '—',
+                            r.hsseRamTarget || '—',
+                            r.status || '—',
+                            r.riskOwnerName || '—'
+                        ]);
+                        
+                        // Add autoTable if available
+                        if (typeof pdf.autoTable === 'function') {
+                            pdf.autoTable({
+                                head: headers,
+                                body: data,
+                                startY: y,
+                                margin: { left: 10, right: 10 },
+                                styles: { fontSize: 8, cellPadding: 2 },
+                                headStyles: { fillColor: [93, 161, 161] }
+                            });
+                        }
+
+                        pdf.save(`risk-profile-${currentView}-${currentSize}.pdf`);
+                    });
+                } else {
+                    pdf.save('risk-profile-basic.pdf');
+                }
+            };
+
+            // Initialize axis labels
+            updateAxisLabels();
+
+            // Make functions globally available
+            window.switchView = switchView;
+            window.switchSize = switchSize;
+            window.refreshMatrix = refreshMatrix;
+
+            // Load risks when page loads
+            document.addEventListener('DOMContentLoaded', () => {
+                // Check authentication
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.parent.location.href = '/login.html';
+                    return;
+                }
+                loadRisks();
+            });
+
+            // Add escape key to close tooltip and notify parent
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    hideTooltip();
+                }
+            });
+
+            // Listen for messages from parent
+            window.addEventListener('message', (event) => {
+                if (event.data === 'refreshRisks') {
+                    refreshMatrix();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

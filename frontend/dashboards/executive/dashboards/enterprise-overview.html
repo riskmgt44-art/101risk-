@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Risk Dashboard • RiskMGT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #5DA1A1;
+            --primary-hover: #4e9393;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --neutral: #6b7280;
+            --text-primary: #111111;
+            --text-secondary: #555555;
+            --bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border: #e8e8e8;
+            --shadow-sm: 0 3.2px 9.6px rgba(0,0,0,0.06);
+            --shadow-md: 0 9.6px 25.6px rgba(0,0,0,0.08);
+            --radius: 12.8px;
+            --transition: all 0.3s ease;
+            --shimmer-gradient: linear-gradient(90deg, #f0f0f0 0%, #f8f8f8 50%, #f0f0f0 100%);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* hide scrollbars but keep scrolling */
+        body::-webkit-scrollbar, ::-webkit-scrollbar { display: none; width: 0; background: transparent; }
+        html, body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* top bar */
+        .top-bar {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+            z-index: 20;
+        }
+        .top-title { font-size: 20px; font-weight: 700; }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .select-control, .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            background: var(--bg);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn { display: flex; align-items: center; gap: 8px; background: transparent; }
+        .btn:hover { border-color: var(--primary); color: var(--primary); }
+        .refresh-time {
+            font-size: 12px;
+            color: var(--neutral);
+            white-space: nowrap;
+        }
+
+        /* main scroll area */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 32px 80px 32px;
+        }
+
+        /* KPI row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            transition: var(--transition);
+        }
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .kpi-label { font-size: 13px; color: var(--neutral); }
+        .kpi-trend { font-size: 12px; font-weight: 600; }
+        .trend-up { color: var(--red); }
+        .trend-down { color: var(--green); }
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            transition: color 0.4s ease;
+        }
+        .kpi-sub { font-size: 13px; color: var(--neutral); }
+
+        /* analytics grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .chart-container {
+            position: relative;
+            min-height: 320px;
+            width: 100%;
+        }
+        canvas { width: 100% !important; height: auto !important; max-height: 320px; }
+
+        .secondary-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        .attention-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+        }
+        .attention-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--red);
+        }
+        .attention-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .attention-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(239,68,68,0.05);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .attention-empty {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--neutral);
+            font-style: italic;
+        }
+        .attention-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* ========= SHIMMER SKELETON STYLES ========= */
+        .shimmer {
+            background: linear-gradient(90deg, #ececec 0%, #f5f5f5 50%, #ececec 100%);
+            background-size: 200% 100%;
+            animation: shimmerWave 1.5s infinite linear;
+            border-radius: 6px;
+        }
+        @keyframes shimmerWave {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skeleton-kpi-value {
+            width: 70%;
+            height: 42px;
+            margin-bottom: 8px;
+        }
+        .skeleton-text {
+            height: 14px;
+            width: 80%;
+            border-radius: 6px;
+        }
+        .skeleton-trend {
+            width: 50px;
+            height: 18px;
+            border-radius: 12px;
+        }
+        .skeleton-chart-box {
+            width: 100%;
+            height: 280px;
+            background: #f8f8f8;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 14px;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .skeleton-chart-box i {
+            font-size: 32px;
+            opacity: 0.5;
+        }
+        .skeleton-attention-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .skeleton-line {
+            height: 16px;
+            width: 60%;
+            background: #e2e2e2;
+            border-radius: 20px;
+        }
+        .skeleton-line-sm {
+            width: 30%;
+            height: 14px;
+        }
+        .hidden-canvas {
+            display: none;
+        }
+        .chart-skeleton-placeholder {
+            transition: all 0.2s;
+        }
+        @media (max-width: 1024px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .top-bar { padding: 16px; flex-direction: column; align-items: stretch; gap: 16px; }
+            .top-controls { justify-content: stretch; }
+            .select-control, .btn { width: 100%; justify-content: center; }
+            .main { padding: 20px 16px 80px 16px; }
+            .kpi-row, .secondary-row { grid-template-columns: 1fr; }
+            .chart-container { min-height: 260px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="top-title">Enterprise Risk Dashboard</div>
+    <div class="top-controls">
+        <!-- Consistent order: Last 30 days, All Organizations, Export Snapshot -->
+        <select class="select-control" id="dateRangeSelect">
+            <option>Last 30 days</option>
+            <option>Last 90 days</option>
+            <option>Last 180 days</option>
+            <option>Custom range</option>
+        </select>
+        <select class="select-control" id="orgSelect">
+            <option>All Organizations</option>
+            <option>Corporate</option>
+            <option>Subsidiary A</option>
+            <option>Subsidiary B</option>
+        </select>
+        <button class="btn" id="exportSnapshotBtn"><i class="fas fa-file-export"></i> Export Snapshot</button>
+        <div class="refresh-time" id="refreshTimeLabel">Loading dashboard...</div>
+    </div>
+</div>
+
+<main class="main">
+    <!-- KPI row (dynamic + shimmer) -->
+    <div class="kpi-row" id="kpiContainer"></div>
+
+    <div class="analytics-grid" id="chartsGrid"></div>
+
+    <div class="secondary-row" id="secondaryChartsRow"></div>
+
+    <div class="attention-panel" id="attentionPanel">
+        <div class="attention-title">Attention Required</div>
+        <div id="attentionDynamicZone"></div>
+    </div>
+</main>
+
+<script>
+    // ----------------------------- GLOBALS ---------------------------------
+    let chartInstances = {
+        heatMap: null,
+        trend: null,
+        actionDonut: null,
+        areaBar: null,
+        driversPie: null,
+        ramMovement: null
+    };
+    let dataLoaded = false;
+    let refreshInterval = null;
+    const API_ENDPOINT = '/api/dashboard/executive';
+    const REFRESH_MS = 45000;
+
+    let kpiRowContainer, chartsGridContainer, secondaryRowContainer, attentionZone;
+
+    // ----------------------------- HELPER: BUILD SKELETON UI ------------------
+    function buildSkeletonUI() {
+        // KPI skeleton cards
+        kpiRowContainer.innerHTML = '';
+        const kpiLabels = ['Total Active Risks', 'High & Extreme Risks', 'Risk Exposure Index', 'Actions Effectiveness', 'Pending Approvals', 'Upcoming Reviews'];
+        for (let i = 0; i < 6; i++) {
+            const card = document.createElement('div');
+            card.className = 'kpi-card';
+            card.innerHTML = `
+                <div class="kpi-header">
+                    <div class="kpi-label">${kpiLabels[i]}</div>
+                    <div class="skeleton-trend shimmer" style="width: 48px; height: 18px;"></div>
+                </div>
+                <div class="skeleton-kpi-value shimmer" style="width: 65%;"></div>
+                <div class="skeleton-text shimmer" style="width: 50%;"></div>
+            `;
+            kpiRowContainer.appendChild(card);
+        }
+
+        // Main chart skeletons (4 charts)
+        const mainCharts = ['Risk Heat Map (Likelihood × Impact)', 'Risk Trend Over Time', 'Action Status Breakdown', 'Functional Area Exposure'];
+        chartsGridContainer.innerHTML = '';
+        mainCharts.forEach(title => {
+            const card = document.createElement('div');
+            card.className = 'chart-card';
+            card.innerHTML = `
+                <div class="chart-title">${title}</div>
+                <div class="chart-container" data-chart-type="${title.replace(/\s/g, '')}">
+                    <div class="skeleton-chart-box shimmer" style="height: 280px;">
+                        <i class="fas fa-chart-line" style="font-size: 36px; color:#ccc;"></i>
+                        <span>Loading chart data...</span>
+                    </div>
+                    <canvas style="display: none;"></canvas>
+                </div>
+            `;
+            chartsGridContainer.appendChild(card);
+        });
+
+        // Secondary row: Top Risk Drivers + RAM Movement
+        secondaryRowContainer.innerHTML = '';
+        const secTitles = ['Top Risk Drivers', 'RAM Movement Summary (Last 90 days)'];
+        secTitles.forEach(title => {
+            const card = document.createElement('div');
+            card.className = 'chart-card';
+            card.innerHTML = `
+                <div class="chart-title">${title}</div>
+                <div class="chart-container" data-chart-type="${title.replace(/\s/g, '')}">
+                    <div class="skeleton-chart-box shimmer" style="height: 280px;">
+                        <i class="fas fa-chart-pie" style="font-size: 36px; color:#ccc;"></i>
+                        <span>Loading analytics...</span>
+                    </div>
+                    <canvas style="display: none;"></canvas>
+                </div>
+            `;
+            secondaryRowContainer.appendChild(card);
+        });
+
+        // Attention panel skeleton
+        attentionZone.innerHTML = `
+            <div class="attention-list">
+                ${Array(3).fill(0).map(() => `
+                    <div class="skeleton-attention-item">
+                        <div class="skeleton-line shimmer"></div>
+                        <div class="skeleton-line-sm shimmer"></div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // ----------------------------- INITIALIZE REAL CHARTS ------------------
+    function initAllCharts(data) {
+        const containers = document.querySelectorAll('.chart-container');
+        const findContainer = (titleKeyword) => {
+            return Array.from(containers).find(c => c.closest('.chart-card')?.querySelector('.chart-title')?.innerText.includes(titleKeyword));
+        };
+
+        const heatMapContainer = findContainer('Risk Heat Map');
+        const trendContainer = findContainer('Risk Trend Over Time');
+        const actionContainer = findContainer('Action Status Breakdown');
+        const areaContainer = findContainer('Functional Area Exposure');
+        const driversContainer = findContainer('Top Risk Drivers');
+        const ramContainer = findContainer('RAM Movement Summary');
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } },
+                tooltip: { backgroundColor: 'rgba(0,0,0,0.8)', cornerRadius: 8 }
+            }
+        };
+
+        // 1) HeatMap bubble
+        if (heatMapContainer) {
+            const canvas = heatMapContainer.querySelector('canvas');
+            const skeletonDiv = heatMapContainer.querySelector('.skeleton-chart-box');
+            if (canvas && skeletonDiv) {
+                canvas.style.display = 'block';
+                skeletonDiv.style.display = 'none';
+                const ctx = canvas.getContext('2d');
+                const heatData = data.heatMapData || [];
+                chartInstances.heatMap = new Chart(ctx, {
+                    type: 'bubble',
+                    data: { datasets: [{ label: 'Risks', data: heatData, backgroundColor: 'rgba(239,68,68,0.65)', borderColor: '#ef4444', borderWidth: 1 }] },
+                    options: {
+                        ...commonOptions,
+                        scales: {
+                            x: { min: 0.5, max: 5.5, ticks: { stepSize: 1, callback: v => ['','Rare','Unlikely','Possible','Likely','Almost Certain'][v] || '' }, title: { display: true, text: 'Likelihood' } },
+                            y: { min: 0.5, max: 5.5, ticks: { stepSize: 1, callback: v => ['','Insignificant','Minor','Moderate','Major','Catastrophic'][v] || '' }, title: { display: true, text: 'Impact' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // 2) Trend line
+        if (trendContainer) {
+            const canvas = trendContainer.querySelector('canvas');
+            const skeletonDiv = trendContainer.querySelector('.skeleton-chart-box');
+            if (canvas && skeletonDiv) {
+                canvas.style.display = 'block';
+                skeletonDiv.style.display = 'none';
+                const ctx = canvas.getContext('2d');
+                const trendLabels = data.trendData?.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+                const trendDatasets = data.trendData?.datasets || [{ label: 'Risk Index', data: [42, 45, 48, 44, 40, 38], borderColor: '#5DA1A1', tension: 0.3 }];
+                chartInstances.trend = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: trendLabels, datasets: trendDatasets },
+                    options: commonOptions
+                });
+            }
+        }
+
+        // 3) Action Donut
+        if (actionContainer) {
+            const canvas = actionContainer.querySelector('canvas');
+            const skeletonDiv = actionContainer.querySelector('.skeleton-chart-box');
+            if (canvas && skeletonDiv) {
+                canvas.style.display = 'block';
+                skeletonDiv.style.display = 'none';
+                const ctx = canvas.getContext('2d');
+                const actionLabels = data.actionStatusData?.labels || ['Not Started', 'In Progress', 'At Risk', 'Completed'];
+                const actionValues = data.actionStatusData?.values || [12, 28, 7, 23];
+                const actionColors = data.actionStatusData?.colors || ['#f59e0b', '#5DA1A1', '#ef4444', '#10b981'];
+                chartInstances.actionDonut = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels: actionLabels, datasets: [{ data: actionValues, backgroundColor: actionColors, borderWidth: 0 }] },
+                    options: { ...commonOptions, cutout: '65%' }
+                });
+            }
+        }
+
+        // 4) Area Bar
+        if (areaContainer) {
+            const canvas = areaContainer.querySelector('canvas');
+            const skeletonDiv = areaContainer.querySelector('.skeleton-chart-box');
+            if (canvas && skeletonDiv) {
+                canvas.style.display = 'block';
+                skeletonDiv.style.display = 'none';
+                const ctx = canvas.getContext('2d');
+                const areaLabels = data.areaBarData?.labels || ['Finance', 'IT', 'Legal', 'Ops', 'Compliance'];
+                const areaValues = data.areaBarData?.values || [18, 27, 12, 33, 21];
+                chartInstances.areaBar = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: areaLabels, datasets: [{ label: 'Exposure Score', data: areaValues, backgroundColor: '#5DA1A1', borderRadius: 6 }] },
+                    options: { ...commonOptions, scales: { y: { beginAtZero: true, title: { display: true, text: 'Risk Count' } } } }
+                });
+            }
+        }
+
+        // 5) Drivers Pie
+        if (driversContainer) {
+            const canvas = driversContainer.querySelector('canvas');
+            const skeletonDiv = driversContainer.querySelector('.skeleton-chart-box');
+            if (canvas && skeletonDiv) {
+                canvas.style.display = 'block';
+                skeletonDiv.style.display = 'none';
+                const ctx = canvas.getContext('2d');
+                const driverLabels = data.riskDriversData?.labels || ['Cyber', 'Compliance', 'Market', 'Operational', 'Strategic'];
+                const driverValues = data.riskDriversData?.values || [28, 22, 18, 24, 12];
+                const driverColors = data.riskDriversData?.colors || ['#ef4444', '#f59e0b', '#5DA1A1', '#6b7280', '#3b82f6'];
+                chartInstances.driversPie = new Chart(ctx, {
+                    type: 'pie',
+                    data: { labels: driverLabels, datasets: [{ data: driverValues, backgroundColor: driverColors }] },
+                    options: commonOptions
+                });
+            }
+        }
+
+        // 6) RAM Movement Bar
+        if (ramContainer) {
+            const canvas = ramContainer.querySelector('canvas');
+            const skeletonDiv = ramContainer.querySelector('.skeleton-chart-box');
+            if (canvas && skeletonDiv) {
+                canvas.style.display = 'block';
+                skeletonDiv.style.display = 'none';
+                const ctx = canvas.getContext('2d');
+                const ramData = data.ramMovementData || { increased: 14, decreased: 9, stable: 42 };
+                chartInstances.ramMovement = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Increased', 'Decreased', 'Stable'],
+                        datasets: [{ label: 'RAM Count', data: [ramData.increased || 0, ramData.decreased || 0, ramData.stable || 0], backgroundColor: ['#ef4444', '#10b981', '#9ca3af'] }]
+                    },
+                    options: commonOptions
+                });
+            }
+        }
+    }
+
+    function updateExistingCharts(data) {
+        if (chartInstances.heatMap && data.heatMapData) {
+            chartInstances.heatMap.data.datasets[0].data = data.heatMapData;
+            chartInstances.heatMap.update();
+        }
+        if (chartInstances.trend && data.trendData) {
+            chartInstances.trend.data.labels = data.trendData.labels || chartInstances.trend.data.labels;
+            chartInstances.trend.data.datasets = data.trendData.datasets || chartInstances.trend.data.datasets;
+            chartInstances.trend.update();
+        }
+        if (chartInstances.actionDonut && data.actionStatusData) {
+            chartInstances.actionDonut.data.labels = data.actionStatusData.labels || chartInstances.actionDonut.data.labels;
+            chartInstances.actionDonut.data.datasets[0].data = data.actionStatusData.values || chartInstances.actionDonut.data.datasets[0].data;
+            chartInstances.actionDonut.data.datasets[0].backgroundColor = data.actionStatusData.colors || chartInstances.actionDonut.data.datasets[0].backgroundColor;
+            chartInstances.actionDonut.update();
+        }
+        if (chartInstances.areaBar && data.areaBarData) {
+            chartInstances.areaBar.data.labels = data.areaBarData.labels || chartInstances.areaBar.data.labels;
+            chartInstances.areaBar.data.datasets[0].data = data.areaBarData.values || chartInstances.areaBar.data.datasets[0].data;
+            chartInstances.areaBar.update();
+        }
+        if (chartInstances.driversPie && data.riskDriversData) {
+            chartInstances.driversPie.data.labels = data.riskDriversData.labels || chartInstances.driversPie.data.labels;
+            chartInstances.driversPie.data.datasets[0].data = data.riskDriversData.values || chartInstances.driversPie.data.datasets[0].data;
+            chartInstances.driversPie.update();
+        }
+        if (chartInstances.ramMovement && data.ramMovementData) {
+            chartInstances.ramMovement.data.datasets[0].data = [data.ramMovementData.increased || 0, data.ramMovementData.decreased || 0, data.ramMovementData.stable || 0];
+            chartInstances.ramMovement.update();
+        }
+    }
+
+    // Populate KPI cards with real data
+    function populateKPIs(data) {
+        const kpiCards = document.querySelectorAll('.kpi-row .kpi-card');
+        if (!kpiCards.length) return;
+        const kpiValues = [
+            { value: data.totalRisks ?? '—', trend: data.totalRisksTrend || '-12%', trendClass: data.totalRisksTrend?.includes('+') ? 'trend-up' : 'trend-down' },
+            { value: data.highSeverityRisks ?? '—', trend: data.highRisksTrend || '+5%', trendClass: data.highRisksTrend?.includes('+') ? 'trend-up' : 'trend-down' },
+            { value: data.exposureIndex ?? '—', trend: null },
+            { value: data.actionsEffectiveness ?? '—', trend: null },
+            { value: data.pendingApprovals ?? '—', trend: null },
+            { value: data.upcomingReviews ?? '—', trend: null }
+        ];
+        kpiCards.forEach((card, idx) => {
+            const valObj = kpiValues[idx];
+            const valueDiv = card.querySelector('.kpi-value');
+            const trendSpan = card.querySelector('.kpi-trend');
+            const subSpan = card.querySelector('.kpi-sub');
+            if (valueDiv) valueDiv.innerText = valObj.value;
+            if (trendSpan && valObj.trend) {
+                trendSpan.innerText = valObj.trend;
+                trendSpan.className = `kpi-trend ${valObj.trendClass || ''}`;
+            } else if (trendSpan && !valObj.trend) {
+                trendSpan.style.display = 'none';
+            }
+            if (idx === 1 && valObj.value !== '—') {
+                const highCount = parseInt(valObj.value);
+                if (!isNaN(highCount)) {
+                    valueDiv.style.color = highCount >= 30 ? 'var(--red)' : (highCount >= 15 ? 'var(--amber)' : 'var(--green)');
+                }
+            }
+            if (subSpan) {
+                if (idx === 2) subSpan.innerText = 'RAM-weighted exposure';
+                else if (idx === 3) subSpan.innerText = 'On Track • —% Overdue';
+                else if (idx === 4) subSpan.innerText = 'SLA breaches: —';
+                else if (idx === 5) subSpan.innerText = 'Next 30 days';
+                else subSpan.innerText = idx === 0 ? 'vs previous period' : (idx === 1 ? 'of total active risks' : '');
+            }
+        });
+    }
+
+    function renderAttentionItems(data) {
+        const attentionList = data.attentionItems || [];
+        if (attentionList.length === 0) {
+            attentionZone.innerHTML = `<div class="attention-empty">No immediate attention required — all risks and actions are on track.</div>`;
+            return;
+        }
+        const html = `<div class="attention-list">${attentionList.map(item => `
+            <div class="attention-item">
+                <div>${escapeHtml(item.title || 'Attention needed')}</div>
+                <a class="attention-link" href="${item.link || '#'}">${item.action || 'View'}</a>
+            </div>
+        `).join('')}</div>`;
+        attentionZone.innerHTML = html;
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    function replaceSkeletonWithRealData(data) {
+        // Update KPI cards (rebuild inner HTML)
+        const skeletonCards = document.querySelectorAll('.kpi-row .kpi-card');
+        const labelsArr = ['Total Active Risks', 'High & Extreme Risks', 'Risk Exposure Index', 'Actions Effectiveness', 'Pending Approvals', 'Upcoming Reviews'];
+        skeletonCards.forEach((card, idx) => {
+            const label = labelsArr[idx];
+            let trendHtml = '';
+            if (idx === 0 || idx === 1) {
+                const trendVal = idx === 0 ? (data.totalRisksTrend || '-12%') : (data.highRisksTrend || '+5%');
+                const trendClass = trendVal.includes('+') ? 'trend-up' : 'trend-down';
+                trendHtml = `<div class="kpi-trend ${trendClass}">${trendVal}</div>`;
+            } else {
+                trendHtml = `<div class="kpi-trend" style="visibility:hidden;"></div>`;
+            }
+            let valueDisplay = '—';
+            if (idx === 0) valueDisplay = data.totalRisks ?? '—';
+            if (idx === 1) valueDisplay = data.highSeverityRisks ?? '—';
+            if (idx === 2) valueDisplay = data.exposureIndex ?? '—';
+            if (idx === 3) valueDisplay = data.actionsEffectiveness ?? '—';
+            if (idx === 4) valueDisplay = data.pendingApprovals ?? '—';
+            if (idx === 5) valueDisplay = data.upcomingReviews ?? '—';
+            const subText = idx === 0 ? 'vs previous period' : (idx === 1 ? 'of total active risks' : (idx === 2 ? 'Medium (RAM-weighted)' : (idx === 3 ? 'On Track • —% Overdue' : (idx === 4 ? 'SLA breaches: —' : 'Next 30 days'))));
+            card.innerHTML = `
+                <div class="kpi-header">
+                    <div class="kpi-label">${label}</div>
+                    ${trendHtml}
+                </div>
+                <div class="kpi-value" style="${idx===1 && valueDisplay!=='—' && parseInt(valueDisplay)>=30 ? 'color:var(--red);' : (idx===1 && parseInt(valueDisplay)>=15 ? 'color:var(--amber);' : '')}">${valueDisplay}</div>
+                <div class="kpi-sub">${subText}</div>
+            `;
+        });
+        renderAttentionItems(data);
+        if (!dataLoaded) {
+            initAllCharts(data);
+            dataLoaded = true;
+        } else {
+            updateExistingCharts(data);
+        }
+    }
+
+    async function fetchDashboardData() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Authentication token missing. Please login.');
+            const res = await fetch(API_ENDPOINT, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', 'Content-Type': 'application/json' }
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().then(t => t.slice(0, 80))}`);
+            const data = await res.json();
+            replaceSkeletonWithRealData(data);
+            const now = new Date();
+            const timeStr = now.toLocaleString('en-GB', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' });
+            document.getElementById('refreshTimeLabel').innerHTML = `Last updated: ${timeStr} UTC`;
+            return data;
+        } catch (err) {
+            console.error('Fetch error:', err);
+            document.getElementById('refreshTimeLabel').innerHTML = `Update failed: ${err.message}`;
+            attentionZone.innerHTML = `<div class="attention-item"><div>⚠️ Failed to load dashboard: ${err.message}</div><a class="attention-link" href="#" onclick="window.location.reload();return false;">Retry</a></div>`;
+            throw err;
+        }
+    }
+
+    async function bootstrap() {
+        kpiRowContainer = document.getElementById('kpiContainer');
+        chartsGridContainer = document.getElementById('chartsGrid');
+        secondaryRowContainer = document.getElementById('secondaryChartsRow');
+        attentionZone = document.getElementById('attentionDynamicZone');
+        buildSkeletonUI();
+        try {
+            await fetchDashboardData();
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(() => fetchDashboardData().catch(e => console.warn('Periodic refresh error', e)), REFRESH_MS);
+        } catch (err) {
+            attentionZone.innerHTML = `<div class="attention-item"><div>❌ Data connection error: ${err.message}</div><button class="btn" onclick="location.reload()" style="margin-top:12px;">Reload Dashboard</button></div>`;
+        }
+    }
+
+    // Export Snapshot (demo)
+    document.getElementById('exportSnapshotBtn')?.addEventListener('click', () => {
+        alert('Export snapshot initiated – current dashboard data would be exported as PDF/Excel.');
+    });
+
+    window.addEventListener('load', bootstrap);
+</script>
+</body>
+</html>
